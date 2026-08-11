@@ -8,6 +8,7 @@ All notable changes to the Photon Circus organization standards are documented i
 
 - Public organization profile introducing Photon Circus, its engineering principles, featured projects, and adopted repository standards.
 - Shared bug-report, feature-proposal, and pull-request templates that preserve bounded scope, evidence provenance, compatibility decisions, and explicit handoffs across repositories without local overrides.
+- Read-only repository standards auditor producing Markdown and JSON evidence without remediation authority or GitHub write operations.
 
 ## 0.1.0 - 2026-08-11
 

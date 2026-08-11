@@ -12,6 +12,10 @@ Version 0.1.0 was adopted on 2026-08-11 UTC.
 
 Changes to normative requirements are documented in [CHANGELOG.md](CHANGELOG.md).
 
+## Standards audit
+
+The [read-only repository auditor](docs/STANDARDS_AUDIT.md) collects Markdown and JSON evidence against machine-observable parts of the standard. It has no remediation mode or authority to change anything it flags.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).
