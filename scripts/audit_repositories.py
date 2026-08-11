@@ -285,7 +285,13 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     powershell_alternatives = sorted(
         path for path in paths if path in {"scripts/local-ci.ps1", "scripts/ci.ps1", "tools/check.ps1"}
     )
-    if canonical_ci and powershell_alternatives:
+    if not technical or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
+        local_ci_status = NOT_APPLICABLE
+        local_ci_evidence = "not a maintained technical repository"
+    elif not lifecycle_known:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = "lifecycle is unavailable, so applicability cannot be determined"
+    elif canonical_ci and powershell_alternatives:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
             "scripts/ci.sh plus a PowerShell entry point; verify PowerShell is only a thin launcher: "
@@ -297,12 +303,6 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif tree_incomplete:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = f"cannot determine ({tree_reason})"
-    elif not lifecycle_known:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = "lifecycle is unavailable, so applicability cannot be determined"
-    elif not technical or lifecycle not in MAINTAINED_LIFECYCLES:
-        local_ci_status = NOT_APPLICABLE
-        local_ci_evidence = "not a maintained technical repository"
     elif shell_alternatives:
         local_ci_status = WARN
         local_ci_evidence = f"noncanonical shell entry point: {', '.join(shell_alternatives)}; verify documented exception"
@@ -319,12 +319,14 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     contributing_present = has_root(roots, ("CONTRIBUTING", "CONTRIBUTING.md"))
     contributing_required = visibility == "public" and lifecycle in MAINTAINED_LIFECYCLES
-    if contributing_present:
+    if visibility != "public" or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
+        contributing_status, contributing_evidence = NOT_APPLICABLE, "not required by the deterministic profile"
+    elif not lifecycle_known:
+        contributing_status, contributing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif contributing_present:
         contributing_status, contributing_evidence = PASS, "present"
     elif tree_incomplete:
         contributing_status, contributing_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
-    elif visibility == "public" and not lifecycle_known:
-        contributing_status, contributing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif contributing_required:
         contributing_status, contributing_evidence = FAIL, "required for this public lifecycle"
     else:
@@ -340,12 +342,14 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     security_present = has_root(roots, ("SECURITY", "SECURITY.md"))
     security_required = visibility == "public" and lifecycle in {"Active", "Maintenance"}
-    if security_present:
+    if visibility != "public" or (lifecycle_known and lifecycle not in {"Active", "Maintenance"}):
+        security_status, security_evidence = NOT_APPLICABLE, "not required by the deterministic profile"
+    elif not lifecycle_known:
+        security_status, security_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif security_present:
         security_status, security_evidence = PASS, "present"
     elif tree_incomplete:
         security_status, security_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
-    elif visibility == "public" and not lifecycle_known:
-        security_status, security_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif security_required:
         security_status, security_evidence = FAIL, "required for public Active or Maintenance repositories"
     else:
@@ -360,12 +364,12 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     )
 
     releasing_present = has_root(roots, ("RELEASING", "RELEASING.md"))
-    if releasing_present:
-        releasing_status, releasing_evidence = PASS, "present"
-    elif tree_incomplete:
-        releasing_status, releasing_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    if lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES:
+        releasing_status, releasing_evidence = NOT_APPLICABLE, "not a maintained release candidate"
     elif not lifecycle_known:
         releasing_status, releasing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif releasing_present:
+        releasing_status, releasing_evidence = PASS, "present"
     elif lifecycle in MAINTAINED_LIFECYCLES:
         releasing_status, releasing_evidence = MANUAL_REVIEW, "publication/versioned-deliverable status is not machine-inferable"
     else:
@@ -373,12 +377,12 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     checks.append(check("releasing", releasing_status, releasing_evidence, "Sections 7 and 17 Releases"))
 
     agents_present = has_root(roots, ("AGENTS.md",))
-    if agents_present:
-        agents_status, agents_evidence = PASS, "present"
-    elif tree_incomplete:
-        agents_status, agents_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
-    elif not lifecycle_known and technical:
+    if not technical or (lifecycle_known and lifecycle != "Active"):
+        agents_status, agents_evidence = NOT_APPLICABLE, "not deterministically required"
+    elif not lifecycle_known:
         agents_status, agents_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif agents_present:
+        agents_status, agents_evidence = PASS, "present"
     elif lifecycle == "Active" and technical:
         agents_status, agents_evidence = MANUAL_REVIEW, "agent use and non-obvious invariants require human classification"
     else:
@@ -393,10 +397,12 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif workflows:
         hosted_status = MANUAL_REVIEW
         hosted_evidence = f"{len(workflows)} optional workflow file(s); private cost or nontechnical value requires review"
+    elif visibility != "public" or not technical or (lifecycle_known and lifecycle not in {"Active", "Maintenance"}):
+        hosted_status, hosted_evidence = NOT_APPLICABLE, "hosted CI not required by visibility/lifecycle profile"
+    elif not lifecycle_known:
+        hosted_status, hosted_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif tree_incomplete:
         hosted_status, hosted_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
-    elif visibility == "public" and technical and not lifecycle_known:
-        hosted_status, hosted_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif hosted_required:
         hosted_status, hosted_evidence = FAIL, "bounded hosted CI required but no workflow exists"
     else:
@@ -424,10 +430,15 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
             context.casefold() == "ci" or context.casefold().endswith(" / ci")
             for context in required_checks
         )
-        if protection_required and conversation and not force_pushes and not deletions:
-            protection_status = WARN if stable_ci_required and not has_stable_ci else PASS
-        else:
+        safety_floor = protection_required and conversation and not force_pushes and not deletions
+        if not safety_floor:
             protection_status = WARN
+        elif hosted_required and tree_incomplete and not has_stable_ci:
+            protection_status = MANUAL_REVIEW
+        elif stable_ci_required and not has_stable_ci:
+            protection_status = WARN
+        else:
+            protection_status = PASS
         protection_evidence = (
             f"protected via {protection.get('source', 'unknown')}; checks={required_checks or 'none'}, "
             f"conversation_resolution={conversation}, allow_force_pushes={force_pushes}, "
@@ -435,11 +446,20 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         )
     checks.append(check("branch_protection", protection_status, protection_evidence, "Section 15.2 Protection profile"))
 
+    if visibility != "public":
+        hardening_status, hardening_evidence = NOT_APPLICABLE, "not a public workflow surface"
+    elif workflows:
+        hardening_status = MANUAL_REVIEW
+        hardening_evidence = "inspect permissions, immutable action pins, concurrency, timeouts, duplication, and aggregate ci"
+    elif tree_incomplete:
+        hardening_status, hardening_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    else:
+        hardening_status, hardening_evidence = NOT_APPLICABLE, "not a public workflow surface"
     checks.append(
         check(
             "public_ci_hardening",
-            MANUAL_REVIEW if workflows and visibility == "public" else (MANUAL_REVIEW if tree_incomplete else NOT_APPLICABLE),
-            "inspect permissions, immutable action pins, concurrency, timeouts, duplication, and aggregate ci" if workflows and visibility == "public" else (f"cannot determine ({tree_reason})" if tree_incomplete else "not a public workflow surface"),
+            hardening_status,
+            hardening_evidence,
             "Section 14.3 Public repositories",
         )
     )
@@ -487,6 +507,7 @@ def collect_snapshot(org: str, repository: dict[str, Any]) -> dict[str, Any]:
         f"/repos/{owner}/{repo}/rules/branches/{branch_path}",
         allow_not_found=True,
         allow_forbidden=True,
+        paginate=True,
     )
 
     classic_unavailable = isinstance(classic_raw, dict) and classic_raw.get("_audit_unavailable")

@@ -150,6 +150,28 @@ class PolicyTests(unittest.TestCase):
         for check_id in ("readme", "license", "changelog", "local_ci", "hosted_ci"):
             self.assertEqual(checks[check_id]["status"], audit.MANUAL_REVIEW)
 
+    def test_deterministic_non_applicability_precedes_incomplete_tree(self):
+        candidate = snapshot(
+            lifecycle="Experimental",
+            domains=["Experience"],
+            paths=[],
+            protected=False,
+        )
+        candidate["repository"]["visibility"] = "private"
+        candidate["tree_truncated"] = True
+        result = audit.evaluate_repository(candidate, self.policy)
+        checks = self.by_id(result)
+        for check_id in (
+            "local_ci",
+            "contributing",
+            "security",
+            "releasing",
+            "agent_guidance",
+            "hosted_ci",
+            "public_ci_hardening",
+        ):
+            self.assertEqual(checks[check_id]["status"], audit.NOT_APPLICABLE)
+
     def test_license_prefixes_do_not_count_as_license_files(self):
         candidate = snapshot(paths=["README.md", "LICENSES", "LICENSE.old", "COPYING-NOTES.md"])
         result = audit.evaluate_repository(candidate, self.policy)
@@ -167,6 +189,16 @@ class PolicyTests(unittest.TestCase):
         candidate["protection"]["required_checks"] = []
         result = audit.evaluate_repository(candidate, self.policy)
         self.assertEqual(self.by_id(result)["branch_protection"]["status"], audit.WARN)
+
+    def test_unknown_workflow_inventory_prevents_protection_pass(self):
+        candidate = snapshot(paths=[])
+        candidate["tree_truncated"] = True
+        candidate["protection"]["required_checks"] = []
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.MANUAL_REVIEW,
+        )
 
     @patch.object(audit, "gh_get")
     def test_empty_repository_is_a_repository_level_manual_review(self, gh_get):
@@ -215,6 +247,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(collected["protection"]["required_checks"], ["ci"])
         self.assertFalse(collected["protection"]["allow_force_pushes"])
         self.assertFalse(collected["protection"]["allow_deletions"])
+        self.assertTrue(gh_get.call_args_list[3].kwargs["paginate"])
 
     def test_policy_file_round_trip(self):
         with tempfile.TemporaryDirectory() as directory:
