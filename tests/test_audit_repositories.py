@@ -4,6 +4,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -27,10 +28,11 @@ def snapshot(*, lifecycle="Active", domains=None, paths=None, protected=True):
         },
         "properties": {
             "Lifecycle": lifecycle,
-            "Domain": domains or ["Libraries"],
+            "Domain": domains if domains is not None else ["Libraries"],
         },
         "paths": paths
-        or [
+        if paths is not None
+        else [
             "README.md",
             "LICENSE",
             "CHANGELOG.md",
@@ -59,6 +61,14 @@ class ReadOnlyBoundaryTests(unittest.TestCase):
         self.assertEqual(command, ["gh", "api", "/repos/photon-circus/ph-example"])
         forbidden = {"--method", "-X", "POST", "PUT", "PATCH", "DELETE"}
         self.assertTrue(forbidden.isdisjoint(command))
+
+    def test_paginated_command_remains_get_only(self):
+        command = audit.build_gh_get("/orgs/photon-circus/repos", paginate=True)
+        self.assertEqual(
+            command,
+            ["gh", "api", "/orgs/photon-circus/repos", "--paginate", "--slurp"],
+        )
+        self.assertEqual(audit.flatten_paginated_list([[1, 2], [3]]), [1, 2, 3])
 
     def test_unsafe_endpoint_is_rejected(self):
         with self.assertRaises(audit.AuditError):
@@ -131,6 +141,80 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         checks = self.by_id(result)
         self.assertEqual(checks["hosted_ci"]["status"], audit.MANUAL_REVIEW)
+
+    def test_truncated_tree_never_turns_missing_paths_into_findings(self):
+        candidate = snapshot(paths=[])
+        candidate["tree_truncated"] = True
+        result = audit.evaluate_repository(candidate, self.policy)
+        checks = self.by_id(result)
+        for check_id in ("readme", "license", "changelog", "local_ci", "hosted_ci"):
+            self.assertEqual(checks[check_id]["status"], audit.MANUAL_REVIEW)
+
+    def test_license_prefixes_do_not_count_as_license_files(self):
+        candidate = snapshot(paths=["README.md", "LICENSES", "LICENSE.old", "COPYING-NOTES.md"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(self.by_id(result)["license"]["status"], audit.FAIL)
+
+    def test_unknown_lifecycle_propagates_to_gated_checks(self):
+        candidate = snapshot(lifecycle=None, paths=["README.md", "LICENSE"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        checks = self.by_id(result)
+        for check_id in ("changelog", "local_ci", "contributing", "security", "branch_protection"):
+            self.assertEqual(checks[check_id]["status"], audit.MANUAL_REVIEW)
+
+    def test_public_hosted_ci_without_required_ci_check_warns(self):
+        candidate = snapshot()
+        candidate["protection"]["required_checks"] = []
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(self.by_id(result)["branch_protection"]["status"], audit.WARN)
+
+    @patch.object(audit, "gh_get")
+    def test_empty_repository_is_a_repository_level_manual_review(self, gh_get):
+        gh_get.return_value = []
+        repository = {
+            "name": "ph-empty",
+            "default_branch": None,
+            "description": None,
+            "visibility": "private",
+            "topics": [],
+            "html_url": "https://github.com/photon-circus/ph-empty",
+        }
+        collected = audit.collect_snapshot("photon-circus", repository)
+        self.assertEqual(collected["tree_unavailable"], "repository has no default branch")
+        self.assertEqual(gh_get.call_count, 1)
+
+    @patch.object(audit, "gh_get")
+    def test_ruleset_only_protection_is_collected(self, gh_get):
+        gh_get.side_effect = [
+            [],
+            {"tree": [], "truncated": False},
+            None,
+            [
+                {"type": "deletion"},
+                {"type": "non_fast_forward"},
+                {
+                    "type": "pull_request",
+                    "parameters": {"required_review_thread_resolution": True},
+                },
+                {
+                    "type": "required_status_checks",
+                    "parameters": {"required_status_checks": [{"context": "ci"}]},
+                },
+            ],
+        ]
+        repository = {
+            "name": "ph-example",
+            "default_branch": "main",
+            "description": "example",
+            "visibility": "public",
+            "topics": [],
+            "html_url": "https://github.com/photon-circus/ph-example",
+        }
+        collected = audit.collect_snapshot("photon-circus", repository)
+        self.assertEqual(collected["protection"]["source"], "ruleset")
+        self.assertEqual(collected["protection"]["required_checks"], ["ci"])
+        self.assertFalse(collected["protection"]["allow_force_pushes"])
+        self.assertFalse(collected["protection"]["allow_deletions"])
 
     def test_policy_file_round_trip(self):
         with tempfile.TemporaryDirectory() as directory:

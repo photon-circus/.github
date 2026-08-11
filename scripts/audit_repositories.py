@@ -59,11 +59,20 @@ class Policy:
     grandfathered_default_branches: dict[str, str]
 
 
-def build_gh_get(endpoint: str) -> list[str]:
+def build_gh_get(endpoint: str, *, paginate: bool = False) -> list[str]:
     """Build the only permitted GitHub command: an implicit GET request."""
     if not endpoint.startswith("/") or any(char.isspace() for char in endpoint):
         raise AuditError(f"unsafe GitHub API endpoint: {endpoint!r}")
-    return ["gh", "api", endpoint]
+    command = ["gh", "api", endpoint]
+    if paginate:
+        command.extend(("--paginate", "--slurp"))
+    return command
+
+
+def flatten_paginated_list(payload: Any) -> list[Any]:
+    if not isinstance(payload, list) or any(not isinstance(page, list) for page in payload):
+        raise AuditError("paginated GitHub response was not a list of pages")
+    return [item for page in payload for item in page]
 
 
 def gh_get(
@@ -71,8 +80,9 @@ def gh_get(
     *,
     allow_not_found: bool = False,
     allow_forbidden: bool = False,
+    paginate: bool = False,
 ) -> Any:
-    command = build_gh_get(endpoint)
+    command = build_gh_get(endpoint, paginate=paginate)
     completed = subprocess.run(
         command,
         check=False,
@@ -88,7 +98,8 @@ def gh_get(
         detail = completed.stderr.strip() or "unknown gh error"
         raise AuditError(f"GET {endpoint} failed: {detail}")
     try:
-        return json.loads(completed.stdout)
+        payload = json.loads(completed.stdout)
+        return flatten_paginated_list(payload) if paginate else payload
     except json.JSONDecodeError as error:
         raise AuditError(f"GET {endpoint} returned invalid JSON: {error}") from error
 
@@ -167,6 +178,15 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     roots = root_files(paths)
     topics = repo.get("topics") or []
     checks: list[dict[str, str]] = []
+    lifecycle_known = lifecycle in ALLOWED_LIFECYCLES
+    tree_incomplete = bool(snapshot.get("tree_truncated") or snapshot.get("tree_unavailable"))
+    tree_reason = snapshot.get("tree_unavailable") or "GitHub truncated the recursive tree"
+
+    def absent_path_status(status: str) -> str:
+        return MANUAL_REVIEW if tree_incomplete else status
+
+    def absent_path_evidence(evidence: str) -> str:
+        return f"cannot determine ({tree_reason})" if tree_incomplete else evidence
 
     checks.append(
         check(
@@ -203,20 +223,34 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         )
     )
 
+    readme_present = has_root(roots, ("README", "README.md", "README.rst"))
     checks.append(
         check(
             "readme",
-            PASS if has_root(roots, ("README", "README.md", "README.rst")) else FAIL,
-            "root README present" if has_root(roots, ("README", "README.md", "README.rst")) else "root README missing",
+            PASS if readme_present else absent_path_status(FAIL),
+            "root README present" if readme_present else absent_path_evidence("root README missing"),
             "Section 6 README contract",
         )
     )
-    license_present = any(path.casefold().startswith(("license", "licence", "copying")) for path in roots)
+    license_present = has_root(
+        roots,
+        (
+            "LICENSE",
+            "LICENSE.md",
+            "LICENSE.txt",
+            "LICENCE",
+            "LICENCE.md",
+            "LICENCE.txt",
+            "COPYING",
+            "COPYING.md",
+            "COPYING.txt",
+        ),
+    )
     checks.append(
         check(
             "license",
-            PASS if license_present else FAIL,
-            "root license file present" if license_present else "root license file missing",
+            PASS if license_present else absent_path_status(FAIL),
+            "root license file present" if license_present else absent_path_evidence("root license file missing"),
             "Section 9 Licensing",
         )
     )
@@ -225,9 +259,9 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     if lifecycle == "Experimental":
         changelog_status = PASS if changelog_present else NOT_APPLICABLE
         changelog_evidence = "present (optional for Experimental)" if changelog_present else "optional for Experimental"
-    elif lifecycle in ALLOWED_LIFECYCLES:
-        changelog_status = PASS if changelog_present else FAIL
-        changelog_evidence = "present" if changelog_present else "required but missing"
+    elif lifecycle_known:
+        changelog_status = PASS if changelog_present else absent_path_status(FAIL)
+        changelog_evidence = "present" if changelog_present else absent_path_evidence("required but missing")
     else:
         changelog_status = MANUAL_REVIEW
         changelog_evidence = "lifecycle is unavailable, so applicability cannot be determined"
@@ -251,10 +285,7 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     powershell_alternatives = sorted(
         path for path in paths if path in {"scripts/local-ci.ps1", "scripts/ci.ps1", "tools/check.ps1"}
     )
-    if not technical or lifecycle not in MAINTAINED_LIFECYCLES:
-        local_ci_status = NOT_APPLICABLE
-        local_ci_evidence = "not a maintained technical repository"
-    elif canonical_ci and powershell_alternatives:
+    if canonical_ci and powershell_alternatives:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
             "scripts/ci.sh plus a PowerShell entry point; verify PowerShell is only a thin launcher: "
@@ -263,6 +294,15 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif canonical_ci:
         local_ci_status = PASS
         local_ci_evidence = "scripts/ci.sh"
+    elif tree_incomplete:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = f"cannot determine ({tree_reason})"
+    elif not lifecycle_known:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = "lifecycle is unavailable, so applicability cannot be determined"
+    elif not technical or lifecycle not in MAINTAINED_LIFECYCLES:
+        local_ci_status = NOT_APPLICABLE
+        local_ci_evidence = "not a maintained technical repository"
     elif shell_alternatives:
         local_ci_status = WARN
         local_ci_evidence = f"noncanonical shell entry point: {', '.join(shell_alternatives)}; verify documented exception"
@@ -279,22 +319,42 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     contributing_present = has_root(roots, ("CONTRIBUTING", "CONTRIBUTING.md"))
     contributing_required = visibility == "public" and lifecycle in MAINTAINED_LIFECYCLES
+    if contributing_present:
+        contributing_status, contributing_evidence = PASS, "present"
+    elif tree_incomplete:
+        contributing_status, contributing_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    elif visibility == "public" and not lifecycle_known:
+        contributing_status, contributing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif contributing_required:
+        contributing_status, contributing_evidence = FAIL, "required for this public lifecycle"
+    else:
+        contributing_status, contributing_evidence = NOT_APPLICABLE, "not required by the deterministic profile"
     checks.append(
         check(
             "contributing",
-            PASS if contributing_present else (FAIL if contributing_required else NOT_APPLICABLE),
-            "present" if contributing_present else ("required for this public lifecycle" if contributing_required else "not required by the deterministic profile"),
+            contributing_status,
+            contributing_evidence,
             "Section 7 Documentation requirements",
         )
     )
 
     security_present = has_root(roots, ("SECURITY", "SECURITY.md"))
     security_required = visibility == "public" and lifecycle in {"Active", "Maintenance"}
+    if security_present:
+        security_status, security_evidence = PASS, "present"
+    elif tree_incomplete:
+        security_status, security_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    elif visibility == "public" and not lifecycle_known:
+        security_status, security_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif security_required:
+        security_status, security_evidence = FAIL, "required for public Active or Maintenance repositories"
+    else:
+        security_status, security_evidence = NOT_APPLICABLE, "not required by the deterministic profile"
     checks.append(
         check(
             "security",
-            PASS if security_present else (FAIL if security_required else NOT_APPLICABLE),
-            "present" if security_present else ("required for public Active or Maintenance repositories" if security_required else "not required by the deterministic profile"),
+            security_status,
+            security_evidence,
             "Section 7 Documentation requirements",
         )
     )
@@ -302,6 +362,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     releasing_present = has_root(roots, ("RELEASING", "RELEASING.md"))
     if releasing_present:
         releasing_status, releasing_evidence = PASS, "present"
+    elif tree_incomplete:
+        releasing_status, releasing_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    elif not lifecycle_known:
+        releasing_status, releasing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif lifecycle in MAINTAINED_LIFECYCLES:
         releasing_status, releasing_evidence = MANUAL_REVIEW, "publication/versioned-deliverable status is not machine-inferable"
     else:
@@ -311,6 +375,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     agents_present = has_root(roots, ("AGENTS.md",))
     if agents_present:
         agents_status, agents_evidence = PASS, "present"
+    elif tree_incomplete:
+        agents_status, agents_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    elif not lifecycle_known and technical:
+        agents_status, agents_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif lifecycle == "Active" and technical:
         agents_status, agents_evidence = MANUAL_REVIEW, "agent use and non-obvious invariants require human classification"
     else:
@@ -325,6 +393,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif workflows:
         hosted_status = MANUAL_REVIEW
         hosted_evidence = f"{len(workflows)} optional workflow file(s); private cost or nontechnical value requires review"
+    elif tree_incomplete:
+        hosted_status, hosted_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
+    elif visibility == "public" and technical and not lifecycle_known:
+        hosted_status, hosted_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif hosted_required:
         hosted_status, hosted_evidence = FAIL, "bounded hosted CI required but no workflow exists"
     else:
@@ -336,6 +408,9 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     if protection is not None and protection.get("unavailable"):
         protection_status = MANUAL_REVIEW
         protection_evidence = f"GitHub did not expose protection data: {protection['unavailable']}"
+    elif not lifecycle_known:
+        protection_status = MANUAL_REVIEW
+        protection_evidence = "lifecycle is unavailable, so applicability cannot be determined"
     elif protection is None:
         protection_status = FAIL if protection_required else NOT_APPLICABLE
         protection_evidence = "default branch is unprotected" if protection_required else "not required before Active"
@@ -344,12 +419,17 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         conversation = protection.get("conversation_resolution")
         force_pushes = protection.get("allow_force_pushes")
         deletions = protection.get("allow_deletions")
+        stable_ci_required = hosted_required and bool(workflows)
+        has_stable_ci = any(
+            context.casefold() == "ci" or context.casefold().endswith(" / ci")
+            for context in required_checks
+        )
         if protection_required and conversation and not force_pushes and not deletions:
-            protection_status = PASS
+            protection_status = WARN if stable_ci_required and not has_stable_ci else PASS
         else:
             protection_status = WARN
         protection_evidence = (
-            f"protected; checks={required_checks or 'none'}, "
+            f"protected via {protection.get('source', 'unknown')}; checks={required_checks or 'none'}, "
             f"conversation_resolution={conversation}, allow_force_pushes={force_pushes}, "
             f"allow_deletions={deletions}"
         )
@@ -358,8 +438,8 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     checks.append(
         check(
             "public_ci_hardening",
-            MANUAL_REVIEW if workflows and visibility == "public" else NOT_APPLICABLE,
-            "inspect permissions, immutable action pins, concurrency, timeouts, duplication, and aggregate ci" if workflows and visibility == "public" else "not a public workflow surface",
+            MANUAL_REVIEW if workflows and visibility == "public" else (MANUAL_REVIEW if tree_incomplete else NOT_APPLICABLE),
+            "inspect permissions, immutable action pins, concurrency, timeouts, duplication, and aggregate ci" if workflows and visibility == "public" else (f"cannot determine ({tree_reason})" if tree_incomplete else "not a public workflow surface"),
             "Section 14.3 Public repositories",
         )
     )
@@ -380,41 +460,103 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
 def collect_snapshot(org: str, repository: dict[str, Any]) -> dict[str, Any]:
     name = validate_name(repository["name"], "repository name")
-    branch = validate_name(repository["default_branch"], "default branch")
     owner = quote(org, safe="")
     repo = quote(name, safe="")
-    branch_path = quote(branch, safe="")
-
     values = gh_get(f"/repos/{owner}/{repo}/properties/values")
+
+    branch_value = repository.get("default_branch")
+    if not isinstance(branch_value, str) or not branch_value:
+        return {
+            "repository": repository,
+            "properties": property_map(values),
+            "paths": [],
+            "tree_truncated": False,
+            "tree_unavailable": "repository has no default branch",
+            "protection": {"unavailable": "repository has no default branch"},
+        }
+
+    branch = validate_name(branch_value, "default branch")
+    branch_path = quote(branch, safe="")
     tree = gh_get(f"/repos/{owner}/{repo}/git/trees/{branch_path}?recursive=1")
-    protection_raw = gh_get(
+    classic_raw = gh_get(
         f"/repos/{owner}/{repo}/branches/{branch_path}/protection",
         allow_not_found=True,
         allow_forbidden=True,
     )
-    protection = None
-    if protection_raw is not None and protection_raw.get("_audit_unavailable"):
-        protection = {"unavailable": protection_raw["_audit_unavailable"]}
-    elif protection_raw is not None:
-        status_checks = protection_raw.get("required_status_checks") or {}
-        contexts = list(status_checks.get("contexts") or [])
-        contexts.extend(
-            item.get("context")
-            for item in status_checks.get("checks") or []
-            if item.get("context")
-        )
-        protection = {
-            "required_checks": sorted(set(contexts)),
-            "conversation_resolution": bool((protection_raw.get("required_conversation_resolution") or {}).get("enabled")),
-            "allow_force_pushes": bool((protection_raw.get("allow_force_pushes") or {}).get("enabled")),
-            "allow_deletions": bool((protection_raw.get("allow_deletions") or {}).get("enabled")),
+    rules_raw = gh_get(
+        f"/repos/{owner}/{repo}/rules/branches/{branch_path}",
+        allow_not_found=True,
+        allow_forbidden=True,
+    )
+
+    classic_unavailable = isinstance(classic_raw, dict) and classic_raw.get("_audit_unavailable")
+    rules_unavailable = isinstance(rules_raw, dict) and rules_raw.get("_audit_unavailable")
+    if classic_unavailable and rules_unavailable:
+        protection: dict[str, Any] | None = {
+            "unavailable": f"classic protection: {classic_unavailable}; rulesets: {rules_unavailable}"
         }
+    else:
+        contexts: list[str] = []
+        conversation = False
+        prohibit_force_pushes = False
+        prohibit_deletions = False
+        sources: list[str] = []
+
+        if isinstance(classic_raw, dict) and not classic_unavailable:
+            sources.append("classic")
+            status_checks = classic_raw.get("required_status_checks") or {}
+            contexts.extend(status_checks.get("contexts") or [])
+            contexts.extend(
+                item.get("context")
+                for item in status_checks.get("checks") or []
+                if item.get("context")
+            )
+            conversation = bool((classic_raw.get("required_conversation_resolution") or {}).get("enabled"))
+            prohibit_force_pushes = not bool((classic_raw.get("allow_force_pushes") or {}).get("enabled"))
+            prohibit_deletions = not bool((classic_raw.get("allow_deletions") or {}).get("enabled"))
+
+        if isinstance(rules_raw, list) and rules_raw:
+            sources.append("ruleset")
+            rule_types = {item.get("type") for item in rules_raw if isinstance(item, dict)}
+            prohibit_force_pushes = prohibit_force_pushes or "non_fast_forward" in rule_types
+            prohibit_deletions = prohibit_deletions or "deletion" in rule_types
+            for rule in rules_raw:
+                if not isinstance(rule, dict):
+                    continue
+                parameters = rule.get("parameters") or {}
+                if rule.get("type") == "required_status_checks":
+                    contexts.extend(
+                        item.get("context")
+                        for item in parameters.get("required_status_checks") or []
+                        if item.get("context")
+                    )
+                if rule.get("type") == "pull_request":
+                    conversation = conversation or bool(parameters.get("required_review_thread_resolution"))
+
+        if sources:
+            protection = {
+                "source": "+".join(sources),
+                "required_checks": sorted(set(contexts)),
+                "conversation_resolution": conversation,
+                "allow_force_pushes": not prohibit_force_pushes,
+                "allow_deletions": not prohibit_deletions,
+            }
+        elif classic_raw is None and rules_raw == []:
+            protection = None
+        else:
+            unavailable = []
+            if classic_unavailable:
+                unavailable.append(f"classic protection: {classic_unavailable}")
+            if rules_unavailable:
+                unavailable.append(f"rulesets: {rules_unavailable}")
+            protection = {"unavailable": "; ".join(unavailable) or "protection sources were inconclusive"}
 
     return {
         "repository": repository,
         "properties": property_map(values),
         "paths": [item["path"] for item in tree.get("tree", [])],
         "tree_truncated": tree.get("truncated", False),
+        "tree_unavailable": None,
         "protection": protection,
     }
 
@@ -496,7 +638,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         org = validate_name(args.org, "organization name")
         policy = load_policy(args.policy)
-        repositories = gh_get(f"/orgs/{quote(org, safe='')}/repos?type=all&per_page=100")
+        repositories = gh_get(
+            f"/orgs/{quote(org, safe='')}/repos?type=all&per_page=100",
+            paginate=True,
+        )
         if not isinstance(repositories, list):
             raise AuditError("organization repository response was not a list")
         selected = select_repositories(repositories, args.repo, args.scope, policy)
