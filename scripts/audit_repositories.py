@@ -433,10 +433,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         safety_floor = protection_required and conversation and not force_pushes and not deletions
         if not safety_floor:
             protection_status = WARN
-        elif hosted_required and tree_incomplete and not has_stable_ci:
-            protection_status = MANUAL_REVIEW
         elif stable_ci_required and not has_stable_ci:
             protection_status = WARN
+        elif hosted_required and tree_incomplete and not has_stable_ci:
+            protection_status = MANUAL_REVIEW
         else:
             protection_status = PASS
         protection_evidence = (

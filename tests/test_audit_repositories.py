@@ -200,6 +200,16 @@ class PolicyTests(unittest.TestCase):
             audit.MANUAL_REVIEW,
         )
 
+    def test_observed_workflow_preserves_missing_ci_warning_on_truncated_tree(self):
+        candidate = snapshot(paths=[".github/workflows/ci.yml"])
+        candidate["tree_truncated"] = True
+        candidate["protection"]["required_checks"] = []
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.WARN,
+        )
+
     @patch.object(audit, "gh_get")
     def test_empty_repository_is_a_repository_level_manual_review(self, gh_get):
         gh_get.return_value = []
