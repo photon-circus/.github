@@ -1,0 +1,72 @@
+name: Feature proposal
+description: Propose a bounded capability with an explicit contract, value, and acceptance evidence.
+title: "[Proposal]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A proposal is a decision record, not automatic authorization to implement or release. Keep the capability at the lowest layer able to own its invariants, and make non-goals explicit.
+
+  - type: textarea
+    id: problem-value
+    attributes:
+      label: Problem and user value
+      description: What concrete problem exists, for whom, and what becomes possible if it is solved?
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope-fit
+    attributes:
+      label: Repository fit and invariant ownership
+      description: Explain why this repository is the correct layer and which invariants it would own. If another crate, integration layer, or application should own them, say so.
+    validations:
+      required: true
+
+  - type: textarea
+    id: contract
+    attributes:
+      label: Proposed behavioral contract
+      description: Describe observable behavior, inputs and outputs, failure behavior, ownership, overload, cancellation, timing, or recovery semantics where relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: non-goals
+    attributes:
+      label: Non-goals and boundaries
+      description: List adjacent problems, policies, hardware responsibilities, or configurations this feature would not claim to solve.
+    validations:
+      required: true
+
+  - type: textarea
+    id: compatibility
+    attributes:
+      label: Compatibility and release impact
+      description: Identify API, behavior, feature, target, memory, timing, package, and versioning consequences. State when unknown.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Acceptance evidence
+      description: Which tests, models, measurements, target builds, hardware observations, or artifacts would establish the claims?
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives and open decisions
+      description: Record competing approaches, rejected directions, unresolved questions, and the promotion bar for implementation.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I applied the repository's feature-admission and bounded-scope guidance.
+          required: true
+        - label: I understand that opening this proposal does not authorize implementation, publication, or other irreversible actions.
+          required: true

@@ -1,0 +1,93 @@
+name: Bug report
+description: Report reproducible behavior that conflicts with a repository's documented contract.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for providing field evidence. Be precise about what was observed and whether the evidence came from hardware, simulation, or a mock. Please report security-sensitive findings through the repository's security policy instead.
+
+  - type: input
+    id: version
+    attributes:
+      label: Affected version or commit
+      description: Provide a release, tag, or full commit SHA.
+      placeholder: v0.2.0 or 0123456789abcdef...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include the MCU or host, target triple, board and device revision, interface or bus mode, enabled features, and toolchain where applicable.
+      placeholder: |
+        MCU or host:
+        Target triple:
+        Board and device revision:
+        Interface or bus mode:
+        Enabled features:
+        Toolchain:
+    validations:
+      required: true
+
+  - type: dropdown
+    id: evidence-source
+    attributes:
+      label: Evidence source
+      description: Select the strongest source that directly produced the reported observation.
+      options:
+        - Physical hardware
+        - Simulator or emulator
+        - Mock or host model
+        - Static analysis or compilation
+        - Not yet established
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Give the smallest repeatable sequence, including relevant configuration and timing.
+      placeholder: Numbered steps, commands, or a link to a minimal repository.
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: State the documented contract, invariant, or result you expected.
+    validations:
+      required: true
+
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+      description: State what happened, including frequency and whether recovery was possible.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add minimal logs, traces, register observations, measurements, screenshots, or failure output. Remove secrets and unrelated data.
+
+  - type: textarea
+    id: limits
+    attributes:
+      label: Known limits and additional context
+      description: Identify what has not been reproduced, configurations not tested, workarounds, and related issues.
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I searched existing issues for the same behavior.
+          required: true
+        - label: I have distinguished direct evidence from inference and removed sensitive information.
+          required: true
