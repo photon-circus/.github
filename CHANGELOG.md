@@ -4,6 +4,10 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
+### Added
+
+- Public organization profile introducing Photon Circus, its engineering principles, featured projects, and adopted repository standards.
+
 ## 0.1.0 - 2026-08-11
 
 **What this release delivers.** This first standards release gives Photon Circus repositories a shared language for bounded scope, lifecycle, naming, documentation, licensing, contributions, feature development, verification, CI, branch protection, and releases. It was created so strong local engineering can remain maintainable as the organization grows, while allowing experiments to stay honest experiments and requiring supported work to carry reproducible evidence.
