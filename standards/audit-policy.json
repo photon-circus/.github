@@ -1,0 +1,19 @@
+{
+  "active_cohort": [
+    ".github",
+    "ph-eventing",
+    "ph-curves",
+    "ph-esp32-mac",
+    "ph-qmi8658-imu",
+    "ph-hil",
+    "ph-haptics",
+    "ph-ads1115-adc",
+    "ph-ds3231-rtc",
+    "ph-pcf8563-rtc",
+    "ph-veml7700-als",
+    "ph-w25q-nor"
+  ],
+  "grandfathered_default_branches": {
+    "ph-eventing": "master"
+  }
+}
