@@ -4,6 +4,8 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
+Last updated: 2026-08-12 UTC
+
 ### Added
 
 - Public organization profile introducing Photon Circus, its engineering principles, featured projects, and adopted repository standards.
@@ -19,6 +21,11 @@ All notable changes to the Photon Circus organization standards are documented i
   future home for reusable local tooling. This preserves a repeatable path from
   data sheet to reviewable driver without making temporary agent coordination or
   self-validating implementations part of the product repository.
+
+### Changed
+
+- Update the active audit cohort for the pre-publication rename from
+  `ph-ads1115-adc` to `ph-ads1x15-adc`.
 
 ## 0.1.0 - 2026-08-11
 
