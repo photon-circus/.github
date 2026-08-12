@@ -364,6 +364,55 @@ The decision test is:
 
 > Behavior required to make one supported device operation truthful belongs to the driver. Concrete resources, scheduling, composition, and application response belong to integration.
 
+### 10.1 Pre-`ph-hil` peripheral-driver profile
+
+This profile applies to organization-owned peripheral-driver repositories and
+crates that have not been published and do not yet have reviewed physical
+evidence from `ph-hil`.
+
+Before `ph-hil` qualification, a driver is a datasheet-derived executable
+hypothesis. It may be developed privately or made public, but it:
+
+- must remain `Experimental` or `Incubating`;
+- must remain unpublished to crates.io, with Rust packages using
+  `publish = false`;
+- must state prominently that verification is against a datasheet-derived
+  behavioral mock and does not constitute hardware-in-the-loop or silicon
+  evidence;
+- must not claim physical-device support, electrical correctness, timing
+  accuracy, or silicon validation;
+- must not include MCU, BSP, board, or firmware examples before hardware
+  qualification;
+- must not carry speculative `ph-hil` firmware, fixture definitions, plans,
+  schemas, evidence policies, build shims, or capability inventories.
+
+The pre-qualification repository should contain only the narrow driver, its
+datasheet-derived behavioral mock, explicit assumptions and ambiguities,
+driver-versus-mock tests, supported-target compilation, documentation, and the
+ordinary repository policy required by its lifecycle.
+
+The mock is an executable model of device-side behavior, not a second copy of
+the driver. It should be implemented independently from the datasheet contract
+and must not reuse driver codecs or sequencing logic in ways that make tests
+tautological. CI runs the public driver against this model and establishes only
+that driver changes remain compatible with the modeled behavior.
+
+`ph-hil` qualification later compares the driver and behavioral model claims
+with physical silicon. Any discrepancy must update the contract, mock, driver,
+or stated limitation before qualification is accepted. Maintainer discretion,
+a passing host test, compilation, or a mock result is not a substitute for this
+physical evidence.
+
+Crates.io publication and promotion to `Active` require reviewed `ph-hil`
+evidence tied to the exact driver revision and supported hardware scope. This
+gate is not waived because the crate is otherwise complete or useful. Existing
+already-published drivers are not retroactively unpublished, but should adopt
+the evidence boundary when making new support claims.
+
+The reusable warning, minimal repository shape, CI contract, and qualification
+handoff are defined in the
+[`Pre-ph-hil Peripheral Driver Profile`](docs/PERIPHERAL_DRIVER_PROFILE.md).
+
 ## 11. Contribution and hardware evidence
 
 Public Incubating, Active, and Maintenance repositories must support contributor bug reports and pull requests.
