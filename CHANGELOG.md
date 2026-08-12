@@ -8,6 +8,9 @@ Last updated: 2026-08-12 UTC
 
 ### Added
 
+- Add `switch` as the peripheral-driver class token for multi-channel digital
+  bus switches, and add `ph-tca954x-switch` to the active standards-audit
+  cohort.
 - Add `touch` as the peripheral-driver class token for capacitive touch and
   proximity controllers, and add `ph-mpr121-touch` to the active standards-audit
   cohort.

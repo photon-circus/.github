@@ -205,6 +205,7 @@ Initial class tokens:
 | `pmon` | Digital current, voltage, and power monitor |
 | `rtc` | Real-time clock/calendar |
 | `touch` | Capacitive touch and proximity controller |
+| `switch` | Multi-channel digital bus switch |
 
 New tokens may be added when a real project requires them. Synonyms should not be introduced casually.
 
