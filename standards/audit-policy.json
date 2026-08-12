@@ -11,6 +11,7 @@
     "ph-mpr121-touch",
     "ph-tca954x-switch",
     "ph-mcp23x17-gpio",
+    "ph-mp1584-buck",
     "ph-ads1x15-adc",
     "ph-ds3231-rtc",
     "ph-pcf8563-rtc",

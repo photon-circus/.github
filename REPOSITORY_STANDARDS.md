@@ -210,7 +210,24 @@ Initial class tokens:
 
 New tokens may be added when a real project requires them. Synonyms should not be introduced casually.
 
-### 5.2 Shared capabilities
+### 5.2 Hardware design libraries
+
+Libraries that encode source-derived design equations or constraints for an
+analog component, but do not control a digital peripheral, use the same bounded
+part-and-class form:
+
+```text
+ph-<part>-<class>
+```
+
+Their README must state plainly that they are not device drivers, circuit
+simulators, or hardware-qualification tools. Initial class tokens:
+
+| Token | Meaning |
+| --- | --- |
+| `buck` | Step-down converter design and validation |
+
+### 5.3 Shared capabilities
 
 Repositories solving a reusable cross-component problem use:
 
