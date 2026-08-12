@@ -4,6 +4,9 @@ This repository contains the shared repository, contribution, release, and engin
 
 Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
 
+Unpublished peripheral drivers also follow the
+[Pre-`ph-hil` Peripheral Driver Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
+
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
 ## Status
