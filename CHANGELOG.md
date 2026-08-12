@@ -9,6 +9,12 @@ All notable changes to the Photon Circus organization standards are documented i
 - Public organization profile introducing Photon Circus, its engineering principles, featured projects, and adopted repository standards.
 - Shared bug-report, feature-proposal, and pull-request templates that preserve bounded scope, evidence provenance, compatibility decisions, and explicit handoffs across repositories without local overrides.
 - Read-only repository standards auditor producing Markdown and JSON evidence without remediation authority or GitHub write operations.
+- Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining
+  source-first intake, bounded task packets, independent driver/mock/validation
+  lanes, temporary workspace boundaries, durable artifact graduation, and the
+  future home for reusable local tooling. This preserves a repeatable path from
+  data sheet to reviewable driver without making temporary agent coordination or
+  self-validating implementations part of the product repository.
 
 ## 0.1.0 - 2026-08-11
 
