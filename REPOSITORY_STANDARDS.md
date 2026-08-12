@@ -204,6 +204,7 @@ Initial class tokens:
 | `nor` | NOR flash memory |
 | `pmon` | Digital current, voltage, and power monitor |
 | `rtc` | Real-time clock/calendar |
+| `touch` | Capacitive touch and proximity controller |
 
 New tokens may be added when a real project requires them. Synonyms should not be introduced casually.
 

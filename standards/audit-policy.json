@@ -8,6 +8,7 @@
     "ph-hil",
     "ph-haptics",
     "ph-ina226-230-231-pmon",
+    "ph-mpr121-touch",
     "ph-ads1x15-adc",
     "ph-ds3231-rtc",
     "ph-pcf8563-rtc",
