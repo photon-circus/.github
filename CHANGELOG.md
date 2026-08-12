@@ -14,6 +14,9 @@ Last updated: 2026-08-12 UTC
 - Add `touch` as the peripheral-driver class token for capacitive touch and
   proximity controllers, and add `ph-mpr121-touch` to the active standards-audit
   cohort.
+- Add `gpio` as the peripheral-driver class token for general-purpose digital
+  I/O expanders, and add `ph-mcp23x17-gpio` to the active standards-audit
+  cohort.
 - Add `pmon` as the peripheral-driver class token for digital current,
   voltage, and power monitors, and add `ph-ina226-230-231-pmon` to the active
   standards-audit cohort.

@@ -198,6 +198,7 @@ Initial class tokens:
 | --- | --- |
 | `adc` | Analog-to-digital converter |
 | `als` | Ambient-light sensor |
+| `gpio` | General-purpose digital I/O expander |
 | `hts` | Humidity and temperature sensor |
 | `imu` | Inertial measurement unit |
 | `mac` | Network media-access controller |
