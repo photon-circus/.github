@@ -19,6 +19,13 @@ Changes to normative requirements are documented in [CHANGELOG.md](CHANGELOG.md)
 
 The [read-only repository auditor](docs/STANDARDS_AUDIT.md) collects Markdown and JSON evidence against machine-observable parts of the standard. It has no remediation mode or authority to change anything it flags.
 
+## Future driver-bootstrap machinery
+
+The [Peripheral Driver Bootstrap Intent](docs/PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md)
+records the authority boundary, independent derivation lanes, temporary-workspace
+model, and durable handoff expected from future local tooling. It records design
+intent only; the machinery and reusable templates do not yet exist.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

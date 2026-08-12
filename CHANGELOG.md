@@ -13,6 +13,12 @@ All notable changes to the Photon Circus organization standards are documented i
   Incubating driver development against an independent datasheet-derived mock
   while prohibiting crates.io publication, MCU examples, physical claims, and
   speculative HIL boilerplate until reviewed silicon evidence exists.
+- Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining
+  source-first intake, bounded task packets, independent driver/mock/validation
+  lanes, temporary workspace boundaries, durable artifact graduation, and the
+  future home for reusable local tooling. This preserves a repeatable path from
+  data sheet to reviewable driver without making temporary agent coordination or
+  self-validating implementations part of the product repository.
 
 ## 0.1.0 - 2026-08-11
 
