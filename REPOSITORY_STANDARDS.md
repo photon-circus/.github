@@ -202,6 +202,7 @@ Initial class tokens:
 | `imu` | Inertial measurement unit |
 | `mac` | Network media-access controller |
 | `nor` | NOR flash memory |
+| `pmon` | Digital current, voltage, and power monitor |
 | `rtc` | Real-time clock/calendar |
 
 New tokens may be added when a real project requires them. Synonyms should not be introduced casually.
