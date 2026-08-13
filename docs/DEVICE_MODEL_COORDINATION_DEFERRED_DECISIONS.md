@@ -63,9 +63,10 @@ and should not be relitigated as coordinator API choices:
   another supported variant.
 - Device models do not reference or mutate one another.
 
-Revising one of these findings requires a direct change to the working
-specification with evidence showing why the boundary is insufficient. It is
-not an incidental consequence of choosing a coordinator implementation.
+Revising one of these findings requires a direct change to
+[`DEVICE_BEHAVIORAL_MODEL_STANDARD.md`](DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
+with evidence showing why the boundary is insufficient. It is not an
+incidental consequence of choosing a coordinator implementation.
 
 ## Deferred decision index
 

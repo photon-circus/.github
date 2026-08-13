@@ -402,27 +402,11 @@ The durable context, reopening triggers, and expected ownership for these
 questions are maintained in
 [`DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md`](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
 That record preserves design seams without making them requirements of this
-device-model specification.
+device-model standard.
 
 A simple model should not implement speculative machinery for any deferred
 choice. It should preserve the semantic inputs and outputs needed for a later
 coordinator to supply that machinery externally.
-
-The following questions are review prompts, not a complete partition of
-responsibility. A concern may have both a device-owned rule and an
-externally-owned execution choice. Ask:
-
-1. Is it a deterministic, source-backed consequence of device state,
-   transport, applied stimulus, or elapsed duration?
-2. Is it needed to challenge behavior observable through the supported driver
-   contract?
-3. Or does it decide when an input occurs, what the shared world contains, how
-   devices are connected, or how several models are coordinated?
-
-Use the answers to separate source-backed device consequences from choices
-about occurrence, parameter selection, topology, and coordination. When a
-concern spans both, record each responsibility separately rather than assigning
-the whole concern to one actor.
 
 ## 5. Purpose-driven fidelity and honest incompleteness (normative)
 
@@ -668,6 +652,20 @@ an organization-wide precedent.
 ## 11. Working review prompts (non-normative)
 
 These are prompts for design review, not normative acceptance criteria:
+
+When a concern may span both device behavior and external execution, ask:
+
+- Is it a deterministic, source-backed consequence of device state,
+  transport, applied stimulus, or elapsed duration?
+- Is it needed to challenge behavior observable through the supported driver
+  contract?
+- Or does it decide when an input occurs, what the shared world contains, how
+  devices are connected, or how several models are coordinated?
+
+Use those answers to separate source-backed device consequences from choices
+about occurrence, parameter selection, topology, and coordination. When a
+concern spans both, record each responsibility separately rather than assigning
+the whole concern to one actor.
 
 - Can the observation boundary be explained in one paragraph?
 - Is every modeled behavior traceable to a pinned source or recorded decision?
