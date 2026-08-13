@@ -33,6 +33,14 @@ simulator. Its boundary should remain usable by a focused test helper and by a
 future coordinated multi-model harness without requiring the device's
 behavioral logic to be redesigned.
 
+The core concept is:
+
+> A device behavioral model deterministically predicts the device behavior
+> declared from its sources, given explicit transport operations, applied
+> stimuli, and elapsed duration. It does not invent physics, environmental
+> reality, or autonomous variation, and it remains compatible with an
+> externally coordinated temporal framework.
+
 It exists to make a datasheet interpretation executable and reviewable before
 physical evidence is available. Passing driver-versus-model tests establishes
 compatibility with that model only. It does not establish correctness on
@@ -230,6 +238,18 @@ The purpose of this working specification is to prevent independently authored
 peripheral models from capturing responsibilities that would make later
 coordination require rewriting them. It does not define that coordinator.
 
+These shared semantic decisions are useful before a shared coordinator exists.
+A focused repository test can supply transport operations, stimuli, and elapsed
+duration directly and use the model immediately in CI. A future coordinator can
+supply those same categories of input across RTC, sensor, GPIO, flash, and
+other models without changing their device-specific transition logic.
+
+Interoperability therefore comes from shared meanings and responsibility
+boundaries, not from prematurely standardizing one framework. Each model should
+avoid inventing a private answer for a concern that belongs to external
+coordination, while remaining no more complex than its declared purpose
+requires.
+
 A device model owns:
 
 - datasheet-derived device state and deterministic transitions;
@@ -261,6 +281,18 @@ has concrete requirements:
 A simple model should not implement speculative machinery for any deferred
 choice. It should preserve the semantic inputs and outputs needed for a later
 coordinator to supply that machinery externally.
+
+For a proposed model responsibility, ask:
+
+1. Is it a deterministic, source-backed consequence of device state,
+   transport, applied stimulus, or elapsed duration?
+2. Is it needed to challenge behavior observable through the supported driver
+   contract?
+3. Or does it decide when an input occurs, what the shared world contains, how
+   devices are connected, or how several models are coordinated?
+
+The first two questions identify device-model work. The third identifies a
+focused-test helper or future coordinator concern.
 
 ## 5. Purpose-driven fidelity and honest incompleteness
 

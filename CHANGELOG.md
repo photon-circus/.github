@@ -44,8 +44,10 @@ Last updated: 2026-08-13 UTC
 - Refine the device behavioral model working specification: the model is an
   explicit-input sink that consumes relative duration and applied stimuli
   without owning world time, environmental truth, topology, or orchestration;
-  coordinator APIs remain deferred; and evidence-backed silicon variants
-  preserve observed differences without rewriting or forking the common model.
+  shared semantic boundaries make models useful in focused CI before a common
+  coordinator exists; coordinator APIs remain deferred; and evidence-backed
+  silicon variants preserve observed differences without rewriting or forking
+  the common model.
 - Update the active audit cohort for the pre-publication rename from
   `ph-ads1115-adc` to `ph-ads1x15-adc`.
 
