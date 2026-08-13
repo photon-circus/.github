@@ -12,6 +12,10 @@ defines a normative responsibility and implementation core for driver-test
 models, surrounded by explicitly non-normative rationale and review guidance,
 so independently acting contributors and AI agents inherit settled decisions
 without making model success a hardware-qualification claim.
+The
+[device model resource pack](docs/device-model-resources/README.md) provides
+a non-normative procedural brief and intake/declaration template that apply
+those decisions without prescribing code structure.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
@@ -30,7 +34,9 @@ The [read-only repository auditor](docs/STANDARDS_AUDIT.md) collects Markdown an
 The [Peripheral Driver Bootstrap Intent](docs/PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md)
 records the authority boundary, independent derivation lanes, temporary-workspace
 model, and durable handoff expected from future local tooling. It records design
-intent only; the machinery and reusable templates do not yet exist.
+intent only; executable bootstrap machinery and workspace-generation templates
+do not yet exist. The non-executable device-model aids above do not implement
+that deferred tooling.
 
 ## License
 
