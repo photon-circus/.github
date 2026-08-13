@@ -4,10 +4,13 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-12 UTC
+Last updated: 2026-08-13 UTC
 
 ### Added
 
+- Add a non-normative deferred design record that preserves device-model
+  coordination seams, settled boundary findings, explicit reopening triggers,
+  and expected ownership without prematurely specifying a shared harness.
 - Add a non-normative device behavioral model working specification that
   distinguishes an independently derived driver-test model from stubs,
   transcript fakes, simulators, integration scaffolding, and physical evidence.
@@ -41,6 +44,13 @@ Last updated: 2026-08-12 UTC
 
 ### Changed
 
+- Refine the device behavioral model working specification: the model is an
+  explicit-input sink that consumes relative duration and applied stimuli
+  without owning world time, environmental truth, topology, or orchestration;
+  shared semantic boundaries make models useful in focused CI before a common
+  coordinator exists; coordinator APIs remain deferred; and evidence-backed
+  silicon variants preserve observed differences without silently overwriting
+  the datasheet baseline or another supported variant.
 - Update the active audit cohort for the pre-publication rename from
   `ph-ads1115-adc` to `ph-ads1x15-adc`.
 
