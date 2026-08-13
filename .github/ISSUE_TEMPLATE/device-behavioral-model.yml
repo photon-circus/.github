@@ -1,0 +1,60 @@
+name: Device behavioral model
+description: Define a source-derived device-model claim and boundary before implementation.
+title: "[Device model]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Apply the normative [Device Behavioral Model Standard](https://github.com/photon-circus/.github/blob/main/docs/DEVICE_BEHAVIORAL_MODEL_STANDARD.md). This form captures device-specific answers; it does not invite a new framework or coordinator design.
+
+  - type: textarea
+    id: identity-purpose
+    attributes:
+      label: Device identity, behavioral selection, and purpose
+      description: Identify the exact device or variant, the behavior being selected, the current consumer, and the concrete CI value.
+    validations:
+      required: true
+
+  - type: textarea
+    id: sources
+    attributes:
+      label: Sources and provenance
+      description: Record the primary source revision/date, source locations, and integrity or provenance information.
+    validations:
+      required: true
+
+  - type: textarea
+    id: behavioral-claim
+    attributes:
+      label: Behavioral boundary and fidelity
+      description: Summarize explicit inputs, observable outputs, temporal consequences, and behavior that is modeled, abstracted, injected, excluded, or unsupported. Do not restate the shared standard.
+    validations:
+      required: true
+
+  - type: textarea
+    id: decisions-boundaries
+    attributes:
+      label: Device-specific decisions and boundaries
+      description: Record genuine source ambiguities and interpretations, plus non-goals or deferred coordination that could otherwise be pulled into the model. Write "None identified" where appropriate.
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Acceptance evidence
+      description: Identify tests and review evidence proportional to the behavioral claim and meaningful false-pass risks.
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Submission checks
+      options:
+        - label: I treated the normative standard as inherited decisions rather than an open design prompt.
+          required: true
+        - label: I have not proposed shared support code or a coordinator API without a current consumer or repeated semantic need.
+          required: true
+        - label: I will keep the completed behavioral declaration in one maintained location rather than creating parallel policy documents.
+          required: true
