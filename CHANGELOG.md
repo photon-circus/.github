@@ -42,11 +42,10 @@ Last updated: 2026-08-13 UTC
 ### Changed
 
 - Refine the device behavioral model working specification: the model is an
-  explicit-trigger sink; harnesses own the temporal frontier, environmental
-  truth, ordering, and the duration of every trigger; all participating models
-  advance together; and models declare purpose-driven fidelity without
-  autonomous or hidden mutation, so a later shared host harness does not
-  require rewriting each device model.
+  explicit-input sink that consumes relative duration and applied stimuli
+  without owning world time, environmental truth, topology, or orchestration;
+  coordinator APIs remain deferred; and evidence-backed silicon variants
+  preserve observed differences without rewriting or forking the common model.
 - Update the active audit cohort for the pre-publication rename from
   `ph-ads1115-adc` to `ph-ads1x15-adc`.
 
