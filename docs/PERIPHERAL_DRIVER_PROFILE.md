@@ -70,6 +70,9 @@ The mock represents the device side of the abstract transport. It is derived
 from the datasheet contract independently from the driver and should model the
 observable state transitions needed to test supported operations.
 
+For non-normative vocabulary, boundaries, and design guidance, see the
+[Device Behavioral Model Working Specification](DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md).
+
 The mock must not reuse driver encoding, decoding, or sequencing logic where
 doing so would cause the driver and oracle to repeat the same defect. Shared
 types may be appropriate when they express public values; shared implementation

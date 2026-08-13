@@ -8,6 +8,9 @@ Last updated: 2026-08-12 UTC
 
 ### Added
 
+- Add a non-normative device behavioral model working specification that
+  distinguishes an independently derived driver-test model from stubs,
+  transcript fakes, simulators, integration scaffolding, and physical evidence.
 - Add `switch` as the peripheral-driver class token for multi-channel digital
   bus switches, and add `ph-tca954x-switch` to the active standards-audit
   cohort.
