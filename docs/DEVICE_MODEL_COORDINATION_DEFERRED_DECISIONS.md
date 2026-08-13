@@ -10,7 +10,7 @@ only in pull-request discussion while avoiding premature design of a shared
 support crate, execution harness, or coordinated simulator.
 
 The device boundary itself is described by
-[`DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md`](DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md).
+[`DEVICE_BEHAVIORAL_MODEL_STANDARD.md`](DEVICE_BEHAVIORAL_MODEL_STANDARD.md).
 That specification governs current model responsibilities. This record governs
 neither implementations nor acceptance; it is a durable handoff for questions
 whose concrete requirements do not yet exist.
@@ -42,7 +42,7 @@ such issues close.
 
 ## Findings that are not deferred
 
-The following boundaries are already established by the working specification
+The following boundaries are already established by the device-model standard
 and should not be relitigated as coordinator API choices:
 
 - Device models are deterministic predictors of declared device behavior.
@@ -264,7 +264,7 @@ represent a routed transport path.
 
 - The semantic transition is deterministic for the same initial state and
   ordered inputs.
-- The working specification does not prescribe in-place mutation or value
+- The device-model standard does not prescribe in-place mutation or value
   semantics.
 - Inspection represented as pure must not mutate device state.
 
