@@ -8,9 +8,9 @@ Last updated: 2026-08-13 UTC
 
 ### Added
 
-- Add non-normative device-model implementation resources: an agent brief,
-  behavioral-declaration content template, issue form, selectable pull-request
-  template, proportional review checklist, and minimal completed example.
+- Add non-normative device-model implementation resources: a procedural agent
+  brief that requires the normative core and one intake/declaration template
+  that graduates into existing maintained documentation.
 - Add a non-normative deferred design record that preserves device-model
   coordination seams, settled boundary findings, explicit reopening triggers,
   and expected ownership without prematurely specifying a shared harness.

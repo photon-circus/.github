@@ -2,9 +2,15 @@
 
 Status: **Non-normative content template**
 
-Copy the useful sections into the model's existing README or module
-documentation. Replace prompts, remove inapplicable entries, and keep one
-maintained declaration rather than preserving this template as a second file.
+Use the useful sections as the implementation issue body. At handoff, replace
+the prompts, remove inapplicable entries, and graduate the durable answers into
+the model's existing README or module documentation. Keep that location as the
+one maintained declaration; the issue remains discussion history.
+
+This template elicits device-specific answers only. Reading and applying the
+normative core of the
+[Device Behavioral Model Standard](../DEVICE_BEHAVIORAL_MODEL_STANDARD.md) is
+still required; completing these prompts is not a substitute.
 
 ## Claim
 
@@ -15,8 +21,8 @@ maintained declaration rather than preserving this template as a second file.
 
 ## Sources
 
-- Primary source, revision, and date:
-- Provenance or integrity record:
+- Primary source URL, revision, and date:
+- Recorded digest and provenance or integrity record:
 - Additional evidence, if any:
 
 ## Behavioral boundary
@@ -59,7 +65,7 @@ source-undeclared behavior. Include source locations and issue links where
 available.
 
 - Decision:
-  - Evidence:
+  - Source section or evidence:
   - Interpretation:
   - Observable consequence:
 

@@ -9,6 +9,11 @@ maintainer bootstrap a narrow peripheral-driver repository from vendor source
 material. It is not a task plan, an agent prompt, a generated workspace, or a
 claim that the machinery currently exists.
 
+Non-executable
+[device behavioral model resources](device-model-resources/README.md) help
+apply the current model standard. They are not the workspace templates,
+supervisor tooling, or generated bootstrap machinery deferred by this document.
+
 The purpose of the workflow is to make the expensive initial reasoning
 repeatable without committing temporary coordination scaffolding to the driver
 repository or allowing one implementation to validate itself.
