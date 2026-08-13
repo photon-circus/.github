@@ -4,7 +4,7 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-12 UTC
+Last updated: 2026-08-13 UTC
 
 ### Added
 
@@ -41,6 +41,10 @@ Last updated: 2026-08-12 UTC
 
 ### Changed
 
+- Refine the device behavioral model working specification: the model is an
+  environment sink, harnesses own simulated `now`, and devices `step(Δt)`
+  rather than `set_now(t)`, so a later shared host harness does not require
+  rewriting each device model.
 - Update the active audit cohort for the pre-publication rename from
   `ph-ads1115-adc` to `ph-ads1x15-adc`.
 

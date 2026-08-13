@@ -4,6 +4,8 @@ Status: **Non-normative working specification**
 
 Recorded: **2026-08-12 UTC**
 
+Last revised: **2026-08-13 UTC**
+
 This document supplies vocabulary and design guidance for the executable model
 commonly called a *driver mock*. It is not an organization standard, audit
 input, publication gate, or claim of hardware qualification. It does not
@@ -57,6 +59,7 @@ A device behavioral model is not:
 - a stub that returns canned success values;
 - a complete simulator, emulator, digital twin, or model of device physics;
 - an MCU, board-support package, firmware example, or integration harness;
+- a host-side world clock, scheduler, or virtual-time kernel;
 - hardware-in-the-loop evidence or a substitute for `ph-hil`;
 - an assertion about undocumented silicon behavior;
 - proof of electrical, analog, timing, performance, safety, or board-level
@@ -78,7 +81,7 @@ Examples include:
 
 - injecting a raw conversion result rather than simulating temperature,
   luminance, pressure, or electrode physics;
-- advancing an explicit logical clock rather than sleeping on wall time;
+- stepping logical time by a duration rather than sleeping on wall time;
 - injecting a documented fault rather than reproducing an electrical cause;
   and
 - exposing an interrupt state as device behavior without owning a GPIO driver,
@@ -87,6 +90,77 @@ Examples include:
 Transaction boundaries that alter documented behavior, such as an I2C STOP or
 chip-select transition, belong in the model. Concrete buses, pins, DMA,
 scheduling, retries, and product policy do not.
+
+### Device API as a sink
+
+The model is a **sink** for three kinds of input. It is not a source of world
+time and not a test harness.
+
+1. **Transport operations** from the driver (the abstract bus the driver
+   already uses).
+2. **Environment injections** from the harness: held physical conditions such
+   as power availability, a completed sensor sample, or a pending transport
+   fault.
+3. **Time steps** from the harness: `step(Δt)` meaning “this much simulated
+   time passed under the environment you currently hold.”
+
+The harness answers *what time is it, and what is physically true?* The model
+answers *given that, what does the datasheet do to this device?* The driver
+answers *which transport operations do I issue?*
+
+A later organization-wide host harness, and later `ph-hil` physical execution,
+should be able to drive the same sink. Driver repositories should not invent a
+private world, scheduler, or `now` object that other peripherals would have to
+copy.
+
+### Logical time is `step(Δt)`, not `set_now(t)`
+
+Distinguish two clocks:
+
+- **Harness `now`:** a monotonic simulated elapsed-time coordinate. The
+  harness owns it. Jumping `now` is a harness operation.
+- **Device state:** registers, flags, pin modes, and any datasheet timers
+  (busy remaining, conversion period, countdown chain). Those are device
+  state. They are not a copy of harness `now`. An RTC’s civil calendar is an
+  *output* of stepping while the modeled oscillator is running, not the
+  definition of time.
+
+Prefer a device method shaped like `step(Δt)` with `Δt ≥ 0`:
+
+- **Inject is instantaneous.** Changing power or a sample does not consume
+  simulated time. Datasheet effects that occur on the condition change (for
+  example an oscillator-stop flag on loss of supply) happen on inject.
+- **`step(Δt)` is the only way simulated time passes.** Transport operations
+  do not implicitly advance `now`. Driver `DelayNs` or pin waits belong to
+  the harness: a wait of `n` is `now += n` followed by `device.step(n)`.
+- **A zero step is a no-op** for time. A negative step is a contract error.
+- **A large step must apply every modeled event in the interval**, not skip
+  to the end as if intermediate matches, conversions, or rollovers did not
+  occur. Variable-sized steps are still discrete-event evolution, not a
+  busy 1 ms loop.
+- **If environment changes at an intermediate time,** the harness splits the
+  interval (`step` under `E0`, inject, `step` under `E1`). The model does
+  not own a stimulus timeline.
+
+`set_now(t)` on the **device** couples the chip to a world coordinate:
+rewind policy, epoch, units, and a stored `last_now`. That coordinate
+belongs to the harness. A harness may offer `set_now` as sugar
+(`Δt = t − now`; `device.step(Δt)`; `now = t`). The device should not.
+
+The model may keep remaining-time counters that the datasheet requires. Those
+counters are updated by `step(Δt)`. They are not harness `now`.
+
+### Held environment
+
+The harness owns the story of physical conditions. The model holds only the
+last told condition, the way a pin holds a level until it changes. Injected
+power, samples, and similar levels remain in force until the next inject.
+Pending one-shot faults are consumed at the transport boundary.
+
+This specification does not prescribe a host-harness crate, a shared clock
+type, or packaging. It only preserves a seam: environment in, datasheet
+state out, so a future shared `now` does not require rewriting each device
+model.
 
 ## 5. Fidelity and honest incompleteness
 
@@ -165,8 +239,9 @@ crate; this specification does not prescribe packaging or make it a public API.
   and documented transaction boundaries without modeling its analog circuit.
 - A sensor can accept injected raw samples and model status or data-ready
   behavior without generating real-world environmental values.
-- An RTC can advance through a deterministic clock input and model calendar
-  rollover without claiming crystal accuracy, drift, or backup-supply behavior.
+- An RTC can `step(Δt)` under a harness-owned `now` and model calendar
+  rollover without owning world time or claiming crystal accuracy, drift, or
+  analog backup-supply behavior.
 - A flash device can model command state, write enable, busy state, and address
   rules without claiming endurance or signal integrity.
 - A bus switch can model channel-selection semantics and reset behavior without
@@ -184,6 +259,13 @@ crate; this specification does not prescribe packaging or make it a public API.
 - **Silent completeness:** returns invented behavior for unsupported commands.
 - **Integration capture:** absorbs HAL, board, executor, DMA, retry, or product
   policy into the device model.
+- **World clock in the device:** stores harness `now`, exposes `set_now(t)`, or
+  implements `DelayNs` / pin waits on the model. Logical time is a harness
+  coordinate; the device only `step(Δt)` under a held environment.
+- **Harness capture:** puts a scheduler, stimulus timeline, subscriber bus, or
+  multi-device kernel inside the device model. A 20-line test helper that
+  calls `inject` / `step` is disposable glue. A private world object is a
+  product other peripherals will have to replace.
 - **Hidden physical claim:** describes host-model success as hardware support.
 - **Speculative scaffolding:** adds future `ph-hil` layouts or evidence machinery
   before a reviewed protocol requires them.
@@ -197,6 +279,9 @@ These are prompts for design review, not normative acceptance criteria:
 - Can the model be tested without the production driver?
 - Does it avoid production logic whose correctness it is meant to challenge?
 - Are time and external events explicit and deterministic?
+- Does the model `step(Δt)` under a held environment, or does it own a `now`?
+- Could a later harness drive the same inject/step sink without rewriting the
+  device?
 - Does unsupported behavior fail honestly?
 - Would a deliberate driver or model defect cause a test to fail?
 - Are physical and board-level claims explicitly excluded?
