@@ -25,21 +25,16 @@ refer to this same artifact; **device behavioral model** is the preferred
 durable name used by this working specification.
 
 A device behavioral model is an independently derived, deterministic,
-executable model of documented device behavior that is observable through the
-operations supported by the driver.
+executable predictor of source-declared device behavior observable through the
+operations supported by the driver. Given an explicitly selected behavioral
+claim, transport operations, applied stimuli, and elapsed duration, it produces
+device state, responses, and outputs without inventing physics, environmental
+reality, or autonomous variation.
 
 It is intentionally a cheap peripheral predictor for CI, not a complete
-simulator. Its boundary should remain usable by a focused test helper and by a
-future coordinated multi-model harness without requiring the device's
+simulator. Its boundary should remain usable by a focused test helper and by
+future external temporal coordination without requiring the device's
 behavioral logic to be redesigned.
-
-The core concept is:
-
-> A device behavioral model deterministically predicts the device behavior
-> declared from its sources, given explicit transport operations, applied
-> stimuli, and elapsed duration. It does not invent physics, environmental
-> reality, or autonomous variation, and it remains compatible with an
-> externally coordinated temporal framework.
 
 It exists to make a datasheet interpretation executable and reviewable before
 physical evidence is available. Passing driver-versus-model tests establishes
@@ -113,8 +108,12 @@ inputs from outside the model. Its useful input categories are:
 2. **Applied stimuli** at the device boundary, such as supply availability,
    sensing-element temperature, an available raw sample, or a pending fault.
 3. **Relative elapsed duration** under the currently applied stimuli.
-4. **Behavioral configuration**, including a declared datasheet baseline or
-   evidence-backed silicon variant where the supported behavior differs.
+4. **Behavioral selection**, identifying the datasheet-derived baseline or an
+   evidence-backed silicon variant whose claim this execution evaluates.
+
+Behavioral selection is explicit execution provenance. It may be fixed when a
+model is constructed rather than delivered as a temporal input, but CI must not
+change it implicitly.
 
 For the same initial state and the same ordered inputs, the model produces the
 same state transitions, transport responses, and device outputs. It remains
@@ -126,7 +125,7 @@ Conceptually:
 
 ```text
 (next state, response, outputs) =
-    transition(current state, applied inputs)
+    transition(behavioral selection, current state, ordered execution inputs)
 ```
 
 This notation does not prescribe a Rust trait, mutation style, trigger type, or
@@ -146,12 +145,18 @@ The model may retain device state required by the datasheet, such as
 fractional remainder. Those values describe the device's progress; they are not
 a copy of a world-time coordinate.
 
-Under unchanged applied stimuli, dividing one elapsed interval into smaller
-steps should preserve the final modeled state and ordered observable effects.
-The model must therefore retain any sub-resolution progress needed by its
-declared timing abstraction. The concrete duration representation, resolution,
-rounding policy, overflow behavior, and event-discovery surface remain future
-shared-API decisions.
+Under unchanged applied stimuli, different valid partitions of the same elapsed
+duration should be observationally equivalent at the model's declared
+boundary. This does not require reporting or individually iterating internal
+events that have no distinct modeled observation. The model must retain enough
+relative progress to honor its declared timing abstraction.
+
+The concrete duration representation, resolution, rounding policy, overflow
+behavior, and event-discovery surface remain future shared-API decisions. A
+model may use arithmetic, retained phase, bounded iteration, or another honest
+implementation appropriate to its purpose. A future event-discovery API may
+reduce coordination cost, but is not required for temporal correctness within
+the model.
 
 A focused test may advance one model directly. A future coordinated simulator
 may advance several participating models against a shared temporal frontier.
@@ -163,6 +168,13 @@ The device boundary must support both without alteration. In particular:
   advancement mechanism as other elapsed duration; and
 - the model does not implement `DelayNs`, timers, or pin waits on behalf of the
   harness.
+
+A no-op driver delay provider invalidates timing-sensitive driver-versus-model
+tests. It can make conversions appear to complete only after unrelated
+transport activity, or make insufficient-wait defects pass for reasons that do
+not reflect the driver's requested delay. A focused test must therefore route
+driver delay intent into its explicit duration input; a future shared harness
+must preserve that same semantic path.
 
 This specification does not decide whether every external action has a modeled
 cost, how simultaneous actions are represented, how a transaction is divided
@@ -232,6 +244,12 @@ the model's supported fidelity is instead an explicit model limitation and
 must fail clearly or remain unavailable rather than fabricate a plausible
 device response, duration, or state transition.
 
+Unsupported behavior may become knowable only after part of the transport
+abstraction has already been accepted. In that case the model or test must not
+invent subsequent behavior or erase effects already committed at its declared
+boundary. How partial transport phases, elapsed duration, and abort semantics
+are represented remains part of the deferred transport and failure contract.
+
 ### Compatibility boundary and deferred coordination
 
 The purpose of this working specification is to prevent independently authored
@@ -282,7 +300,9 @@ A simple model should not implement speculative machinery for any deferred
 choice. It should preserve the semantic inputs and outputs needed for a later
 coordinator to supply that machinery externally.
 
-For a proposed model responsibility, ask:
+The following questions are review prompts, not a complete partition of
+responsibility. A concern may have both a device-owned rule and an
+externally-owned execution choice. Ask:
 
 1. Is it a deterministic, source-backed consequence of device state,
    transport, applied stimulus, or elapsed duration?
@@ -291,8 +311,10 @@ For a proposed model responsibility, ask:
 3. Or does it decide when an input occurs, what the shared world contains, how
    devices are connected, or how several models are coordinated?
 
-The first two questions identify device-model work. The third identifies a
-focused-test helper or future coordinator concern.
+Use the answers to separate source-backed device consequences from choices
+about occurrence, parameter selection, topology, and coordination. When a
+concern spans both, record each responsibility separately rather than assigning
+the whole concern to one actor.
 
 ## 5. Purpose-driven fidelity and honest incompleteness
 
@@ -318,11 +340,19 @@ preventing a known false confidence. Physical behavior must not be invented
 merely to make the model appear realistic.
 
 In particular, accuracy limits and physical uncertainty do not by themselves
-define a stochastic process. Under the same initial state and ordered trigger
+define a stochastic process. Under the same initial state and ordered input
 trace, the model must not add undocumented noise, jitter, drift, or
 environmental change. Useful physical variation should normally be supplied as
 an explicit, reproducible harness stimulus or separately configured device
 characteristic.
+
+A documented range must not silently collapse into one universal physical
+truth. A model may select a fixed, conservative, typical, or swept point when
+that choice is useful and explicitly declared as modeled, abstracted, or
+externally selected. The declaration should also state whether the choice is
+fixed per model instance, per execution, or per test case. The model need not
+invent a probability distribution or parameterization unsupported by its
+purpose and sources.
 
 Each model should state its purpose, applied-stimulus boundary, modeled and
 abstracted behavior, injected inputs, exclusions, unsupported operations,
@@ -342,10 +372,11 @@ demonstrate behavior specific to a silicon family member, revision, lot, or
 other recorded identity.
 
 A silicon-specific observation must not silently replace the datasheet
-baseline or behavior supported by another observed variant. The common device
-state machine should permit explicitly selected behavioral profiles so CI can
-exercise the datasheet baseline and every supported variant without forking or
-duplicating the model.
+baseline or behavior supported by another observed variant. CI should be able
+to select the baseline or a supported variant explicitly and preserve the
+claim under test. This specification does not prescribe whether variants use
+parameters, profiles, constructors, tables, shared implementation, or separate
+implementations with common conformance tests.
 
 Each departure from the baseline should record:
 
@@ -465,7 +496,8 @@ crate; this specification does not prescribe packaging or make it a public API.
 - **Unitless duration:** accepts a numeric time step whose unit and resolution
   are implicit.
 - **Partition-dependent evolution:** discards fractional progress so that
-  `step(a); step(b)` differs from `step(a + b)` under unchanged stimuli.
+  valid partitions of the same elapsed duration are observably different under
+  unchanged stimuli merely because the caller divided the interval.
 - **Invented realism:** adds noise, jitter, drift, thermal behavior, or random
   variation without a documented requirement and explicit fidelity claim.
 - **Harness capture:** puts a scheduler, stimulus timeline, subscriber bus, or
