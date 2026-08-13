@@ -17,6 +17,43 @@ The terms **must**, **must not**, **required**, **should**, **should not**, and
 **may** express the strength of a rule. Statements that explicitly defer a
 choice do not authorize each model to choose a private coordinator contract.
 
+### Authority and agent use
+
+The normative core is the inherited decision set for independently acting
+contributors, including AI agents. Its purpose is to prevent each model effort
+from re-deriving shared semantics and making locally plausible choices that are
+incompatible with other models or the direction of the organization standards.
+
+An implementation must apply the normative core as an input constraint, not as
+an open design prompt. It may choose among alternatives only where the standard
+explicitly permits a local choice. It must not override a settled boundary for
+local convenience, infer a required code structure from another model, or
+privately resolve a choice recorded as deferred.
+
+If current work demonstrates that a normative rule is insufficient or
+incompatible with source-backed device behavior, the implementation must
+preserve that evidence and propose a standards change. It must not silently
+establish a conflicting local convention. If a deferred question becomes
+concrete, the work must identify its reopening trigger and route the decision
+to the expected shared owner recorded in the deferred-decision register.
+
+A provision belongs in the normative core only when all of the following are
+true:
+
+1. it resolves a recurring seam that independently authored models could
+   otherwise resolve incompatibly;
+2. it is supported by concrete design or implementation evidence;
+3. it expresses a stable semantic, responsibility, evidence, or independence
+   boundary that applies across device families;
+4. recording it prevents rediscovery or incompatible local decisions; and
+5. it can be stated without prescribing incidental code structure or resolving
+   a coordinator concern whose requirements remain deferred.
+
+Material that does not meet this admission test remains non-normative guidance
+or a deferred decision. One implementation, agent preference, code-size target,
+or convenient API shape is not by itself sufficient to create an
+organization-wide requirement.
+
 ### Status map
 
 The following sections are **normative**:

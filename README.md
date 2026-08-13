@@ -10,6 +10,7 @@ The
 [Device Behavioral Model Standard](docs/DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
 defines a normative responsibility and implementation core for driver-test
 models, surrounded by explicitly non-normative rationale and review guidance,
+so independently acting contributors and AI agents inherit settled decisions
 without making model success a hardware-qualification claim.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.

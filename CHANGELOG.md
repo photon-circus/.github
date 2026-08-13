@@ -53,7 +53,10 @@ Last updated: 2026-08-13 UTC
   persistent stimulus levels are idempotent; model limitations remain distinct
   from device refusals; source-undeclared sequences are not invented; and
   model, adapter, documentation, and policy complexity remains proportional to
-  current behavioral value.
+  current behavioral value. Define the normative core as an inherited decision
+  set for independently acting contributors and AI agents, including an
+  evidence-based admission test and an escalation path when a settled or
+  deferred boundary proves insufficient.
 - Refine the device behavioral model working specification: the model is an
   explicit-input sink that consumes relative duration and applied stimuli
   without owning world time, environmental truth, topology, or orchestration;
