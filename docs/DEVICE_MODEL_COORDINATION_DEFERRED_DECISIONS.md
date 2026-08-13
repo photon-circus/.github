@@ -10,7 +10,7 @@ only in pull-request discussion while avoiding premature design of a shared
 support crate, execution harness, or coordinated simulator.
 
 The device boundary itself is described by
-[`DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md`](DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md).
+[`DEVICE_BEHAVIORAL_MODEL_STANDARD.md`](DEVICE_BEHAVIORAL_MODEL_STANDARD.md).
 That specification governs current model responsibilities. This record governs
 neither implementations nor acceptance; it is a durable handoff for questions
 whose concrete requirements do not yet exist.
@@ -42,7 +42,7 @@ such issues close.
 
 ## Findings that are not deferred
 
-The following boundaries are already established by the working specification
+The following boundaries are already established by the device-model standard
 and should not be relitigated as coordinator API choices:
 
 - Device models are deterministic predictors of declared device behavior.
@@ -63,9 +63,10 @@ and should not be relitigated as coordinator API choices:
   another supported variant.
 - Device models do not reference or mutate one another.
 
-Revising one of these findings requires a direct change to the working
-specification with evidence showing why the boundary is insufficient. It is
-not an incidental consequence of choosing a coordinator implementation.
+Revising one of these findings requires a direct change to
+[`DEVICE_BEHAVIORAL_MODEL_STANDARD.md`](DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
+with evidence showing why the boundary is insufficient. It is not an
+incidental consequence of choosing a coordinator implementation.
 
 ## Deferred decision index
 
@@ -264,7 +265,7 @@ represent a routed transport path.
 
 - The semantic transition is deterministic for the same initial state and
   ordered inputs.
-- The working specification does not prescribe in-place mutation or value
+- The device-model standard does not prescribe in-place mutation or value
   semantics.
 - Inspection represented as pure must not mutate device state.
 

@@ -44,6 +44,19 @@ Last updated: 2026-08-13 UTC
 
 ### Changed
 
+- Adopt the responsibility, fidelity, independence, validation, and source
+  boundaries of the former device behavioral model working specification as a
+  normative core while retaining its rationale, examples, anti-patterns, and
+  review prompts as non-normative guidance. Add implementation guardrails
+  learned from the first simple-model smoke test: packaging does not define
+  independence; conformance consumers may depend on both implementations;
+  persistent stimulus levels are idempotent; model limitations remain distinct
+  from device refusals; source-undeclared sequences are not invented; and
+  model, adapter, documentation, and policy complexity remains proportional to
+  current behavioral value. Define the normative core as an inherited decision
+  set for independently acting contributors and AI agents, including an
+  evidence-based admission test and an escalation path when a settled or
+  deferred boundary proves insufficient.
 - Refine the device behavioral model working specification: the model is an
   explicit-input sink that consumes relative duration and applied stimuli
   without owning world time, environmental truth, topology, or orchestration;

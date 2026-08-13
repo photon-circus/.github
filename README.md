@@ -6,10 +6,12 @@ Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
 
 Unpublished peripheral drivers also follow the
 [Pre-`ph-hil` Peripheral Driver Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
-The non-normative
-[Device Behavioral Model Working Specification](docs/DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md)
-provides shared vocabulary for what a driver mock is and is not without adding
-an audit or qualification gate.
+The
+[Device Behavioral Model Standard](docs/DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
+defines a normative responsibility and implementation core for driver-test
+models, surrounded by explicitly non-normative rationale and review guidance,
+so independently acting contributors and AI agents inherit settled decisions
+without making model success a hardware-qualification claim.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
