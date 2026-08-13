@@ -296,6 +296,12 @@ has concrete requirements:
 - mutable versus value transition APIs;
 - trace, snapshot, rollback, and failure semantics.
 
+The durable context, reopening triggers, and expected ownership for these
+questions are maintained in
+[`DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md`](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+That record preserves design seams without making them requirements of this
+device-model specification.
+
 A simple model should not implement speculative machinery for any deferred
 choice. It should preserve the semantic inputs and outputs needed for a later
 coordinator to supply that machinery externally.

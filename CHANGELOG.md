@@ -8,6 +8,9 @@ Last updated: 2026-08-13 UTC
 
 ### Added
 
+- Add a non-normative deferred design record that preserves device-model
+  coordination seams, settled boundary findings, explicit reopening triggers,
+  and expected ownership without prematurely specifying a shared harness.
 - Add a non-normative device behavioral model working specification that
   distinguishes an independently derived driver-test model from stubs,
   transcript fakes, simulators, integration scaffolding, and physical evidence.
