@@ -7,7 +7,7 @@ Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
 Unpublished peripheral drivers also follow the
 [Pre-`ph-hil` Peripheral Driver Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
 The non-normative
-[Device Behavioral Model Working Specification](docs/DRIVER_MOCK_WORKING_SPEC.md)
+[Device Behavioral Model Working Specification](docs/DEVICE_BEHAVIORAL_MODEL_WORKING_SPEC.md)
 provides shared vocabulary for what a driver mock is and is not without adding
 an audit or qualification gate.
 

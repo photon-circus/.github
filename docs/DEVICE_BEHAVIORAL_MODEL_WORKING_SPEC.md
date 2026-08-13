@@ -18,6 +18,10 @@ acceptable shorthand, but can misleadingly suggest that the driver itself is
 being mocked. The driver is the system under test; the model represents the
 device side of its abstract transport boundary.
 
+The organization standards' terms **behavioral mock** and **behavioral model**
+refer to this same artifact; **device behavioral model** is the preferred
+durable name used by this working specification.
+
 A device behavioral model is an independently derived, deterministic,
 executable model of documented device behavior that is observable through the
 operations supported by the driver.
