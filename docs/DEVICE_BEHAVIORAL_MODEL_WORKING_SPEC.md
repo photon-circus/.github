@@ -93,89 +93,250 @@ scheduling, retries, and product policy do not.
 
 ### Device API as a sink
 
-The model is a **sink** for three kinds of input. It is not a source of world
-time and not a test harness.
+The model is a deterministic **sink** for explicitly timed triggers. It is not
+a source of world time, environmental truth, or execution policy. Every
+committed trigger carries a positive, unit-bearing relative duration from the
+current temporal frontier to the next one.
 
-1. **Transport operations** from the driver (the abstract bus the driver
-   already uses).
-2. **Environment injections** from the harness: held physical conditions such
-   as power availability, a completed sensor sample, or a pending transport
-   fault.
-3. **Time steps** from the harness: `step(Δt)` meaning “this much simulated
-   time passed under the environment you currently hold.”
+1. **Timed transport boundaries** from the driver-facing abstract transport,
+   such as a read, write, I2C STOP, or chip-select transition.
+2. **Timed applied-stimulus changes** from the harness, such as supply
+   availability, a sensing-element temperature, a completed raw sample, or a
+   pending transport fault.
+3. **Pure duration advancement** from the harness when elapsed time passes
+   without another external operation.
 
-The harness answers *what time is it, and what is physically true?* The model
-answers *given that, what does the datasheet do to this device?* The driver
-answers *which transport operations do I issue?*
+For each trigger, the harness advances every participating model through the
+same relative duration, applies the addressed operation at its declared
+boundary, and publishes the resulting frontier only after its effects settle.
+The addressed model deterministically transforms its prior state and returns
+any transport response or externally visible device output. The harness owns
+the trigger, duration, ordering, and commit boundary. The device model remains
+quiescent between triggers.
 
-A later organization-wide host harness, and later `ph-hil` physical execution,
-should be able to drive the same sink. Driver repositories should not invent a
-private world, scheduler, or `now` object that other peripherals would have to
-copy.
+A later organization-wide host harness should be able to orchestrate the same
+transport, stimulus, and relative-step seam. Driver repositories should not
+invent a private world coordinate, scheduler, environmental model, or stimulus
+timeline that other peripherals would have to copy.
 
-### Logical time is `step(Δt)`, not `set_now(t)`
+### Temporal frontier and explicit triggers
 
-Distinguish two clocks:
+The harness maintains a strictly advancing **temporal frontier**: the greatest
+point in the ordered trigger history through which every participating model
+has been brought and all immediate consequences have settled. At a settled
+frontier, each model's state and applied stimuli are valid at that frontier.
 
-- **Harness `now`:** a monotonic simulated elapsed-time coordinate. The
-  harness owns it. Jumping `now` is a harness operation.
-- **Device state:** registers, flags, pin modes, and any datasheet timers
-  (busy remaining, conversion period, countdown chain). Those are device
-  state. They are not a copy of harness `now`. An RTC’s civil calendar is an
-  *output* of stepping while the modeled oscillator is running, not the
-  definition of time.
+A harness may associate an elapsed-time coordinate called `now` with the
+frontier, but its origin and absolute value have no device-level meaning. Only
+relative duration and the resulting trigger order are semantic. Every
+committed trigger advances that coordinate by its explicit duration; there are
+no committed zero-duration triggers. Conditions that are simultaneous at the
+declared resolution are grouped into one trigger.
 
-Prefer a device method shaped like `step(Δt)` with `Δt ≥ 0`:
+Every state mutation must be attributable to an explicitly timed trigger
+controlled by the harness:
 
-- **Inject is instantaneous.** Changing power or a sample does not consume
-  simulated time. Datasheet effects that occur on the condition change (for
-  example an oscillator-stop flag on loss of supply) happen on inject.
-- **`step(Δt)` is the only way simulated time passes.** Transport operations
-  do not implicitly advance `now`. Driver `DelayNs` or pin waits belong to
-  the harness: a wait of `n` is `now += n` followed by `device.step(n)`.
-- **A zero step is a no-op** for time. A negative step is a contract error.
-- **A large step must apply every modeled event in the interval**, not skip
-  to the end as if intermediate matches, conversions, or rollovers did not
-  occur. Variable-sized steps are still discrete-event evolution, not a
-  busy 1 ms loop.
-- **If environment changes at an intermediate time,** the harness splits the
-  interval (`step` under `E0`, inject, `step` under `E1`). The model does
-  not own a stimulus timeline.
+- elapsed duration applies documented time-dependent effects to every
+  participating device;
+- the trigger's transport boundary may additionally apply documented
+  transaction-dependent effects to the addressed device; and
+- the trigger's stimulus boundary may additionally apply documented effects
+  of the new stimulus to every affected device.
 
-`set_now(t)` on the **device** couples the chip to a world coordinate:
-rewind policy, epoch, units, and a stored `last_now`. That coordinate
-belongs to the harness. A harness may offer `set_now` as sugar
-(`Δt = t − now`; `device.step(Δt)`; `now = t`). The device should not.
+The model must not advance from wall time, poll external state, run background
+evolution, introduce random variation, or lazily catch up during an unrelated
+operation. Replaying the same initial state and ordered trigger trace must
+produce the same transitions and outputs regardless of host speed, polling
+frequency, test structure, or harness implementation.
 
-The model may keep remaining-time counters that the datasheet requires. Those
-counters are updated by `step(Δt)`. They are not harness `now`.
+Not every model changes observably at every frontier, but every participating
+model consumes the trigger's relative duration. A targeted operation may add a
+transition only to its addressed device; other models retain or evolve their
+state according to elapsed time. The harness settles all immediate
+consequences before publishing the frontier.
 
-### Held environment
+### Relative-duration contract
 
-The harness owns the story of physical conditions. The model holds only the
-last told condition, the way a pin holds a level until it changes. Injected
-power, samples, and similar levels remain in force until the next inject.
-Pending one-shot faults are consumed at the transport boundary.
+A time step is a non-negative, unit-bearing elapsed duration in the harness
+reference-time domain. It is not an absolute timestamp or a device oscillator
+tick count. An interface must make the unit explicit; an unqualified numeric
+`delta` is insufficient. A duration type with nanosecond resolution, or an
+explicitly named integer such as `delta_ns`, is suitable. This working
+specification does not prescribe a shared Rust type.
 
-This specification does not prescribe a host-harness crate, a shared clock
-type, or packaging. It only preserves a seam: environment in, datasheet
-state out, so a future shared `now` does not require rewriting each device
-model.
+The device does not choose the duration of a trigger. The harness derives it
+from a declared deterministic timing policy, such as an abstract fixed
+transaction cost, explicit test input, or a transport model. Changing that
+policy changes the trigger trace and must be visible in test provenance.
 
-## 5. Fidelity and honest incompleteness
+Prefer a device method shaped like `step(delta)`:
 
-The model should classify its behavior rather than imply completeness:
+- **Zero is inspection, not a trigger.** A zero duration cannot commit an
+  operation or mutate state. It may be used only to describe pure evaluation
+  of a frozen state.
+- **No hidden elapsed time.** Every transport operation and stimulus change
+  carries a harness-supplied duration. The device does not infer that duration
+  from bus speed, host wall time, or the operation itself. If intermediate
+  signal edges are in scope, the harness represents them as additional timed
+  triggers.
+- **Partitioning is consistent.** Under unchanged applied stimuli,
+  `step(a)` followed by `step(b)` produces the same final state and ordered
+  externally visible effects at the same relative offsets as `step(a + b)`.
+- **Modeled events are preserved.** A large step applies every modeled
+  rollover, match, conversion, flag change, and other event in the interval.
+  It need not iterate through artificial fixed-size ticks.
+- **Sub-resolution progress is retained.** The model preserves any fractional
+  duration or oscillator phase needed to make valid partitions equivalent.
 
-1. **Modeled:** behavior required by the repository's supported driver
-   contract.
-2. **Optional:** additional documented behavior useful for exercising that
-   contract.
-3. **Excluded:** analog and electrical behavior, board topology, physical
-   tolerances, undocumented quirks, and functionality outside the declared
-   scope.
+Advancing reference time is always a harness-wide operation, including when
+the trigger is a transaction or stimulus change. Before the harness publishes
+the next frontier, every participating model must have consumed the trigger's
+duration. A driver wait of `n` means conceptually `harness.advance(n)`, not
+`now += n` followed by `one_device.step(n)`.
 
-Unsupported behavior should fail explicitly or remain unavailable. The model
-must not invent a plausible response and quietly broaden the support claim.
+The harness partitions a requested advance at scheduled stimulus changes and
+at modeled device events whose externally visible consequences affect another
+model. At each boundary it routes outputs, applies resulting stimulus changes,
+and settles their immediate consequences before advancing again. This
+specification preserves that seam without prescribing an event-discovery API.
+
+`set_now(t)` on the device couples it to a world coordinate, including its
+origin, units, rewind policy, and a stored `last_now`. That coordinate belongs
+to the harness. A model may keep datasheet-required `busy_remaining`,
+oscillator phase, conversion progress, and similar relative state. Those are
+consequences of elapsed time, not a copy of harness `now`.
+
+Harness reference time, device oscillator state, and device-visible time are
+distinct. An RTC calendar may stop, drift, wrap, reset, or be written backward
+while the harness frontier remains monotonic.
+
+### Harness-owned environment and applied stimuli
+
+The harness owns the **authoritative environmental state** for an execution:
+shared physical conditions, their supplied history and changes, and
+relationships among devices. This does not require a detailed physical world
+model. A focused test may act as a minimal harness and supply deterministic
+stimuli directly. A device model does not contain the authoritative environment
+and does not receive a reference to harness environmental state.
+
+The harness projects environmental truth into narrow, device-specific
+**applied stimuli**. A model may retain the last applied value of a persistent
+stimulus so it can evolve under that value during `step(delta)`. This retained
+input is not authoritative environmental state: the model does not decide when
+it changes, extrapolate its trajectory, or propagate it to another device.
+
+For example, a temperature-sensor model may accept a sensing-element
+temperature or a completed raw conversion. It owns its documented sampling,
+conversion timing, quantization, filtering, register, and interrupt behavior.
+It does not own ambient temperature, thermal coupling, airflow, self-heating,
+or the future evolution of the physical quantity unless a deliberately
+declared, source-backed fidelity decision places a specific effect in scope.
+
+The device's measurement state may differ from current environmental truth. A
+sensor may still report its previous conversion after the applied temperature
+changes, and two sensors at the same frontier may report different values due
+to their respective documented state. That is not temporal or environmental
+inconsistency.
+
+Persistent stimuli remain applied until a timed harness trigger changes them.
+Unless a finer boundary is explicitly modeled, the prior stimulus is held over
+that trigger's duration and the new value takes effect at its ending frontier.
+Changes declared simultaneous at the harness resolution are applied as one
+trigger. One-shot stimuli are delivered and consumed at their documented
+boundary. Device outputs return to the harness; when an output affects another
+device or a shared condition, the harness updates its world state and schedules
+the resulting timed trigger. Devices do not mutate one another.
+
+At every settled frontier, each model's applied stimuli must agree with the
+harness projection for that device. If a condition changes during an elapsed
+interval, the harness splits the interval at that change. The model does not
+invent a trajectory between supplied values.
+
+Initial device state and initial applied stimuli must be explicit or have
+documented deterministic defaults. A model must not silently invent ambient
+conditions merely because the harness has not supplied them.
+
+### Transport transitions and visible effects
+
+Transport operations are explicitly timed inputs to the state machine, not
+necessarily pure observations. A transaction may return a response and apply
+documented effects such as FIFO consumption, read-clear behavior, pointer
+advancement, latching, or interrupt acknowledgement.
+
+The harness advances every participating model through the transaction's
+declared duration. Transaction-dependent effects then occur at their documented
+linearization boundary. A second committed operation necessarily occurs at a
+later temporal frontier and is evaluated against the resulting state.
+
+The contract should identify the boundary at which the response and effects
+linearize, such as command acceptance, byte transfer, STOP, or chip-select
+release. If behavior depends on an intermediate point, the harness decomposes
+the transaction into smaller timed triggers. A rejected operation may still
+consume its declared duration; it leaves device state unchanged apart from
+elapsed-time evolution unless documented behavior assigns an additional
+effect to that failure.
+
+The transition must be visible in the model contract and attributable to the
+trigger; an interface presented as pure inspection must not hide device-state
+mutation. A separate diagnostic inspection facility, if provided, observes a
+frozen model state without committing device behavior. Repeated inspection of
+the same frozen state produces the same result.
+
+Semantically, each trigger has the form:
+
+```text
+(next state, response, outputs) =
+    transition(current state, applied stimuli, delta, trigger)
+```
+
+The implementation may mutate storage in place, but the prior state, explicit
+trigger, resulting state, and externally relevant effects must remain
+deterministically reviewable and testable.
+
+This specification does not prescribe a host-harness crate, shared duration
+type, event scheduler API, or packaging. It preserves the responsibility seam:
+the harness owns when and what is physically true; the device owns the
+documented transition that follows.
+
+## 5. Purpose-driven fidelity and honest incompleteness
+
+Model fidelity is purpose-driven and multidimensional. A model is not improved
+merely by containing more simulated detail. It should implement the least
+complexity needed to challenge the documented, driver-observable behavior in
+its declared scope.
+
+Each relevant behavior or phenomenon should be classified as:
+
+1. **Modeled:** implemented from documented behavior and included in the
+   model's claims.
+2. **Abstracted:** simplified while preserving the declared observable
+   behavior.
+3. **Injected:** supplied externally rather than generated by the model.
+4. **Excluded:** deliberately outside scope and not implied by passing tests.
+5. **Unsupported:** detected and rejected or left unavailable rather than
+   approximated.
+
+Additional fidelity should be included only when it adds reviewable value by
+exercising a documented distinction, revealing a meaningful driver defect, or
+preventing a known false confidence. Physical behavior must not be invented
+merely to make the model appear realistic.
+
+In particular, accuracy limits and physical uncertainty do not by themselves
+define a stochastic process. Under the same initial state and ordered trigger
+trace, the model must not add undocumented noise, jitter, drift, or
+environmental change. Useful physical variation should normally be supplied as
+an explicit, reproducible harness stimulus or separately configured device
+characteristic.
+
+Each model should state its purpose, applied-stimulus boundary, modeled and
+abstracted behavior, injected inputs, exclusions, unsupported operations,
+source basis, and explicit nonclaims. Unsupported behavior should fail clearly
+or remain unavailable rather than return a plausible invented result.
+
+Passing tests establish compatibility only with the behavior actually declared
+and implemented. They do not establish correctness for excluded phenomena,
+undocumented silicon behavior, analog performance, environmental physics, or
+physical hardware.
 
 ## 6. Independence from the driver
 
@@ -225,8 +386,11 @@ Each model should identify:
 - the vendor documents and revisions from which it was derived;
 - source URLs and recorded digests without redistributing unlicensed vendor
   documents;
-- the operations and state it models;
-- assumptions, ambiguities, and deliberately excluded behavior; and
+- its purpose and applied-stimulus boundary;
+- behavior classified as modeled, abstracted, injected, excluded, or
+  unsupported;
+- assumptions, ambiguities, explicit nonclaims, and deliberately excluded
+  behavior; and
 - any source-backed correction learned during later physical qualification.
 
 A material change to observable model behavior is a contract change and should
@@ -237,11 +401,12 @@ crate; this specification does not prescribe packaging or make it a public API.
 
 - A register peripheral can model reset values, access rules, field effects,
   and documented transaction boundaries without modeling its analog circuit.
-- A sensor can accept injected raw samples and model status or data-ready
-  behavior without generating real-world environmental values.
-- An RTC can `step(Δt)` under a harness-owned `now` and model calendar
-  rollover without owning world time or claiming crystal accuracy, drift, or
-  analog backup-supply behavior.
+- A sensor can accept an applied sensing-element value or injected raw sample
+  and model documented conversion, status, and data-ready behavior without
+  generating environmental truth or invented analog variation.
+- An RTC can `step(delta)` under a harness-owned temporal frontier and model
+  calendar rollover without owning world time or claiming crystal accuracy,
+  drift, or analog backup-supply behavior.
 - A flash device can model command state, write enable, busy state, and address
   rules without claiming endurance or signal integrity.
 - A bus switch can model channel-selection semantics and reset behavior without
@@ -261,7 +426,25 @@ crate; this specification does not prescribe packaging or make it a public API.
   policy into the device model.
 - **World clock in the device:** stores harness `now`, exposes `set_now(t)`, or
   implements `DelayNs` / pin waits on the model. Logical time is a harness
-  coordinate; the device only `step(Δt)` under a held environment.
+  coordinate; the device consumes only explicit relative-duration steps.
+- **Environmental capture:** owns ambient or shared physical truth, predicts
+  its future evolution, or directly propagates conditions to another device
+  instead of accepting a harness-projected applied stimulus.
+- **Autonomous mutation:** changes state without an explicit harness trigger,
+  including wall-time progress, background execution, lazy temporal catch-up
+  on access, or invented stochastic variation.
+- **Untimed trigger:** commits a transport, stimulus, or other external action
+  without a harness-supplied relative duration and synchronized advancement of
+  every participating model.
+- **Hidden transport effect:** conceals FIFO consumption, read-clear behavior,
+  pointer movement, or another documented transition inside an interface
+  presented as pure inspection.
+- **Unitless duration:** accepts a numeric time step whose unit and resolution
+  are implicit.
+- **Partition-dependent evolution:** discards fractional progress so that
+  `step(a); step(b)` differs from `step(a + b)` under unchanged stimuli.
+- **Invented realism:** adds noise, jitter, drift, thermal behavior, or random
+  variation without a documented requirement and explicit fidelity claim.
 - **Harness capture:** puts a scheduler, stimulus timeline, subscriber bus, or
   multi-device kernel inside the device model. A 20-line test helper that
   calls `inject` / `step` is disposable glue. A private world object is a
@@ -278,10 +461,27 @@ These are prompts for design review, not normative acceptance criteria:
 - Is every modeled behavior traceable to a pinned source or recorded decision?
 - Can the model be tested without the production driver?
 - Does it avoid production logic whose correctness it is meant to challenge?
-- Are time and external events explicit and deterministic?
-- Does the model `step(Δt)` under a held environment, or does it own a `now`?
-- Could a later harness drive the same inject/step sink without rewriting the
-  device?
+- Is every mutation attributable to an explicit, ordered harness trigger?
+- Does the model remain quiescent between triggers?
+- Does every committed trigger carry an explicit relative duration and advance
+  every participating model to the same next frontier?
+- Does the model consume unit-bearing relative duration without owning a
+  harness `now`?
+- Does harness advancement bring every participating model to the same
+  temporal frontier before publishing it?
+- Is duration evolution partition-consistent under unchanged applied stimuli?
+- Does the model retain fractional progress rather than round each step
+  independently?
+- Are environmental truth, applied stimulus, and device measurement state kept
+  distinct?
+- Does the device avoid generating or evolving physical conditions that belong
+  to the harness?
+- Are transport side effects explicit and tied to documented boundaries?
+- Does pure diagnostic inspection leave frozen model state unchanged?
+- Is each relevant phenomenon declared as modeled, abstracted, injected,
+  excluded, or unsupported?
+- Could a later harness drive the same transport/stimulus/step sink without
+  rewriting the device?
 - Does unsupported behavior fail honestly?
 - Would a deliberate driver or model defect cause a test to fail?
 - Are physical and board-level claims explicitly excluded?

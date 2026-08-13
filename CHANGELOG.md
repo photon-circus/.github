@@ -42,9 +42,11 @@ Last updated: 2026-08-13 UTC
 ### Changed
 
 - Refine the device behavioral model working specification: the model is an
-  environment sink, harnesses own simulated `now`, and devices `step(Δt)`
-  rather than `set_now(t)`, so a later shared host harness does not require
-  rewriting each device model.
+  explicit-trigger sink; harnesses own the temporal frontier, environmental
+  truth, ordering, and the duration of every trigger; all participating models
+  advance together; and models declare purpose-driven fidelity without
+  autonomous or hidden mutation, so a later shared host harness does not
+  require rewriting each device model.
 - Update the active audit cohort for the pre-publication rename from
   `ph-ads1115-adc` to `ph-ads1x15-adc`.
 
