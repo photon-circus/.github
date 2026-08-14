@@ -26,6 +26,9 @@ still required; completing these prompts is not a substitute.
 - Primary source URL, revision, and date:
 - Recorded digest and provenance or integrity record:
 - Additional evidence, if any:
+- Pinned source, recorded interpretation, or selected-variant evidence that
+  establishes the preconditions and expected result for each transition in the
+  minimum trace:
 
 ## Behavioral boundary
 
@@ -50,6 +53,8 @@ still required; completing these prompts is not a substitute.
 ### State and mutation
 
 - State retained by the device:
+- Observable status derived from the authoritative lifecycle, plus any
+  deliberately redundant state and its invariant:
 - For each observable initial value, its source, explicit input, declared
   abstraction, or first establishing transition:
 - Inputs that permit mutation:
@@ -95,6 +100,8 @@ available.
   preservation of earlier accepted transport-phase effects:
 - Sequence, repetition, and terminal-state boundary evidence:
 - Timing-sensitive evidence that would fail with no advancement, if applicable:
+- Temporal frontier checkpoints and unit-bearing partition arithmetic, if
+  applicable:
 - Why broader behavior is not needed by the current consumer:
 
 ## Known limitations and change discipline

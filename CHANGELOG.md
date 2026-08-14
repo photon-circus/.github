@@ -51,6 +51,12 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Refine the non-normative device-model implementation and review aids to
+  require source-domain checks for minimum-trace values, explicit pre-frontier
+  assertions and duration totals in temporal partition tests, and review of
+  redundant lifecycle/status representations. These prompts address concrete
+  false-pass and model-auditability failures without prescribing a support
+  library, DSL, state-machine representation, or coordinator API.
 - Clarify that deterministic device models must not invent convenient
   observable initial values when sources declare no reset value, and that the
   accepted input domain includes operation shapes, values, and field

@@ -30,14 +30,22 @@ intake when useful. Before implementation:
    remain valid unless ordering itself is part of the declared device behavior.
 2. Identify the exact device identity, behavioral selection, source revision,
    source URL, and recorded digest.
-3. Define observable outputs and explicit ordered inputs: transport operations,
+3. Audit the proposed trace against those sources and the explicit behavioral
+   selection. For every selected value and transition, identify the pinned
+   source, recorded interpretation, or reviewed evidence-backed silicon variant
+   that establishes its precondition and expected observable result. A vector
+   is not authorized merely because it distinguishes two plausible
+   implementations; if no accepted source, decision, or variant evidence
+   establishes its result, choose an established trace or declare the behavior
+   unsupported.
+4. Define observable outputs and explicit ordered inputs: transport operations,
    applied stimuli, relative duration where behavior depends on it, and any
    injected events.
-4. Audit every observable initial value. Record its source-backed default,
+5. Audit every observable initial value. Record its source-backed default,
    explicit initial input, declared abstraction, or the input that first makes
    it available. Do not fill an undeclared value with zero, `false`, empty, or
    another convenient result merely to make the implementation deterministic.
-5. Define the accepted input domain narrowly enough to implement that trace:
+6. Define the accepted input domain narrowly enough to implement that trace:
    operation and transaction shapes, addresses or commands, values, and field
    combinations, together with supported sequencing, repetition or cardinality,
    and terminal-state behavior. State which adjacent unsupported inputs can be
@@ -46,9 +54,9 @@ intake when useful. Before implementation:
    only to the current driver. An operation needed once by the minimum trace
    does not become repeatable merely because the state machine can accept it
    again.
-6. Classify relevant behavior as modeled, abstracted, injected, excluded, or
+7. Classify relevant behavior as modeled, abstracted, injected, excluded, or
    unsupported.
-7. Record genuine source ambiguity and the selected interpretation. Do not
+8. Record genuine source ambiguity and the selected interpretation. Do not
    invent behavior for a source-undeclared sequence.
 
 During implementation, apply the normative core and reason locally only about
@@ -57,6 +65,12 @@ artifacts proportional to a current behavior, consumer, or false-pass risk.
 Implement only the retained state and transitions required by the minimum
 useful trace. An operation is not supported merely because the model can store
 its value or continue its state machine.
+
+Prefer one authoritative representation for the current lifecycle and derive
+observable status from it when that keeps the model clear. If behavior requires
+redundant retained state, document and test the invariant that relates the
+representations. This is an auditability aid, not a required enum, transition
+table, mutation style, or Rust architecture.
 
 Keep driver or framework adapters outside the behavioral core. If a required
 interface exposes an operation outside the model's claim, preserve a typed or
@@ -73,6 +87,11 @@ At handoff:
 - Prune the intake and graduate its durable answers into one behavioral
   declaration in an existing maintained location.
 - Provide tests proportional to the model's claim and false-pass risks.
+- For a declared temporal frontier, include an observation immediately before
+  it, verify the transition at the frontier, and make the unit-bearing
+  partition arithmetic visibly total the intended duration. Equivalent final
+  states alone do not demonstrate that a partition avoided overshooting the
+  boundary.
 - Include focused checks that source-undeclared initial outputs are not
   invented; unsupported inputs do not mutate state when complete validation
   information is available before commitment; effects from an earlier accepted
