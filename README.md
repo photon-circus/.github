@@ -12,6 +12,10 @@ defines a normative responsibility and implementation core for driver-test
 models, surrounded by explicitly non-normative rationale and review guidance,
 so independently acting contributors and AI agents inherit settled decisions
 without making model success a hardware-qualification claim.
+The explicitly non-normative
+[Rust Peripheral-Driver Documentation Guide](docs/PERIPHERAL_DRIVER_DOCUMENTATION_GUIDE.md)
+offers proportional structures for repository, package, source, contribution,
+and agent documentation without adding requirements.
 The
 [device model resource pack](docs/device-model-resources/README.md) provides
 non-normative procedural, declaration, and optional Rust workspace integration

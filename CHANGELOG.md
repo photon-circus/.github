@@ -8,6 +8,9 @@ Last updated: 2026-08-14 UTC
 
 ### Added
 
+- Add non-normative Rust peripheral-driver documentation guidance for
+  proportional file decomposition, repository and package README roles, status
+  disclosures, source capture, and contributor and agent documentation.
 - Require a device behavioral model to say how it handles an establishing input
   that covers only part of an observable, keeping the remainder unavailable,
   reporting it distinguishably, or declaring an abstraction for it, with a
