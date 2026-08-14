@@ -698,6 +698,9 @@ the whole concern to one actor.
 
 - Can the observation boundary be explained in one paragraph?
 - Can the current claim be demonstrated by one minimum useful execution trace?
+- Do the pinned sources establish the preconditions and expected result for
+  every selected trace value and transition? A useful discriminating vector
+  does not authorize behavior outside the source-declared domain.
 - Is every modeled behavior traceable to a pinned source or recorded decision?
 - For every observable initial zero, `false`, empty, or sentinel value, is its
   source or declared abstraction explicit?
@@ -710,6 +713,9 @@ the whole concern to one actor.
 - Does the model consume unit-bearing relative duration without owning a
   harness `now`?
 - Is duration evolution partition-consistent under unchanged applied stimuli?
+- Do temporal tests assert an observation immediately before a declared
+  frontier and verify that partition components total the claimed duration,
+  rather than relying only on equivalent terminal states?
 - Does the model retain fractional progress rather than round each step
   independently?
 - Are environmental truth, applied stimulus, and device measurement state kept
@@ -743,6 +749,9 @@ the whole concern to one actor.
   the implementations remain independent?
 - Is most implementation complexity attributable to source-backed device
   behavior rather than adapters, policy scripts, or speculative reuse?
+- Is each observable status derived from one authoritative lifecycle where
+  practical? If state is stored redundantly, is the relationship explicit and
+  tested so the representations cannot silently diverge?
 - Is there one maintained declaration, with other documents changed only when
   an existing statement became stale?
 - Would a deliberate driver or model defect cause a test to fail?
