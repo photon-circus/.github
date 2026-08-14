@@ -51,6 +51,15 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Make pre-`ph-hil` driver validation progressive and claim-scoped. Permit
+  honest Experimental or Incubating tagged/package prereleases before an
+  independent behavioral model or physical tooling exists while retaining the
+  crates.io and physical-claim qualification lock. Assign distinct oracle
+  ownership to driver unit tests, scripted transport tests, device-model tests,
+  driver-versus-model conformance, and `ph-hil`; require model coverage only for
+  behavior described as model-conformant; and preserve semantic claims across
+  software and physical execution without requiring duplicated implementations
+  or speculative HIL schemas.
 - Refine the non-normative device-model implementation and review aids to
   require source-domain checks for minimum-trace values, explicit pre-frontier
   assertions and duration totals in temporal partition tests, and review of

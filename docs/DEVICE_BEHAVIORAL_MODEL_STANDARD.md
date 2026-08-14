@@ -570,6 +570,52 @@ These layers answer different questions and should not be collapsed:
   observation capability, and does it reveal a baseline correction or variant
   that the model should preserve explicitly?
 
+Responsibility follows the oracle used by each layer:
+
+- the driver and its unit tests own implementation invariants, local
+  transformations, validation, error propagation, and resource handling;
+- scripted transport tests own focused call sequencing and injected transport
+  failures;
+- the device model and its tests own the independent executable datasheet
+  interpretation and its declared limitations;
+- conformance tests own comparison through the public driver surface; and
+- `ph-hil` owns physical execution, witness, provenance, integrity, and
+  evidence-assessment mechanics while the driver repository owns its claims and
+  semantic procedures.
+
+These responsibilities are additive rather than prerequisites for inventing
+the next layer. An Experimental or Incubating driver may exist with only
+implementation-focused validation when that limitation is explicit. A behavior
+may be described as model-conformant only when the public driver operation has
+passed against an independent model whose accepted domain covers that claim.
+Model-backed tests should cover every public behavior claimed as
+model-conformant; they need not cover implementation-only branches such as
+caller validation, resource return, or injected transport failure when those
+branches are more honestly exercised by driver unit or scripted transport
+tests. A model must not invent device faults merely to increase driver code
+coverage.
+
+A driver unit test may use a fixed datasheet-derived reference vector to check
+a local encoder, decoder, or transaction builder. That establishes only the
+named transformation; it is not an oracle for device state or acceptance.
+Driver unit and scripted transport tests must not grow a second device-side
+state machine to compensate for an absent or incomplete behavioral model.
+
+Progress is recorded per operation or claim, not as one crate-wide evidence
+level. Software validation may advance from implementation-focused tests to
+scripted transport and model conformance, while physical evidence independently
+advances through the tiers defined by `ph-hil`. Missing model or physical
+coverage remains explicit and limits only the corresponding claim; it does not
+erase narrower evidence already established.
+
+Model and physical execution should preserve the same semantic claim where
+practical: preconditions, public driver action, expected device-observable
+result, and stable identity. They are not required to share a Rust test binary,
+adapter, or implementation. Before `ph-hil` adoption, repositories must not add
+speculative HIL schemas merely to reserve those identities. After adoption, the
+exact-major `ph-hil` capability contract remains the sole behavioral case
+catalogue; a parallel case inventory must not be created.
+
 Model tests should not require the production driver. Driver-versus-model tests
 should assert through the driver's public surface and device-observable effects,
 not privileged model state. Deliberately perturbing either implementation is a

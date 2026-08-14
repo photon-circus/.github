@@ -392,14 +392,16 @@ crates that have not been published and do not yet have reviewed physical
 evidence from `ph-hil`.
 
 Before `ph-hil` qualification, a driver is a datasheet-derived executable
-hypothesis. It may be developed privately or made public, but it:
+hypothesis. Validation is progressive and claim-scoped: driver implementation,
+scripted transport, behavioral-model conformance, and physical qualification
+answer different questions and do not substitute for one another. A repository
+may be developed privately or made public, but it:
 
 - must remain `Experimental` or `Incubating`;
 - must remain unpublished to crates.io, with Rust packages using
   `publish = false`;
-- must state prominently that verification is against a datasheet-derived
-  behavioral mock and does not constitute hardware-in-the-loop or silicon
-  evidence;
+- must state prominently which validation layers actually exist and that no
+  software-only result constitutes hardware-in-the-loop or silicon evidence;
 - must not claim physical-device support, electrical correctness, timing
   accuracy, or silicon validation;
 - must not include MCU, BSP, board, or firmware examples before hardware
@@ -407,10 +409,19 @@ hypothesis. It may be developed privately or made public, but it:
 - must not carry speculative `ph-hil` firmware, fixture definitions, plans,
   schemas, evidence policies, build shims, or capability inventories.
 
-The pre-qualification repository should contain only the narrow driver, its
-datasheet-derived behavioral mock, explicit assumptions and ambiguities,
-driver-versus-mock tests, supported-target compilation, documentation, and the
-ordinary repository policy required by its lifecycle.
+The initial pre-qualification repository should contain only the narrow driver,
+its implementation-focused tests, explicit assumptions and ambiguities,
+supported-target compilation, documentation, and the ordinary repository policy
+required by its lifecycle. It may produce tagged or packaged Experimental or
+Incubating prerelease artifacts while retaining `publish = false`; incomplete
+behavioral-model or upstream `ph-hil` tooling must not require speculative
+placeholders or prevent that honest prerelease.
+
+A datasheet-derived behavioral model and driver-versus-model conformance tests
+are additive validation layers. They become required only for behavior described
+as model-conformant. Their absence must remain visible, but does not invalidate
+the narrower driver-implementation evidence. Coverage is per public operation or
+claim rather than a single crate-wide badge.
 
 The mock is an executable model of device-side behavior, not a second copy of
 the driver. It should be implemented independently from the datasheet contract
@@ -418,11 +429,11 @@ and must not reuse driver codecs or sequencing logic in ways that make tests
 tautological. CI runs the public driver against this model and establishes only
 that driver changes remain compatible with the modeled behavior.
 
-`ph-hil` qualification later compares the driver and behavioral model claims
-with physical silicon. Any discrepancy must update the contract, mock, driver,
-or stated limitation before qualification is accepted. Maintainer discretion,
-a passing host test, compilation, or a mock result is not a substitute for this
-physical evidence.
+`ph-hil` qualification later exercises driver claims against physical silicon.
+Where a behavioral model exists, a discrepancy must update the contract, model,
+driver, selected silicon variant, or stated limitation before the affected claim
+is accepted. Maintainer discretion, a passing host test, compilation, or a model
+result is not a substitute for this physical evidence.
 
 Crates.io publication and promotion to `Active` require reviewed `ph-hil`
 evidence tied to the exact driver revision and supported hardware scope. This
