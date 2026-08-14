@@ -26,7 +26,8 @@ still required; completing these prompts is not a substitute.
 - Primary source URL, revision, and date:
 - Recorded digest and provenance or integrity record:
 - Additional evidence, if any:
-- Source-backed preconditions and expected result for each transition in the
+- Pinned source, recorded interpretation, or selected-variant evidence that
+  establishes the preconditions and expected result for each transition in the
   minimum trace:
 
 ## Behavioral boundary

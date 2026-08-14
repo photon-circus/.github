@@ -698,9 +698,10 @@ the whole concern to one actor.
 
 - Can the observation boundary be explained in one paragraph?
 - Can the current claim be demonstrated by one minimum useful execution trace?
-- Do the pinned sources establish the preconditions and expected result for
-  every selected trace value and transition? A useful discriminating vector
-  does not authorize behavior outside the source-declared domain.
+- Do pinned sources, a recorded interpretation, or evidence backing the
+  selected silicon variant establish the preconditions and expected result for
+  every trace value and transition? A useful discriminating vector does not
+  authorize behavior outside that declared evidence-backed domain.
 - Is every modeled behavior traceable to a pinned source or recorded decision?
 - For every observable initial zero, `false`, empty, or sentinel value, is its
   source or declared abstraction explicit?

@@ -30,11 +30,14 @@ intake when useful. Before implementation:
    remain valid unless ordering itself is part of the declared device behavior.
 2. Identify the exact device identity, behavioral selection, source revision,
    source URL, and recorded digest.
-3. Audit the proposed trace against those sources. For every selected value and
-   transition, identify the source-backed precondition and expected observable
-   result. A vector is not authorized merely because it distinguishes two
-   plausible implementations; if its result is source-undeclared, choose a
-   source-supported trace or declare the behavior unsupported.
+3. Audit the proposed trace against those sources and the explicit behavioral
+   selection. For every selected value and transition, identify the pinned
+   source, recorded interpretation, or reviewed evidence-backed silicon variant
+   that establishes its precondition and expected observable result. A vector
+   is not authorized merely because it distinguishes two plausible
+   implementations; if no accepted source, decision, or variant evidence
+   establishes its result, choose an established trace or declare the behavior
+   unsupported.
 4. Define observable outputs and explicit ordered inputs: transport operations,
    applied stimuli, relative duration where behavior depends on it, and any
    injected events.
