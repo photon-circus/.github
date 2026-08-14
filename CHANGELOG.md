@@ -6,17 +6,6 @@ All notable changes to the Photon Circus organization standards are documented i
 
 Last updated: 2026-08-14 UTC
 
-### Changed
-
-- Clarify that the peripheral-driver profile's changelog and release-guidance
-  obligation falls on the repository, not on the distributed archive. The
-  previous wording said published packages "always carry" them, which could be
-  read as requiring `CHANGELOG.md` and `RELEASING.md` inside the `.crate`
-  itself. Section 8 and the required-files table already place the requirement
-  on the repository and treat publication as the trigger; the profile now says
-  so directly, and explicitly forbids adding hand-maintained copies to a package
-  to satisfy it.
-
 ### Added
 
 - Require a device behavioral model to say how it handles an establishing input
@@ -67,6 +56,14 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Clarify in the required-files table and peripheral-driver profile that
+  publishing a package or shipping another versioned deliverable triggers
+  repository-level `CHANGELOG.md` and `RELEASING.md` requirements, including for
+  Experimental repositories. This organization baseline does not itself require
+  those files in a distributed archive and does not override stricter
+  repository-specific release contracts. Make the auditor treat missing
+  publication-triggered documents as a `MANUAL_REVIEW` surface when lifecycle
+  alone cannot determine applicability.
 - Separate peripheral-driver distribution, software maturity, and evidence so
   publication does not imply hardware qualification. Replace the blanket
   crates.io prohibition with intentional prerelease and ordinary software

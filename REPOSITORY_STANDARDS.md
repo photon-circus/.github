@@ -273,7 +273,7 @@ Claims should be specific. Prefer “fixed-capacity, `no_std`, no heap allocatio
 | `CHANGELOG.md` | Every non-Experimental repository and every repository with a published package or versioned deliverable |
 | `CONTRIBUTING.md` | Public Incubating, Active, and Maintenance repositories |
 | `SECURITY.md` | Public Active and Maintenance repositories |
-| `RELEASING.md` | Published packages and versioned deliverables |
+| `RELEASING.md` | Every repository with a published package or versioned deliverable |
 | `AGENTS.md` | Active technical repositories using coding agents or carrying non-obvious invariants |
 | `CODEOWNERS` | Repositories with multiple maintainers or sensitive ownership boundaries |
 | `CODE_OF_CONDUCT.md` | Public repositories accepting community contributions |

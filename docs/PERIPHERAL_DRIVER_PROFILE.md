@@ -118,13 +118,11 @@ Publishing a package, or shipping any other versioned deliverable, triggers the
 changelog and release-documentation requirements of the organization release
 standard, including when the repository remains Experimental.
 
-This is a requirement on the **repository**, not on the distributed archive.
-The repository must contain `CHANGELOG.md` and `RELEASING.md`; neither has to
-be included inside the published package, and a release review must not treat
-their absence from a `.crate`, wheel, or other archive as a defect. Do not add
-hand-maintained copies of either file to a package to satisfy this rule —
-duplicating them without an enforced generation and verification mechanism
-creates exactly the silent drift the single-source rule exists to prevent.
+This requirement applies to the **repository**. The repository must contain
+`CHANGELOG.md` and `RELEASING.md`. This profile does not require either file to
+be included in a `.crate`, wheel, or other distributed archive. Their absence
+from such an archive is not, by itself, a violation of this profile; a
+repository-specific release contract may separately require archive inclusion.
 
 MCU applications, board examples, firmware, models, fixtures, and other
 integration artifacts are optional. Admit them when they add current bounded

@@ -90,7 +90,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(checks["branch_protection"]["status"], audit.PASS)
         self.assertEqual(checks["public_ci_hardening"]["status"], audit.MANUAL_REVIEW)
 
-    def test_experimental_changelog_is_not_required_but_license_is(self):
+    def test_experimental_missing_release_documents_require_manual_review(self):
         result = audit.evaluate_repository(
             snapshot(
                 lifecycle="Experimental",
@@ -100,8 +100,41 @@ class PolicyTests(unittest.TestCase):
             self.policy,
         )
         checks = self.by_id(result)
-        self.assertEqual(checks["changelog"]["status"], audit.NOT_APPLICABLE)
+        for check_id in ("changelog", "releasing"):
+            self.assertEqual(checks[check_id]["status"], audit.MANUAL_REVIEW)
+            self.assertEqual(
+                checks[check_id]["evidence"],
+                "publication/versioned-deliverable status is not machine-inferable",
+            )
         self.assertEqual(checks["license"]["status"], audit.FAIL)
+
+    def test_experimental_present_release_documents_pass(self):
+        result = audit.evaluate_repository(
+            snapshot(
+                lifecycle="Experimental",
+                paths=["README.md", "CHANGELOG.md", "RELEASING.md"],
+                protected=False,
+            ),
+            self.policy,
+        )
+        checks = self.by_id(result)
+        for check_id in ("changelog", "releasing"):
+            self.assertEqual(checks[check_id]["status"], audit.PASS)
+            self.assertEqual(checks[check_id]["evidence"], "present")
+
+    def test_archived_missing_release_guidance_requires_manual_review(self):
+        result = audit.evaluate_repository(
+            snapshot(
+                lifecycle="Archived",
+                paths=["README.md", "LICENSE", "CHANGELOG.md"],
+                protected=False,
+            ),
+            self.policy,
+        )
+        self.assertEqual(
+            self.by_id(result)["releasing"]["status"],
+            audit.MANUAL_REVIEW,
+        )
 
     def test_public_documentation_repo_does_not_require_hosted_ci(self):
         paths = [
@@ -165,12 +198,17 @@ class PolicyTests(unittest.TestCase):
             "local_ci",
             "contributing",
             "security",
-            "releasing",
             "agent_guidance",
             "hosted_ci",
             "public_ci_hardening",
         ):
             self.assertEqual(checks[check_id]["status"], audit.NOT_APPLICABLE)
+        for check_id in ("changelog", "releasing"):
+            self.assertEqual(checks[check_id]["status"], audit.MANUAL_REVIEW)
+            self.assertEqual(
+                checks[check_id]["evidence"],
+                "cannot determine (GitHub truncated the recursive tree)",
+            )
 
     def test_license_prefixes_do_not_count_as_license_files(self):
         candidate = snapshot(paths=["README.md", "LICENSES", "LICENSE.old", "COPYING-NOTES.md"])
