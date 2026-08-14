@@ -6,8 +6,8 @@
 # repository. The structure records interpreted claims and owner-review state;
 # it does not verify silicon behavior, redistribution rights, or hardware
 # qualification. The accompanying resource guide requires adoption review to
-# reject every placeholder or sentinel, including REPLACE_WITH_* values and
-# example.invalid identities below.
+# reject every placeholder or sentinel, including the synthetic `example-*`
+# identities and `REPLACE_WITH_*` values below.
 #
 # This example does not define a shared schema. A repository may add and version
 # its own format only when a machine consumer needs a compatibility contract.
@@ -16,37 +16,61 @@
 # `[ ]` cannot mean both "not yet reviewed" and "reviewed, sources silent."
 # Use an explicit `review` string on every row.
 #
-# `section` is the contract grouping, not a PDF heading. Vendor-source rows
-# should add optional locators as specific as the artifact allows: `page`,
-# `figure`, `table`, and `source_section`. Include only fields the artifact
-# actually has. Repository-declaration rows omit locators; do not invent
-# datasheet pages for host circuit choices. On adoption, reject `page = 0`
-# and any `REPLACE_WITH_*` locator sentinel.
+# `section` is the contract grouping, not a PDF heading. Every vendor-source
+# row cites a `source` ID that resolves through `sources_registry` or an inline
+# `[[source]]` entry. Vendor-source rows should add optional locators as
+# specific as the artifact allows: `page`, `figure`, `table`, and
+# `source_section`. Include only fields the artifact actually has.
+# Repository-declaration rows omit source locators; do not invent datasheet
+# pages for host circuit choices. On adoption, reject `page = 0` and any
+# `REPLACE_WITH_*` locator sentinel.
+#
+# An `omission` applies only to its recorded source and `search_scope`. One
+# cited artifact cannot establish that every source is silent. Use one row per
+# reviewed source unless the local contract defines a multi-source form.
 
 reviewed_utc = "YYYY-MM-DD"
 sources_registry = "docs/SOURCES.toml"
-default_identity = "example-ex1234-ref-afe"
+default_identity_row = "example-default-afe-identity"
+
+# If no separate registry exists, delete `sources_registry` and define each
+# cited source inline instead. Replace every field before uncommenting:
+#
+# [[source]]
+# id = "example-ex1234-datasheet-r1_0"
+# publisher = "Example Semiconductor"
+# title = "EX1234 Ambient Light Sensor"
+# document = "EX1234-DS"
+# revision = "1.0"
+# sha256 = "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"
 
 # Allowed `review` values in this example:
 # - "declared": repository-owned decision; binding for this repository without
 #   vendor-source verification
 # - "provisional": recorded, not yet owner-reviewed; no claim either way
 # - "confirmed": owner reviewed against pinned sources and accepted
-# - "omission": owner reviewed; the sources do not state the fact. The absence
-#   is the finding.
+# - "omission": owner reviewed the recorded source and search scope; that scope
+#   does not state the fact. The scoped absence is the finding.
 #
 # Allowed `provenance` values in this example:
 # - "repository-declaration"
 # - "vendor-source"
+#
+# Valid review/provenance relationships in this example:
+# - "declared" requires "repository-declaration"
+# - "provisional" may use either provenance; a vendor-source row still requires
+#   a resolvable `source`
+# - "confirmed" and "omission" require "vendor-source" plus a resolvable,
+#   pinned `source`
 
 [[row]]
 id = "example-default-afe-identity"
 section = "named-reference-afe"
 review = "declared"
 provenance = "repository-declaration"
-claim = "The only implied default transfer identity is example-ex1234-ref-afe."
+claim = "This row defines the only implied default transfer identity."
 value = "example-ex1234-ref-afe"
-notes = "Synthetic placeholder; replace with the local named identity. Repository declarations are binding without a vendor-source checkbox."
+notes = "Synthetic placeholder; replace with the local named identity. `default_identity_row` points here, and this row's `value` is canonical."
 
 [[row]]
 id = "example-load-and-adc"
@@ -87,7 +111,8 @@ section = "device-interface"
 review = "omission"
 provenance = "vendor-source"
 source = "example-ex1234-datasheet-r1_0"
+search_scope = "REPLACE_WITH_REVIEWED_SCOPE"
 page = 0
 source_section = "REPLACE_WITH_HEADING"
-claim = "The sources state no flag-clearing contract for REPLACE_WITH_STATUS_FIELD."
-notes = "Synthetic placeholder illustrating a reviewed silence. Do not encode this as an unchecked markdown box. Locators cite where the owner looked."
+claim = "The reviewed scope in the cited source states no flag-clearing contract for REPLACE_WITH_STATUS_FIELD."
+notes = "Synthetic placeholder illustrating a scoped, reviewed silence. Add one omission row per reviewed source or document a local multi-source form."

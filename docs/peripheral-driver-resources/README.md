@@ -103,23 +103,46 @@ The example `review` vocabulary is:
 | `declared` | Repository-owned decision; no vendor-source verification is required | Yes, for this repository |
 | `provisional` | Recorded, not yet owner-reviewed; no claim either way | No |
 | `confirmed` | Owner reviewed against pinned sources and accepted | Yes, as a source-backed interpretation |
-| `omission` | Owner reviewed; the sources do not state the fact. The absence is the finding | Yes, as a confirmed silence |
+| `omission` | Owner reviewed the recorded source and search scope; that scope does not state the fact | Yes, only as a confirmed silence within the recorded scope |
 
 Do not encode `omission` as an unchecked box with a footnote. `provenance`
-distinguishes `repository-declaration` from `vendor-source`. Cite a stable
-`docs/SOURCES.toml` ID on vendor-source rows when a registry exists. Cite the
-artifact as specifically as it allows with optional `page`, `figure`, `table`,
-and `source_section` (the source heading). `section` remains the contract
-grouping and is not a page locator. Repository-declaration rows omit those
-locators; do not invent datasheet pages for host circuit choices.
+distinguishes `repository-declaration` from `vendor-source`. Every vendor-source
+row cites a stable `source` ID. Resolve that ID through `docs/SOURCES.toml` when
+a registry exists; otherwise define a concise inline `[[source]]` record that
+pins the source identity. Keep source identity in one of those locations, not
+both.
+
+Cite the artifact as specifically as it allows with optional `page`, `figure`,
+`table`, and `source_section` (the source heading). `section` remains the
+contract grouping and is not a page locator. Repository-declaration rows omit
+source IDs and locators; do not invent datasheet pages for host circuit
+choices.
+
+In this example, `declared` requires `repository-declaration`; `confirmed` and
+`omission` require `vendor-source` plus a resolvable, pinned source; and
+`provisional` may use either provenance, although a provisional vendor-source
+row still cites its source. An `omission` is binding only within its recorded
+source and `search_scope`. Use one omission row per reviewed source unless the
+local contract documents a multi-source representation.
+
+When `default_identity_row` is present, it resolves to one unique, declared
+repository-declaration row. That row's `value` is the canonical identity; do
+not repeat a second machine-readable identity at the document root.
 
 At minimum, during adoption and review of a hardware-contract TOML:
 
 - parse the file as TOML;
 - reject every placeholder or sentinel copied from the example, including
-  synthetic identities, `YYYY-MM-DD`, `example.invalid`, `page = 0`, and
-  `REPLACE_WITH_*` values; and
-- require every row to have a `review` value from the vocabulary above.
+  synthetic identities, `YYYY-MM-DD`, `page = 0`, and `REPLACE_WITH_*` values;
+- require unique row and inline source IDs, and make `default_identity_row`,
+  when present, resolve to one declared repository-declaration row with a
+  non-placeholder `value`;
+- require every row to use a `review` and `provenance` combination permitted
+  above;
+- require every vendor-source row to cite a source that resolves through the
+  referenced registry or an inline source record; and
+- require `confirmed` and `omission` rows to retain reproducible source evidence,
+  with each omission no broader than its recorded source and search scope.
 
 These checks may be manual for a small contract. A repository that adds review
 values documents their meanings locally in this recommended pattern. A driver
