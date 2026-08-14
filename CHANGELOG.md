@@ -56,6 +56,14 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Clarify in the required-files table and peripheral-driver profile that
+  publishing a package or shipping another versioned deliverable triggers
+  repository-level `CHANGELOG.md` and `RELEASING.md` requirements, including for
+  Experimental repositories. This organization baseline does not itself require
+  those files in a distributed archive and does not override stricter
+  repository-specific release contracts. Make the auditor treat missing
+  publication-triggered documents as a `MANUAL_REVIEW` surface when lifecycle
+  alone cannot determine applicability.
 - Separate peripheral-driver distribution, software maturity, and evidence so
   publication does not imply hardware qualification. Replace the blanket
   crates.io prohibition with intentional prerelease and ordinary software

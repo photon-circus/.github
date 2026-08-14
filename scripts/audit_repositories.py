@@ -257,8 +257,13 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     changelog_present = has_root(roots, ("CHANGELOG", "CHANGELOG.md"))
     if lifecycle == "Experimental":
-        changelog_status = PASS if changelog_present else NOT_APPLICABLE
-        changelog_evidence = "present (optional for Experimental)" if changelog_present else "optional for Experimental"
+        if changelog_present:
+            changelog_status, changelog_evidence = PASS, "present"
+        else:
+            changelog_status = MANUAL_REVIEW
+            changelog_evidence = absent_path_evidence(
+                "publication/versioned-deliverable status is not machine-inferable"
+            )
     elif lifecycle_known:
         changelog_status = PASS if changelog_present else absent_path_status(FAIL)
         changelog_evidence = "present" if changelog_present else absent_path_evidence("required but missing")
@@ -364,16 +369,15 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     )
 
     releasing_present = has_root(roots, ("RELEASING", "RELEASING.md"))
-    if lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES:
-        releasing_status, releasing_evidence = NOT_APPLICABLE, "not a maintained release candidate"
-    elif not lifecycle_known:
+    if not lifecycle_known:
         releasing_status, releasing_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
     elif releasing_present:
         releasing_status, releasing_evidence = PASS, "present"
-    elif lifecycle in MAINTAINED_LIFECYCLES:
-        releasing_status, releasing_evidence = MANUAL_REVIEW, "publication/versioned-deliverable status is not machine-inferable"
     else:
-        releasing_status, releasing_evidence = NOT_APPLICABLE, "not a maintained release candidate"
+        releasing_status = MANUAL_REVIEW
+        releasing_evidence = absent_path_evidence(
+            "publication/versioned-deliverable status is not machine-inferable"
+        )
     checks.append(check("releasing", releasing_status, releasing_evidence, "Sections 7 and 17 Releases"))
 
     agents_present = has_root(roots, ("AGENTS.md",))
