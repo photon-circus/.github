@@ -388,8 +388,8 @@ The decision test is:
 ### 10.1 Pre-`ph-hil` peripheral-driver profile
 
 This profile applies to organization-owned peripheral-driver repositories and
-crates that have not been published and do not yet have reviewed physical
-evidence from `ph-hil`.
+crates that do not yet have reviewed physical evidence from `ph-hil`, including
+crates intentionally distributed as Experimental or Incubating prereleases.
 
 Before `ph-hil` qualification, a driver is a datasheet-derived executable
 hypothesis. Validation is progressive and claim-scoped: driver implementation,
@@ -398,8 +398,9 @@ answer different questions and do not substitute for one another. A repository
 may be developed privately or made public, but it:
 
 - must remain `Experimental` or `Incubating`;
-- must remain unpublished to crates.io, with Rust packages using
-  `publish = false`;
+- must either disable registry publication with `publish = false` or use an
+  explicit SemVer prerelease identifier such as `0.1.0-experimental.1` or
+  `0.1.0-incubating.1` for every crates.io publication;
 - must state prominently which validation layers actually exist and that no
   software-only result constitutes hardware-in-the-loop or silicon evidence;
 - must not claim physical-device support, electrical correctness, timing
@@ -412,10 +413,11 @@ may be developed privately or made public, but it:
 The initial pre-qualification repository should contain only the narrow driver,
 its implementation-focused tests, explicit assumptions and ambiguities,
 supported-target compilation, documentation, and the ordinary repository policy
-required by its lifecycle. It may produce tagged or packaged Experimental or
-Incubating prerelease artifacts while retaining `publish = false`; incomplete
-behavioral-model or upstream `ph-hil` tooling must not require speculative
-placeholders or prevent that honest prerelease.
+required by its lifecycle. It may produce tagged, packaged, or crates.io-hosted
+Experimental or Incubating prerelease artifacts; incomplete behavioral-model or
+upstream `ph-hil` tooling must not require speculative placeholders or prevent
+that honest prerelease. Registry publication reserves the crate name and enables
+evaluation and collaboration; it does not strengthen any validation claim.
 
 A datasheet-derived behavioral model and driver-versus-model conformance tests
 are additive validation layers. They become required only for behavior described
@@ -435,9 +437,11 @@ driver, selected silicon variant, or stated limitation before the affected claim
 is accepted. Maintainer discretion, a passing host test, compilation, or a model
 result is not a substitute for this physical evidence.
 
-Crates.io publication and promotion to `Active` require reviewed `ph-hil`
-evidence tied to the exact driver revision and supported hardware scope. This
-gate is not waived because the crate is otherwise complete or useful. Existing
+Crates.io publication of a version without a SemVer prerelease component and
+promotion to `Active` require reviewed `ph-hil` evidence tied to the exact
+driver revision and supported hardware scope. A `0.x.y` version without a
+prerelease component is still an ordinary release for this policy. This gate is
+not waived because the crate is otherwise complete or useful. Existing
 already-published drivers are not retroactively unpublished, but should adopt
 the evidence boundary when making new support claims.
 

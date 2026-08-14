@@ -155,10 +155,12 @@ change, or deletion of that repository remains a separate maintainer decision.
 
 Bootstrap completion does not qualify hardware. Before `ph-hil` is available,
 the result may be public as an Experimental or Incubating driver with an
-explicit datasheet-model warning and publication lock. The later physical
-evidence process validates whether the independent model reflects supported
-silicon; it does not retroactively justify speculative HIL scaffolding during
-bootstrap.
+explicit warning describing its actual validation. It may retain a publication
+lock or, through a separate maintainer decision, use an explicit SemVer
+prerelease for registry distribution. The later physical evidence process
+validates supported driver claims and, where a model exists, whether the
+independent model reflects supported silicon; it does not retroactively justify
+speculative HIL scaffolding during bootstrap.
 
 ## Non-goals of the first machinery
 

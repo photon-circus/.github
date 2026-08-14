@@ -4,7 +4,7 @@ This repository contains the shared repository, contribution, release, and engin
 
 Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
 
-Unpublished peripheral drivers also follow the
+Pre-qualified peripheral drivers also follow the
 [Pre-`ph-hil` Peripheral Driver Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
 The
 [Device Behavioral Model Standard](docs/DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
