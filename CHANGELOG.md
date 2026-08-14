@@ -8,6 +8,12 @@ Last updated: 2026-08-14 UTC
 
 ### Added
 
+- Require a device behavioral model to say how it handles an establishing input
+  that covers only part of an observable, keeping the remainder unavailable,
+  reporting it distinguishably, or declaring an abstraction for it, with a
+  matching anti-pattern, review prompt, template field, and brief step. This
+  closes the case where a latched or set-only observable becomes partly
+  source-backed and the rest is silently completed.
 - Add a non-normative Rust workspace integration note for repositories that
   locally choose an unpublished model crate, covering dependency direction,
   test-side adapters, path-development-dependency policy, package verification,
