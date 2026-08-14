@@ -8,6 +8,11 @@ Last updated: 2026-08-14 UTC
 
 ### Added
 
+- Add a non-normative hardware-contract TOML example to the peripheral-driver
+  resource pack so owner review can use explicit `declared`, `provisional`,
+  `confirmed`, and `omission` states instead of markdown checkboxes that
+  overload `[ ]`. Adoption is optional; this does not add a Repository
+  Standards requirement or an organization-wide schema.
 - Add non-normative Rust peripheral-driver documentation guidance for
   proportional file decomposition, repository and package README roles, status
   disclosures, source capture, and contributor and agent documentation.
