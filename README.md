@@ -16,6 +16,11 @@ The
 [device model resource pack](docs/device-model-resources/README.md) provides
 non-normative procedural, declaration, and optional Rust workspace integration
 aids that apply those decisions without prescribing code structure.
+The
+[peripheral-driver source-registry resource pack](docs/peripheral-driver-resources/README.md)
+provides optional, non-normative metadata and handling guidance for exact vendor
+sources without requiring a registry in every driver or redistributing source
+documents.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 

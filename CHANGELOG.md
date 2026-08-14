@@ -57,6 +57,10 @@ Last updated: 2026-08-14 UTC
   future home for reusable local tooling. This preserves a repeatable path from
   data sheet to reviewable driver without making temporary agent coordination or
   self-validating implementations part of the product repository.
+- Add a non-normative peripheral-driver source-registry resource pack with a
+  conditional `docs/SOURCES.toml` example, exact-byte provenance, authority and
+  supersession guidance, tri-state redistribution posture, explicit ownership
+  boundaries, and proportionate validation.
 
 ### Changed
 
@@ -64,6 +68,14 @@ Last updated: 2026-08-14 UTC
   fallbacks that defer to repository-local guidance, preserve the
   standards-repository workflow in a dedicated guide, and provide a safe
   bootstrap when a private security-reporting channel is not yet advertised.
+- Clarify in the required-files table and peripheral-driver profile that
+  publishing a package or shipping another versioned deliverable triggers
+  repository-level `CHANGELOG.md` and `RELEASING.md` requirements, including for
+  Experimental repositories. This organization baseline does not itself require
+  those files in a distributed archive and does not override stricter
+  repository-specific release contracts. Make the auditor treat missing
+  publication-triggered documents as a `MANUAL_REVIEW` surface when lifecycle
+  alone cannot determine applicability.
 - Separate peripheral-driver distribution, software maturity, and evidence so
   publication does not imply hardware qualification. Replace the blanket
   crates.io prohibition with intentional prerelease and ordinary software
