@@ -294,6 +294,28 @@ absence of a documented reset value does not authorize returning zero, `false`,
 an empty value, or another plausible device result without declaring the
 abstraction and its observable consequence.
 
+An establishing input may cover only part of an observable. A register whose
+fields are asserted but never cleared, a latched status word, or a packed
+observable whose fields are established by different transitions can all reach a
+state where some fields are source-backed and the remainder is still
+undeclared. Reporting the whole observable at that point asserts the undeclared
+remainder, which is the same fabrication as a convenient reset value, merely
+committed later and harder to see.
+
+When an establishing transition is partial, the model must do one of the
+following, and record which:
+
+- keep the observable unavailable until every field it reports is established;
+- report the established fields through a surface that distinguishes them from
+  the unestablished remainder; or
+- declare an abstraction covering the remainder, with its observable
+  consequence, as this section already requires for an initial value.
+
+Choosing to keep an observable unavailable until fully established is honest but
+can make a documented device operation permanently untestable. Where that cost
+is real, a declared abstraction is preferred over silence; what is not
+acceptable is completing the observable without saying so.
+
 ### Transport transitions and visible effects
 
 Transport operations are inputs to the device state machine, not necessarily
@@ -682,6 +704,9 @@ an organization-wide precedent.
 - **Convenient initialization:** assigns zero, `false`, empty, or another
   plausible value to source-undeclared observable initial state merely to make
   the model deterministic.
+- **Partial establishment:** completes an observable from an input that
+  established only part of it, such as reporting a whole latched status word
+  after a transition that could only have set some of its flags.
 - **Fabricated refusal:** reports an unsupported model input as a device NACK,
   timeout, or fault response.
 - **Value-domain leakage:** claims a narrow register or operation slice but
@@ -761,6 +786,9 @@ the whole concern to one actor.
   source or declared abstraction explicit?
 - If an observable initial value is source-undeclared, is it injected,
   explicitly abstracted, or unavailable until an establishing input?
+- Where an establishing input covers only part of an observable, is the
+  remainder kept unavailable, reported distinguishably, or covered by a declared
+  abstraction rather than silently completed?
 - Can the model be tested without the production driver?
 - Does it avoid production logic whose correctness it is meant to challenge?
 - Is every mutation attributable to an explicit, ordered external input?
