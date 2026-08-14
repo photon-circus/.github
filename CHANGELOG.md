@@ -53,6 +53,10 @@ Last updated: 2026-08-14 UTC
   future home for reusable local tooling. This preserves a repeatable path from
   data sheet to reviewable driver without making temporary agent coordination or
   self-validating implementations part of the product repository.
+- Add a non-normative peripheral-driver source-registry resource pack with a
+  conditional `docs/SOURCES.toml` example, exact-byte provenance, authority and
+  supersession guidance, tri-state redistribution posture, explicit ownership
+  boundaries, and proportionate validation.
 
 ### Changed
 
