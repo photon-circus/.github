@@ -25,6 +25,17 @@ Version 0.1.0 was adopted on 2026-08-11 UTC.
 
 Changes to normative requirements are documented in [CHANGELOG.md](CHANGELOG.md).
 
+## Organization-wide community-health fallbacks
+
+The root [contribution](CONTRIBUTING.md) and [security](SECURITY.md) files are
+intentionally general because GitHub may display them in Photon Circus
+repositories that do not provide local replacements. They defer to guidance
+committed in the target repository and do not replace the repository-specific
+files required by the standards.
+
+Changes to this standards repository also follow
+[Contributing to Photon Circus standards and organization defaults](docs/CONTRIBUTING_TO_STANDARDS.md).
+
 ## Standards audit
 
 The [read-only repository auditor](docs/STANDARDS_AUDIT.md) collects Markdown and JSON evidence against machine-observable parts of the standard. It has no remediation mode or authority to change anything it flags.
