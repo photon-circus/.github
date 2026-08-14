@@ -33,6 +33,7 @@ still required; completing these prompts is not a substitute.
 
 - Transport operations:
 - Accepted operation shapes, values, and field combinations:
+- Supported sequencing, repetition or cardinality, and terminal-state behavior:
 - Adjacent unsupported inputs and rejection behavior:
 - Applied stimuli:
 - Relative-duration input and unit, or why elapsed duration has no modeled
@@ -92,6 +93,7 @@ available.
 - Model-only evidence for the minimum useful trace:
 - Unsupported-input evidence, distinguishing pre-commit rejection from
   preservation of earlier accepted transport-phase effects:
+- Sequence, repetition, and terminal-state boundary evidence:
 - Timing-sensitive evidence that would fail with no advancement, if applicable:
 - Why broader behavior is not needed by the current consumer:
 
