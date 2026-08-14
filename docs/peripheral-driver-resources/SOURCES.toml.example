@@ -1,11 +1,13 @@
 # Non-normative example for the target path docs/SOURCES.toml.
 #
 # The records below are synthetic placeholders, not reviewed source identities.
-# Replace every value when copying this file. The structure identifies source
-# bytes and authority; it does not verify interpretations, redistribution
-# rights, silicon behavior, or hardware qualification.
-# Zero byte counts and non-hex digest sentinels deliberately fail the integrity
-# checks recommended by the accompanying resource guide.
+# Replace every placeholder value when copying this file. Retain a structural,
+# vocabulary, or policy value only after confirming that it describes the local
+# repository. The structure identifies source bytes and authority; it does not
+# verify interpretations, redistribution rights, silicon behavior, or hardware
+# qualification. The accompanying resource guide requires adoption review to
+# reject every placeholder or sentinel, including the zero byte counts and
+# non-hex digests below.
 #
 # This example does not define a shared schema. A repository may add and version
 # its own format only when a machine consumer needs a compatibility contract.
@@ -63,9 +65,10 @@ sha256 = "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"
 redistribution = "not-established"
 notes = "Synthetic placeholder; replace with the reviewed precedence and local-copy note."
 
-# For a later exact revision, add a new entry instead of silently replacing the
-# old identity. Optional relationship fields may be used once a real consumer
-# needs them:
+# For a later exact revision, add a new active entry instead of silently
+# replacing the old identity. Current-source selection excludes superseded
+# entries before comparing authority. Optional relationship fields may be used
+# once a real consumer needs them:
 #
 # supersedes = "vendor-document-older-revision"
 # superseded_by = "vendor-document-newer-revision"

@@ -96,15 +96,22 @@ publishes new bytes.
 - Update `reviewed_utc` when the registry as a whole is reviewed. It is not the
   source publication date, artifact retrieval date, or hardware-test date.
 
-Supersession describes the document relationship. Conflict precedence remains
-explicit: in the example, the lower positive `authority` number wins for an
-overlapping claim unless a reviewed decision records a narrower exception.
+Supersession describes the document relationship. A maintained claim that cites
+a stable source ID continues to select that exact retained entry until the claim
+is reviewed; a newer source does not silently replace it. When selecting a
+source for a new or re-reviewed claim, exclude `superseded` entries before
+applying conflict precedence among the remaining entries. In the example, the
+lower positive `authority` number then wins for an overlapping claim unless a
+reviewed decision records a narrower exception. A tie between overlapping
+eligible entries is ambiguous and requires corrected precedence or a reviewed
+decision.
 
 The example uses a small, local `status` vocabulary: `active` means the entry is
-current for claim review, while `superseded` means it is retained for history or
-for claims that still depend on it but a newer entry is preferred. A repository
-that does not need that distinction may omit `status`; a repository that adds
-values documents their meanings locally in this recommended pattern.
+eligible for current claim review, while `superseded` means it is retained for
+history or for claims that cite its stable ID but is not selected by default for
+new review. A repository that does not need that distinction may omit `status`;
+a repository that adds values documents their meanings locally in this
+recommended pattern.
 
 ## Redistribution and local source copies
 
@@ -131,11 +138,20 @@ second catalog.
 
 ## Proportionate validation
 
-At minimum, parse the registry as TOML during review. Add small automated checks
-when the number of sources, references, or releases makes drift plausible:
+At minimum, during adoption and review:
+
+- parse the registry as TOML;
+- reject every placeholder or sentinel copied from the example, including
+  synthetic identities and notes, `YYYY-MM-DD`, `example.invalid`, zero byte
+  counts, and the replacement digest text; and
+- require every retained source to have a positive byte count and a SHA-256
+  value matching exactly 64 lower-case hexadecimal digits.
+
+These checks may be manual for a small registry. When the number of sources,
+references, or releases makes drift plausible, automate them and add checks
+that:
 
 - source IDs are unique and downstream source IDs resolve;
-- byte counts are positive and SHA-256 values contain 64 hexadecimal digits;
 - redistribution values use the three states defined here, and any local
   `status` vocabulary is documented and applied consistently;
 - authority precedence is unambiguous where sources overlap;
