@@ -112,10 +112,10 @@ remain authoritative.
 | --- | --- |
 | Root `README.md` | Every repository |
 | Root `LICENSE` | Every repository |
-| `CHANGELOG.md` | Every non-Experimental repository; also every published package or versioned deliverable regardless of lifecycle |
+| `CHANGELOG.md` | Every non-Experimental repository and every repository with a published package or versioned deliverable |
 | `CONTRIBUTING.md` | Public Incubating, Active, and Maintenance repositories |
 | `SECURITY.md` | Public Active and Maintenance repositories |
-| `RELEASING.md` | Published packages and versioned deliverables |
+| `RELEASING.md` | Every repository with a published package or versioned deliverable |
 | `AGENTS.md` | Active technical repositories using coding agents or carrying non-obvious invariants |
 | `CODEOWNERS` | Multiple maintainers or sensitive ownership boundaries |
 | `CODE_OF_CONDUCT.md` | Public repositories accepting community contributions |
@@ -126,9 +126,12 @@ ambiguities, supported targets, tests, limitations, and evidence behind its
 claims. The standards do not require each concern to have a separate file.
 
 Published Experimental work is the important override: publication still
-triggers changelog and release guidance. A private Incubating repository does
-not acquire a `CONTRIBUTING.md` or `SECURITY.md` requirement merely because a
-public repository would, though either file may still be useful.
+triggers the repository's changelog and release-guidance requirements. Neither
+root document has to be included in the distributed archive unless a
+repository-specific release contract separately requires it. A private
+Incubating repository does not acquire a `CONTRIBUTING.md` or `SECURITY.md`
+requirement merely because a public repository would, though either file may
+still be useful.
 
 GitHub may display default community-health files from the public organization
 `.github` repository when a repository has no local version. Those defaults are
@@ -328,10 +331,14 @@ declaration in its README or crate front page. A useful order is:
 
 The non-normative
 [model declaration template](device-model-resources/MODEL_DECLARATION_TEMPLATE.md)
-supplies the full required declaration prompts from the linked normative model
-standard; the abbreviated order above is navigation, not a substitute. Avoid
-copying the declaration across the model README, architecture, test plan, and
-policy documents; choose one owner and link to it.
+offers a starting set of prompts. Neither it nor the abbreviated order above is
+a complete rendering of, or substitute for, the linked normative model
+standard. The maintained declaration must satisfy every applicable requirement,
+including recording assumptions, ambiguities, explicit nonclaims, deliberately
+excluded behavior, and any corrections to the datasheet baseline or
+evidence-backed silicon variants with their distinct provenance and supported
+identities. Avoid copying the declaration across the model README, architecture,
+test plan, and policy documents; choose one owner and link to it.
 
 ## 7. Badge policy
 
@@ -368,12 +375,18 @@ verify every destination from that README's rendered and packaged context):
 [![License: <SPDX>](<license-badge-URL>)](<license-URL>)
 ```
 
-The root README can use repository-relative manifest and license links. A nested
-crate README needs links that still resolve on crates.io and in the packaged
-crate; use package-relative destinations only when `cargo package` confirms the
-target is included, otherwise use a version-pinned repository URL. Construct
-the license badge URL with the badge provider's required escaping rather than
-placing a raw compound SPDX expression in a URL path.
+A README rendered only in the repository may use repository-relative links. For
+any README published with a crate, treat archive membership and web resolution
+as separate checks: `cargo package --list` only confirms that a file is in the
+`.crate`. crates.io renders the packaged README but, for supported repository
+hosts, rewrites ordinary relative links to the manifest `repository` URL under
+`blob/HEAD` (`raw/HEAD` for media). Ordinary relative links in the docs.rs
+README view, or in README text included in rustdoc, are browser-relative to
+those generated pages, not to the packaged file tree. Use absolute URLs pinned
+to the release tag or commit for release-critical documents, and validate every
+destination in each rendered surface. Construct the license badge URL with the
+badge provider's required escaping rather than placing a raw compound SPDX
+expression in a URL path.
 
 Recommended lifecycle colors, if lifecycle badges are adopted consistently:
 Experimental red, Incubating orange, Active bright green, Maintenance yellow,
@@ -400,8 +413,10 @@ Base block for a README:
 > [!WARNING]
 > **Lifecycle:** <current lifecycle and its practical consequence>.
 > **Distribution:** <unpublished, exact crates.io prerelease, or exact ordinary release>.
-> **Model conformance:** <none, or exact covered operations and important exclusions>.
-> **Physical evidence:** <none, exact observed scope, or exact reviewed qualification scope>.
+> **Model conformance:** <none, or exact public driver operations that passed
+> against an independent model, plus all uncovered operations or a packaged coverage link>.
+> **Physical evidence:** <none, exact observed scope, or exact `ph-hil`-qualified
+> operations or claims, silicon scope, and evidence contract>.
 > Evidence and limitations apply only to the named operations; publication does
 > not imply hardware qualification.
 ```
@@ -444,31 +459,45 @@ and an unpublished state does not by itself imply `publish = false`.
 
 ### 8.3 Model-conformance sentence library
 
-- **None:** `None. <NAME THE SOFTWARE-TEST LAYERS AND THEIR SCOPE>; no
-  independent behavioral-model claim is made.`
-- **Partial:** `The independent <MODEL> covers <NAMED OPERATIONS>. It does not
-  cover <IMPORTANT CALLABLE OR ADJACENT OPERATIONS>.`
-- **Declared public surface:** `The independent <MODEL> covers the declared
-  supported public operations listed in <PACKAGED COVERAGE LINK>; exclusions
-  remain <LIMITATIONS>.`
+- **None:** `None. No public driver operation is claimed as model-conformant.
+  <NAME THE SOFTWARE-TEST LAYERS ACTUALLY PRESENT AND THEIR SCOPE>.`
+- **Partial:** `The public driver operations <COVERED OPERATIONS> have passed
+  against the independent <MODEL>, whose accepted domain covers those claims.
+  <NAME EVERY UNCOVERED PUBLIC OPERATION, OR LINK TO A PACKAGED COVERAGE OR
+  LIMITATIONS SECTION THAT NAMES THE COVERED AND UNCOVERED OPERATIONS>.`
+- **Declared supported public surface:** `Every operation in the declared
+  supported public surface identified in <PACKAGED COVERAGE LINK> has passed
+  against the independent <MODEL>, whose accepted domain covers each claim.
+  Exclusions and limitations remain <LIMITATIONS>.`
 
-Do not say "model tested" without naming the covered operation or declared
-surface. A private issue or unpackaged document is not enough for a package
-consumer to evaluate a partial claim.
+Use **None** only to report that no model-conformance claim is made. Any
+model-conformance claim must state a passing driver-versus-model result through
+the public driver surface; model implementation or model-test coverage alone is
+insufficient. For partial coverage, name every covered and uncovered public
+operation or link a packaged coverage or limitations section that does so. An
+unpackaged issue or private record is insufficient.
 
 ### 8.4 Physical-evidence sentence library
 
-- **None:** `None. No reviewed physical-device or calibrated-system evidence
-  exists.`
-- **Observed:** `Physically observed for <OPERATIONS> on <PART/SILICON IDENTITY>
-  using <BOARD/FIXTURE/TOOLS/CONDITIONS> under <LINKED REVIEWED EVIDENCE RECORD>;
-  this is not a qualification or calibration claim.`
-- **Qualified:** `Qualified only for <OPERATIONS>, <SILICON>, and <CONDITIONS>
-  under <LINKED REVIEWED EVIDENCE RECORD>. No broader device, board, or
+- **None:** `None. No reviewed physical-device evidence supports a physically
+  observed or ph-hil-qualified claim.`
+- **Observed:** `Physically observed for <OPERATIONS> using driver revision
+  <REVISION> on <DEVICE AND SILICON IDENTITY> with
+  <FIXTURE, TOOLS, CONDITIONS, AND OBSERVATION SCOPE>, as recorded in
+  <LINKED REVIEWED EVIDENCE RECORD>; this is not a qualification or calibration
+  claim.`
+- **`ph-hil`-qualified:** `ph-hil-qualified only for <OPERATIONS OR CLAIMS>
+  using driver revision <REVISION> on <DEVICE AND SILICON IDENTITY> with
+  <FIXTURE, TOOLS, CONDITIONS, AND OBSERVATION SCOPE>, under
+  <LINKED REVIEWED PH-HIL EVIDENCE> satisfying
+  <LINKED ADOPTED PH-HIL CONTRACT>. No broader device, board, condition, or
   calibration claim is made.`
 
-The evidence record identifies the exact driver revision, device and silicon,
-board or fixture, tools, conditions, observed scope, and reviewer.
+A physically observed claim requires reviewed evidence identifying the exact
+driver revision, device, conditions, fixture, tools, and observation scope. A
+`ph-hil`-qualified claim additionally requires reviewed `ph-hil` evidence
+satisfying the adopted contract. Both claims remain limited to their recorded
+operation or claim, silicon identity, conditions, and observation capability.
 
 The same factual block normally appears in the root README, packaged driver
 README, and crate front-page docs. Either single-source it or compare the
@@ -533,67 +562,18 @@ Tool-specific files may redirect to AGENTS in one sentence.
 
 ## 10. Source-document capture
 
-Use the exact path `docs/SOURCES.toml` when a structured registry adds value;
-uppercase matters on case-sensitive systems.
+Source-document capture should be proportionate to the provenance risk. A small
+driver may keep a concise source table in its hardware contract or another
+maintained document; use a structured registry only when simpler documentation
+is likely to drift or obscure exact source identity.
 
-Use a registry when it reduces a real provenance risk: multiple documents,
-mutable download URLs, exact behavioral-model derivation, conflicting source
-authority, or redistribution restrictions. A one-page driver can keep a short
-source table in its hardware contract until a machine-readable registry adds
-value.
-
-Recommended ownership chain:
-
-```text
-vendor artifact
-  -> docs/SOURCES.toml
-       identity, exact bytes, authority, retrieval, rights posture
-  -> hardware contract
-       interpreted claim, source ID, page/section, review state, nonclaim
-  -> decisions
-       ambiguity, conflict, inference, deviation, supersession
-  -> driver/model/tests
-       executable behavior and bounded evidence
-```
-
-`SOURCES.toml` does not prove that a claim was interpreted correctly, that
-redistribution is permitted, that silicon behaves that way, or that hardware is
-qualified. It identifies the source bytes and their intended authority.
-
-Recommended source-entry data:
-
-- a repository-local format/schema version when a machine consumer needs a
-  compatibility contract, plus the registry review date;
-- stable ID, kind, role, and conflict precedence;
-- publisher, title, document number, revision, and publication date;
-- stable landing URL and exact artifact URL when both exist;
-- retrieval date, media type, exact byte count, and SHA-256;
-- redistribution state with at least `not-established`, `permitted`, and
-  `prohibited` rather than a Boolean;
-- supersession identity and concise notes.
-
-Prefer a new entry for a new exact revision. Do not silently mutate an old
-source identity and digest. Keep claim interpretations and page/section
-citations in the hardware contract, not in free-form TOML notes.
-
-Recommended contents for `docs/vendor/README.md`, when present:
-
-- how an authorized maintainer retrieves and hashes a local review copy;
-- where untracked copies may live;
-- copyright/redistribution handling;
-- `.gitignore`, `export-ignore`, and CI exclusion controls;
-- how to compare a local copy with `SOURCES.toml`.
-
-Prefer linking to the registry instead of repeating URLs, revisions, sizes, and
-hashes. Do not commit vendor PDFs without an explicit grant for that exact
-document and revision.
-
-Useful checks are TOML parsing, unique IDs, complete digests, valid byte counts,
-recognized redistribution states, resolvable source IDs in contracts, and a
-failure if unapproved or redistribution-restricted vendor artifacts are tracked
-or packaged. Comparing a local PDF to the registry can be an optional maintainer
-check; a clean CI path does not need to download or possess unredistributable
-documents.
+For repositories that need a registry, the
+[peripheral-driver source-registry resource pack](peripheral-driver-resources/README.md)
+is the canonical non-normative implementation reference. It owns the
+recommended path and example, metadata and ownership boundaries, revision and
+supersession handling, rights posture, vendor-file guidance, and proportional
+validation. Keep interpretations and claim evidence in their owning contract
+and evidence surfaces rather than the registry.
 
 ## 11. Manifest and package-documentation notes
 
@@ -616,8 +596,10 @@ Primary references:
 
 - [Cargo manifest `readme`, metadata, MSRV, license, repository, and homepage](https://doc.rust-lang.org/cargo/reference/manifest.html)
 - [Cargo packaging and publication inspection](https://doc.rust-lang.org/cargo/reference/publishing.html)
+- [crates.io README relative-link rendering](https://github.com/rust-lang/crates.io/blob/main/crates/crates_io_markdown/src/lib.rs)
 - [docs.rs build behavior](https://docs.rs/about/builds)
 - [docs.rs build metadata](https://docs.rs/about/metadata)
+- [docs.rs Markdown rendering](https://github.com/rust-lang/docs.rs/blob/main/crates/bin/docs_rs_web/src/utils/markdown.rs)
 - [rustdoc front-page and public-item guidance](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html)
 - [GitHub default community-health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
 - [GitHub Actions status badges](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)
