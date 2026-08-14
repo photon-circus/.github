@@ -7,12 +7,15 @@ These resources help contributors apply the
 without rediscovering settled organization-wide decisions. They do not add
 requirements, prescribe Rust structure, or define a shared harness API.
 
-The resource pack intentionally has two aids:
+The resource pack intentionally has three aids:
 
 - [Implementation brief](IMPLEMENTATION_BRIEF.md): a procedural entry point for
   a contributor or AI agent after it reads the normative core.
 - [Behavioral declaration template](MODEL_DECLARATION_TEMPLATE.md): one intake
   record that graduates into the model's maintained declaration.
+- [Rust workspace integration note](RUST_WORKSPACE_INTEGRATION.md): an optional
+  packaging and validation recipe for repositories that have already chosen an
+  unpublished workspace model crate.
 
 The declaration template is content, not a required file or a parallel policy
 surface. It may begin as the body of the implementation issue. At handoff,

@@ -16,8 +16,10 @@ still required; completing these prompts is not a substitute.
 
 - Device identity and behavioral selection:
 - Purpose and current consumer:
+- Minimum useful behavioral execution trace, not an expected-call transcript:
 - What agreement with this model establishes:
 - What agreement with this model does not establish:
+- Concrete expansion trigger:
 
 ## Sources
 
@@ -30,6 +32,8 @@ still required; completing these prompts is not a substitute.
 ### Inputs
 
 - Transport operations:
+- Accepted operation shapes, values, and field combinations:
+- Adjacent unsupported inputs and rejection behavior:
 - Applied stimuli:
 - Relative-duration input and unit, or why elapsed duration has no modeled
   consequence:
@@ -39,13 +43,17 @@ still required; completing these prompts is not a substitute.
 
 - Device responses:
 - Device outputs visible outside the transport:
+- Outputs unavailable until an establishing input:
 - Pure inspection, if exposed:
 
 ### State and mutation
 
 - State retained by the device:
+- For each observable initial value, its source, explicit input, declared
+  abstraction, or first establishing transition:
 - Inputs that permit mutation:
 - Documented transport side effects:
+- Inputs rejected before mutation:
 - Stable behavior at an unchanged temporal frontier:
 
 ## Fidelity
@@ -75,6 +83,15 @@ available.
 - Why the chosen packaging fits this repository:
 - Any supporting artifact beyond the model and tests, and the current value
   that justifies it:
+- How adapters preserve model limitations for callable but unsupported
+  operations:
+
+## Discrimination evidence
+
+- Model-only evidence for the minimum useful trace:
+- Unsupported-input evidence, including mutation-free rejection:
+- Timing-sensitive evidence that would fail with no advancement, if applicable:
+- Why broader behavior is not needed by the current consumer:
 
 ## Known limitations and change discipline
 

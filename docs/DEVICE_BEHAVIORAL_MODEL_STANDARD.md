@@ -4,7 +4,7 @@ Status: **Normative core with non-normative guidance**
 
 Recorded: **2026-08-12 UTC**
 
-Last revised: **2026-08-13 UTC**
+Last revised: **2026-08-14 UTC**
 
 This document contains the organization-wide responsibility boundary and
 implementation guardrails for the executable model commonly called a *driver
@@ -286,6 +286,14 @@ Initial state and initial applied stimuli must be explicit or have documented
 deterministic defaults. A model must not silently invent ambient conditions
 because no stimulus was supplied.
 
+Determinism does not authorize a convenient value for source-undeclared
+observable initial state. Each such value must be source-backed, supplied as an
+explicit initial input, selected as a declared purpose-driven abstraction, or
+left unavailable until an explicit input establishes it. In particular, the
+absence of a documented reset value does not authorize returning zero, `false`,
+an empty value, or another plausible device result without declaring the
+abstraction and its observable consequence.
+
 ### Transport transitions and visible effects
 
 Transport operations are inputs to the device state machine, not necessarily
@@ -323,12 +331,25 @@ into a protocol NACK, timeout, fault bit, or other response that claims the
 device produced it. Convenience helpers and transport adapters must preserve
 the same distinction rather than collapsing it for a simpler return type.
 
+When an external interface requires callable operations outside the model's
+declared fidelity, its adapter must return or preserve a distinguishable model
+limitation rather than treat an ordinary unsupported input as a process panic
+or fabricated device response. This does not prohibit treating a violated
+programmer invariant as a defect; unsupported fidelity is an expected boundary
+outcome, not such an invariant violation.
+
 A model must not choose behavior for a source-undeclared transport sequence
 merely because its state machine can continue. It must reject the sequence as
 unsupported or leave it unavailable unless the model's declared purpose and
 evidence establish the behavior. Rejection must not commit pending effects or
 perform cleanup that would itself mutate device state, except where the
 declared boundary explicitly models that cleanup input.
+
+The declared input domain includes supported operation shapes, addresses or
+commands, values, and field combinations, not only method or register names.
+The model must validate all information available at its accepted boundary
+before committing effects that depend on that input. This does not require
+rolling back effects already committed at an earlier declared transport phase.
 
 Unsupported behavior may become knowable only after part of the transport
 abstraction has already been accepted. In that case the model or test must not
@@ -604,8 +625,16 @@ an organization-wide precedent.
 - **Omniscient assertion:** tests private model state that the device could not
   expose to the driver.
 - **Silent completeness:** returns invented behavior for unsupported commands.
+- **Convenient initialization:** assigns zero, `false`, empty, or another
+  plausible value to source-undeclared observable initial state merely to make
+  the model deterministic.
 - **Fabricated refusal:** reports an unsupported model input as a device NACK,
   timeout, or fault response.
+- **Value-domain leakage:** claims a narrow register or operation slice but
+  accepts undeclared values, reserved fields, or feature combinations because
+  the storage or transition logic can represent them.
+- **Adapter panic:** crashes on an ordinary unsupported operation required by a
+  callable adapter interface instead of preserving a model limitation.
 - **Level retrigger:** reapplies reset, conversion start, or another edge effect
   whenever an unchanged persistent input level is supplied.
 - **Speculative continuation:** defines behavior for a source-undeclared
@@ -668,7 +697,12 @@ concern spans both, record each responsibility separately rather than assigning
 the whole concern to one actor.
 
 - Can the observation boundary be explained in one paragraph?
+- Can the current claim be demonstrated by one minimum useful execution trace?
 - Is every modeled behavior traceable to a pinned source or recorded decision?
+- For every observable initial zero, `false`, empty, or sentinel value, is its
+  source or declared abstraction explicit?
+- If an observable initial value is source-undeclared, is it injected,
+  explicitly abstracted, or unavailable until an establishing input?
 - Can the model be tested without the production driver?
 - Does it avoid production logic whose correctness it is meant to challenge?
 - Is every mutation attributable to an explicit, ordered external input?
@@ -691,8 +725,14 @@ the whole concern to one actor.
 - Does the model avoid choosing a deferred coordinator API or scheduling
   policy merely because no shared harness exists yet?
 - Does unsupported behavior fail honestly?
+- Does the accepted input domain identify operation shapes, values, and field
+  combinations rather than only method or register names?
+- Are unsupported inputs rejected before state mutation when all required
+  information is available at the accepted boundary?
 - Are model limitations distinguishable from responses produced by the
   modeled device?
+- Do adapters preserve model limitations for callable but unsupported
+  operations rather than panic or fabricate a device response?
 - Do persistent stimulus levels remain idempotent unless their value changes?
 - Are source-undeclared sequences rejected without committing hidden cleanup
   effects?
@@ -701,6 +741,8 @@ the whole concern to one actor.
   the implementations remain independent?
 - Is most implementation complexity attributable to source-backed device
   behavior rather than adapters, policy scripts, or speculative reuse?
+- Is there one maintained declaration, with other documents changed only when
+  an existing statement became stale?
 - Would a deliberate driver or model defect cause a test to fail?
 - Are physical and board-level claims explicitly excluded?
 - Can later silicon evidence correct the baseline or add a selected variant

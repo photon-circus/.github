@@ -4,10 +4,14 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-13 UTC
+Last updated: 2026-08-14 UTC
 
 ### Added
 
+- Add a non-normative Rust workspace integration note for repositories that
+  locally choose an unpublished model crate, covering dependency direction,
+  test-side adapters, path-development-dependency policy, package verification,
+  and single-declaration documentation without making that packaging required.
 - Add non-normative device-model implementation resources: a procedural agent
   brief that requires the normative core and one intake/declaration template
   that graduates into existing maintained documentation.
@@ -47,6 +51,16 @@ Last updated: 2026-08-13 UTC
 
 ### Changed
 
+- Clarify that deterministic device models must not invent convenient
+  observable initial values when sources declare no reset value, and that the
+  accepted input domain includes operation shapes, values, and field
+  combinations which must be validated before dependent effects are committed.
+  Require callable adapters to preserve ordinary model limitations rather than
+  panic or fabricate a device response. Refine the non-normative implementation
+  brief, declaration prompts, anti-patterns, and review questions around a
+  minimum useful execution trace, explicit initialization, rejection
+  boundaries, and proportional discrimination evidence. These refinements are
+  supported by the first VEML7700 model exercise.
 - Adopt the responsibility, fidelity, independence, validation, and source
   boundaries of the former device behavioral model working specification as a
   normative core while retaining its rationale, examples, anti-patterns, and
