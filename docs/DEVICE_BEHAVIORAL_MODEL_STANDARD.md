@@ -556,6 +556,12 @@ to make the test green creates a self-confirming system.
 
 ## 7. Validation layers (normative)
 
+This standard governs a device behavioral model when one exists and the claims
+made from it. It does not require every peripheral-driver crate to create a
+model, complete model coverage, adopt shared tooling, or delay publication until
+those additive capabilities exist. Normative requirements attach conditionally
+to the validation claim being made.
+
 These layers answer different questions and should not be collapsed:
 
 - **Codec and reference-vector tests:** Is a local transformation correct for
@@ -608,13 +614,15 @@ advances through the tiers defined by `ph-hil`. Missing model or physical
 coverage remains explicit and limits only the corresponding claim; it does not
 erase narrower evidence already established.
 
-Model and physical execution should preserve the same semantic claim where
-practical: preconditions, public driver action, expected device-observable
-result, and stable identity. They are not required to share a Rust test binary,
-adapter, or implementation. Before `ph-hil` adoption, repositories must not add
-speculative HIL schemas merely to reserve those identities. After adoption, the
-exact-major `ph-hil` capability contract remains the sole behavioral case
-catalogue; a parallel case inventory must not be created.
+Model and physical procedures may preserve the same semantic question where
+practical: preconditions, public driver action, and expected device-observable
+result. This does not define their correspondence, stable identity, comparison
+artifact, or evidence schema; those concerns remain deferred by
+[DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+They are not required to share a Rust test binary, adapter, or implementation.
+Before `ph-hil` adoption, repositories must not add speculative HIL schemas.
+After a repository adopts a reviewed `ph-hil` contract, it follows that
+contract's catalogue authority rather than creating a parallel case inventory.
 
 Model tests should not require the production driver. Driver-versus-model tests
 should assert through the driver's public surface and device-observable effects,

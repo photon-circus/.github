@@ -162,10 +162,11 @@ Bootstrap completion does not qualify hardware. Before `ph-hil` is available,
 the result may be public as an Experimental or Incubating driver with an
 explicit warning describing its actual validation. It may retain a publication
 lock or, through a separate maintainer decision, use an explicit SemVer
-prerelease for registry distribution. The later physical evidence process
-validates supported driver claims and, where a model exists, whether the
-independent model reflects supported silicon; it does not retroactively justify
-speculative HIL scaffolding during bootstrap.
+prerelease for registry distribution. A later ordinary software release follows
+the release gate independently of model completeness or hardware qualification.
+Physical evidence validates only the supported claims it covers and, where a
+model exists, may test whether the independent model reflects supported silicon;
+it does not retroactively justify speculative HIL scaffolding during bootstrap.
 
 ## Non-goals of the first machinery
 

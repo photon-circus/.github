@@ -4,8 +4,8 @@ This repository contains the shared repository, contribution, release, and engin
 
 Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
 
-Pre-qualification peripheral drivers also follow the
-[Pre-`ph-hil` Peripheral Driver Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
+Peripheral drivers also follow the
+[Peripheral Driver Release and Evidence Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
 The
 [Device Behavioral Model Standard](docs/DEVICE_BEHAVIORAL_MODEL_STANDARD.md)
 defines a normative responsibility and implementation core for driver-test
