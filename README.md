@@ -14,8 +14,8 @@ so independently acting contributors and AI agents inherit settled decisions
 without making model success a hardware-qualification claim.
 The
 [device model resource pack](docs/device-model-resources/README.md) provides
-a non-normative procedural brief and intake/declaration template that apply
-those decisions without prescribing code structure.
+non-normative procedural, declaration, and optional Rust workspace integration
+aids that apply those decisions without prescribing code structure.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
