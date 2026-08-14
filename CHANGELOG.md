@@ -24,6 +24,10 @@ Last updated: 2026-08-14 UTC
 - Add a non-normative deferred design record that preserves device-model
   coordination seams, settled boundary findings, explicit reopening triggers,
   and expected ownership without prematurely specifying a shared harness.
+- Add repository-specific contribution instructions for standards and
+  organization-default changes, including classification, evidence,
+  documentation checks, auditor tests, and approval boundaries. These
+  instructions do not add downstream repository requirements.
 - Add a non-normative device behavioral model working specification that
   distinguishes an independently derived driver-test model from stubs,
   transcript fakes, simulators, integration scaffolding, and physical evidence.
@@ -60,6 +64,10 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Make the inherited root contribution and security files safe organization-wide
+  fallbacks that defer to repository-local guidance, preserve the
+  standards-repository workflow in a dedicated guide, and provide a safe
+  bootstrap when a private security-reporting channel is not yet advertised.
 - Clarify in the required-files table and peripheral-driver profile that
   publishing a package or shipping another versioned deliverable triggers
   repository-level `CHANGELOG.md` and `RELEASING.md` requirements, including for
