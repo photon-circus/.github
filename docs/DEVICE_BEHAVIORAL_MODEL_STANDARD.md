@@ -727,6 +727,8 @@ the whole concern to one actor.
 - Does unsupported behavior fail honestly?
 - Does the accepted input domain identify operation shapes, values, and field
   combinations rather than only method or register names?
+- Does it also identify supported sequencing, repetition or cardinality, and
+  terminal-state behavior when those dimensions affect the declared claim?
 - Are unsupported inputs rejected before state mutation when all required
   information is available at the accepted boundary?
 - Are model limitations distinguishable from responses produced by the

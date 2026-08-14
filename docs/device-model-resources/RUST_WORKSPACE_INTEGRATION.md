@@ -37,9 +37,21 @@ unpublished workspace package:
 device-model = { path = "../device-model" }
 ```
 
-Do not add a registry version merely to satisfy a dependency-policy check when
-the package does not exist in that registry. That can make package verification
-attempt to resolve a fictional published dependency.
+Cargo includes only development dependencies that specify a registry version
+when it prepares a package for publication. It can therefore omit this
+path-only dependency from the normalized package manifest while still including
+an integration-test source file that imports the model. Ordinary `cargo
+package` verification can remain green because it verifies the package's normal
+build, while `cargo test` against the unpacked package fails to compile that
+test. See the Cargo Book's
+[development-dependency publication rule](https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#development-dependencies).
+
+Keep conformance-only test source out of the distributable driver package when
+its model dependency is intentionally unpublished, or place the conformance
+consumer in another non-distributable workspace package. Add a registry version
+only when that exact package and version genuinely exist; do not create a
+fictional published dependency to retain a packaged test or satisfy a
+dependency-policy check.
 
 If the repository denies wildcard dependency versions with `cargo-deny`, its
 [documented path exception](https://embarkstudios.github.io/cargo-deny/checks/bans/cfg.html#the-allow-wildcard-paths-field-optional)
@@ -86,8 +98,12 @@ driver package listing and package verification
 ```
 
 Package listing should confirm that the model implementation is not included
-in the distributable driver package. Package verification should continue to
-work while the model remains unpublished.
+in the distributable driver package. It should also confirm that conformance
+test sources depending on an omitted path-only development dependency are not
+included. Package verification should continue to work while the model remains
+unpublished. When such test sources intentionally remain in the package, test
+the unpacked package rather than treating normal package verification as proof
+that every packaged test target compiles.
 
 ## Documentation
 

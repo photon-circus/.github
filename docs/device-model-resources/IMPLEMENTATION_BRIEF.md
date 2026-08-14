@@ -39,10 +39,13 @@ intake when useful. Before implementation:
    another convenient result merely to make the implementation deterministic.
 5. Define the accepted input domain narrowly enough to implement that trace:
    operation and transaction shapes, addresses or commands, values, and field
-   combinations. State which adjacent unsupported inputs can be rejected before
-   mutation and which earlier-phase effects remain committed when a limitation
-   becomes knowable only later. Avoid a transcript tailored only to the current
-   driver.
+   combinations, together with supported sequencing, repetition or cardinality,
+   and terminal-state behavior. State which adjacent unsupported inputs can be
+   rejected before mutation and which earlier-phase effects remain committed
+   when a limitation becomes knowable only later. Avoid a transcript tailored
+   only to the current driver. An operation needed once by the minimum trace
+   does not become repeatable merely because the state machine can accept it
+   again.
 6. Classify relevant behavior as modeled, abstracted, injected, excluded, or
    unsupported.
 7. Record genuine source ambiguity and the selected interpretation. Do not
@@ -74,8 +77,9 @@ At handoff:
   invented; unsupported inputs do not mutate state when complete validation
   information is available before commitment; effects from an earlier accepted
   transport phase remain when a limitation becomes knowable only later;
-  repeated observation at an unchanged temporal frontier is stable; and a
-  no-op delay cannot make a timing-sensitive conformance test pass.
+  sequencing, repetition, and terminal-state behavior match the declared input
+  domain; repeated observation at an unchanged temporal frontier is stable;
+  and a no-op delay cannot make a timing-sensitive conformance test pass.
 - State exactly what passing tests establish and what they do not establish.
 - Escalate an insufficient shared rule with evidence rather than establishing a
   conflicting local convention.
