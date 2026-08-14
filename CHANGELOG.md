@@ -38,10 +38,9 @@ Last updated: 2026-08-14 UTC
 - Public organization profile introducing Photon Circus, its engineering principles, featured projects, and adopted repository standards.
 - Shared bug-report, feature-proposal, and pull-request templates that preserve bounded scope, evidence provenance, compatibility decisions, and explicit handoffs across repositories without local overrides.
 - Read-only repository standards auditor producing Markdown and JSON evidence without remediation authority or GitHub write operations.
-- Pre-`ph-hil` peripheral-driver profile allowing public Experimental or
-  Incubating driver development against an independent datasheet-derived mock
-  while prohibiting crates.io publication, MCU examples, physical claims, and
-  speculative HIL boilerplate until reviewed silicon evidence exists.
+- Peripheral-driver release and evidence profile defining a proportional base
+  repository, explicit validation status, additive model and physical evidence,
+  and a non-speculative handoff to future shared tooling.
 - Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining
   source-first intake, bounded task packets, independent driver/mock/validation
   lanes, temporary workspace boundaries, durable artifact graduation, and the
@@ -51,6 +50,18 @@ Last updated: 2026-08-14 UTC
 
 ### Changed
 
+- Separate peripheral-driver distribution, software maturity, and evidence so
+  publication does not imply hardware qualification. Replace the blanket
+  crates.io prohibition with intentional prerelease and ordinary software
+  release paths; require lifecycle-matching prerelease metadata from a new
+  driver's initial version, an explicit migration for existing `0.1.0`
+  manifests, nondecreasing lifecycle transitions, release-document obligations
+  for every published artifact, and a release-CI version check. Make model
+  conformance, physical observation, and `ph-hil` qualification conditional,
+  claim-scoped concerns rather than existence or publication gates. Assign
+  distinct oracle ownership to driver unit tests, scripted transport tests,
+  device-model tests, driver-versus-model conformance, and `ph-hil`, while
+  preserving DMC-009's deferred identity and comparison-artifact boundary.
 - Refine the non-normative device-model implementation and review aids to
   require source-domain checks for minimum-trace values, explicit pre-frontier
   assertions and duration totals in temporal partition tests, and review of

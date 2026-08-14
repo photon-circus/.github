@@ -556,6 +556,12 @@ to make the test green creates a self-confirming system.
 
 ## 7. Validation layers (normative)
 
+This standard governs a device behavioral model when one exists and the claims
+made from it. It does not require every peripheral-driver crate to create a
+model, complete model coverage, adopt shared tooling, or delay publication until
+those additive capabilities exist. Normative requirements attach conditionally
+to the validation claim being made.
+
 These layers answer different questions and should not be collapsed:
 
 - **Codec and reference-vector tests:** Is a local transformation correct for
@@ -569,6 +575,54 @@ These layers answer different questions and should not be collapsed:
   driver claim for the identified silicon, conditions, fixture, and
   observation capability, and does it reveal a baseline correction or variant
   that the model should preserve explicitly?
+
+Responsibility follows the oracle used by each layer:
+
+- the driver and its unit tests own implementation invariants, local
+  transformations, validation, error propagation, and resource handling;
+- scripted transport tests own focused call sequencing and injected transport
+  failures;
+- the device model and its tests own the independent executable datasheet
+  interpretation and its declared limitations;
+- conformance tests own comparison through the public driver surface; and
+- `ph-hil` owns physical execution, witness, provenance, integrity, and
+  evidence-assessment mechanics while the driver repository owns its claims and
+  semantic procedures.
+
+These responsibilities are additive rather than prerequisites for inventing
+the next layer. An Experimental or Incubating driver may exist with only
+implementation-focused validation when that limitation is explicit. A behavior
+may be described as model-conformant only when the public driver operation has
+passed against an independent model whose accepted domain covers that claim.
+Model-backed tests should cover every public behavior claimed as
+model-conformant; they need not cover implementation-only branches such as
+caller validation, resource return, or injected transport failure when those
+branches are more honestly exercised by driver unit or scripted transport
+tests. A model must not invent device faults merely to increase driver code
+coverage.
+
+A driver unit test may use a fixed datasheet-derived reference vector to check
+a local encoder, decoder, or transaction builder. That establishes only the
+named transformation; it is not an oracle for device state or acceptance.
+Driver unit and scripted transport tests must not grow a second device-side
+state machine to compensate for an absent or incomplete behavioral model.
+
+Progress is recorded per operation or claim, not as one crate-wide evidence
+level. Software validation may advance from implementation-focused tests to
+scripted transport and model conformance, while physical evidence independently
+advances through the tiers defined by `ph-hil`. Missing model or physical
+coverage remains explicit and limits only the corresponding claim; it does not
+erase narrower evidence already established.
+
+Model and physical procedures may preserve the same semantic question where
+practical: preconditions, public driver action, and expected device-observable
+result. This does not define their correspondence, stable identity, comparison
+artifact, or evidence schema; those concerns remain deferred by
+[DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+They are not required to share a Rust test binary, adapter, or implementation.
+Before `ph-hil` adoption, repositories must not add speculative HIL schemas.
+After a repository adopts a reviewed `ph-hil` contract, it follows that
+contract's catalogue authority rather than creating a parallel case inventory.
 
 Model tests should not require the production driver. Driver-versus-model tests
 should assert through the driver's public surface and device-observable effects,

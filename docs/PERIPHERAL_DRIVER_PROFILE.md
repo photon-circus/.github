@@ -1,68 +1,140 @@
-# Pre-`ph-hil` Peripheral Driver Profile
+# Peripheral Driver Release and Evidence Profile
 
-This is the reusable development profile for unpublished Photon Circus
-peripheral drivers that do not yet have reviewed physical evidence.
+This profile lets a Photon Circus peripheral driver become coherent, testable,
+useful, and publishable without making unfinished models, physical tooling, or
+shared integration contracts prerequisites for its existence or release.
 
-Its purpose is to let a driver become coherent, testable, and publicly
-inspectable without blocking on a speculative hardware-in-the-loop system or
-pretending that a host model proves silicon behavior.
+It separates distribution, software maturity, and evidence. Requirements attach
+to the claims and artifacts that actually exist. Model conformance, physical
+observation, hardware qualification, and `ph-hil` integration are parallel,
+additive concerns; missing coverage limits the affected claim rather than the
+whole crate.
 
-## Status contract
+## Independent status dimensions and initial version
 
-A pre-qualification driver:
+Each driver reports three dimensions independently:
 
-- is `Experimental` or `Incubating`;
-- may be private or public in the Photon Circus organization;
-- is not published to crates.io;
-- has no MCU, board, BSP, or firmware example;
-- makes no hardware-in-the-loop, electrical, timing, or silicon-support claim.
+- **Distribution:** unpublished, explicit SemVer prerelease, or ordinary
+  release.
+- **Software maturity:** `Experimental`, `Incubating`, `Active`, `Maintenance`,
+  or `Archived`.
+- **Evidence:** implementation-tested, model-conformant, physically observed,
+  or qualified behavior, scoped to named operations or claims.
 
-For Rust crates, the package manifest contains:
+Publication does not imply model conformance, physical observation, hardware
+qualification, or lifecycle promotion.
+
+Every newly created Rust peripheral-driver package must begin with a manifest
+version whose prerelease identifier matches its lifecycle, normally:
+
+```toml
+version = "0.1.0-experimental.1"
+```
+
+or:
+
+```toml
+version = "0.1.0-incubating.1"
+```
+
+This applies even when `publish = false`. CI must check the declared prerelease
+state; the version string records policy but does not mechanically prevent an
+ordinary publication by itself.
+
+An existing unpublished package with an ordinary local version such as `0.1.0`
+must replace it with `0.1.0-experimental.1` or the lifecycle-matching
+equivalent before its first durable release. If `0.1.0` was already tagged or
+published, it remains grandfathered rather than being relabeled. Any later
+prerelease must use a higher numeric core such as `0.1.1-experimental.1`; any
+later ordinary release follows the software release gate below. A lifecycle
+transition must not decrease SemVer precedence.
+
+It may produce a tagged release, packaged crate artifact, or crates.io
+publication identified as an Experimental or Incubating prerelease. Publishing
+reserves the crate name, enables explicit opt-in dependency evaluation, and
+invites collaboration. It does not authorize a physical-device support claim or
+elevate the validation status.
+
+For Rust crates not intentionally distributed through a registry, the package
+manifest contains:
 
 ```toml
 publish = false
 ```
 
-This is a qualification lock, not merely protection against accidental early
-publication. It remains in place until reviewed `ph-hil` evidence satisfies the
-publication gate.
+For an intentional crates.io prerelease, the manifest may additionally name the
+registry explicitly:
+
+```toml
+version = "0.1.0-experimental.1"
+publish = ["crates-io"]
+```
+
+Identifiers such as `experimental.N` and `incubating.N` communicate lifecycle;
+the three-part numeric core remains required. A version such as `0.1.0` has no
+prerelease component and is not an experimental publication merely because its
+major version is zero. Removing the prerelease component is an intentional
+software-release transition governed by the release gate below, not a
+hardware-qualification claim.
 
 ## Required public warning
 
-The repository README and crate-level documentation place this warning near the
-status or usage introduction, adapted only for the lifecycle name and device:
+The packaged README and crate-level documentation place a status disclosure near
+the status or usage introduction. It reports facts rather than a hypothetical:
 
 > [!WARNING]
-> **Incubating — datasheet-model verification only.**
-> This driver is verified against an independent behavioral mock derived from
-> documented datasheet behavior. It does not yet have reviewed `ph-hil` evidence
-> from physical silicon, is not published to crates.io, and must not be treated
-> as hardware-qualified.
+> **Lifecycle:** *Experimental, Incubating, or the current value*.
+> **Distribution:** *unpublished, crates.io prerelease with exact version, or
+> ordinary crates.io release with exact version*.
+> **Model conformance:** *none, or the exact covered operations and important
+> limitations*.
+> **Physical evidence:** *none, physically observed scope, or the exact reviewed
+> qualification and silicon scope*.
+> Evidence and limitations apply only to the named operations; publication does
+> not imply hardware qualification.
 
-An Experimental repository substitutes **Experimental** without weakening the
-rest of the warning.
+The disclosure may use prose, but it must preserve those facts. Complete model
+coverage may name the declared supported public surface as a whole. Partial
+coverage must name covered and uncovered operations or link to a packaged
+coverage or limitations section. A link to an unpackaged issue or private record
+is insufficient. Grandfathered ordinary releases report their actual version;
+they must not claim to be available only as prereleases.
 
-## Minimal repository shape
+## Minimum repository shape
 
-The pre-qualification repository contains only what establishes the modeled
-driver contract:
+The minimum repository contains only what establishes its current driver
+contract:
 
 - the narrow driver implementation;
-- an independently implemented datasheet-derived behavioral mock;
 - explicit datasheet revisions, interpretations, assumptions, and ambiguities;
-- tests that exercise the public driver through the mock transport;
+- implementation-focused unit and scripted transport tests appropriate to the
+  code that exists;
 - supported-target compilation;
 - one canonical local CI entry point;
 - lifecycle-appropriate README, changelog, license, contribution, security,
-  release-lock, and agent guidance.
+  release guidance, and agent guidance.
 
-It does not bootstrap future `ph-hil` internals. Do not add placeholder firmware,
-MCU applications, fixture definitions, bench files, execution plans, capability
-inventories, evidence policies, schemas, build hooks, or generated pack
-validators merely to anticipate the future integration.
+Published packages and versioned deliverables always carry the changelog and
+release guidance required by the organization release standard, including when
+the repository remains Experimental.
+
+MCU applications, board examples, firmware, models, fixtures, and other
+integration artifacts are optional. Admit them when they add current bounded
+value, label their evidence limits, and keep them outside the driver's
+responsibility where appropriate. Do not add placeholder execution plans,
+capability inventories, evidence policies, schemas, build hooks, or generated
+pack validators merely to anticipate future `ph-hil` integration.
 
 Temporary implementation roles and work packets belong in GitHub issues, not
 committed agent-persona directories.
+
+An independently implemented datasheet-derived behavioral model, model tests,
+and tests that exercise the public driver through that model are the next
+additive layer. They are required before the corresponding public operations
+are described as model-conformant, but incomplete modeling does not block an
+honestly labeled prerelease or ordinary software release. Coverage and
+limitations are recorded per public operation or claim rather than implied for
+the whole crate.
 
 ## Behavioral mock contract
 
@@ -70,8 +142,8 @@ The mock represents the device side of the abstract transport. It is derived
 from the datasheet contract independently from the driver and should model the
 observable state transitions needed to test supported operations.
 
-Behavioral models used under this profile must conform to the normative
-sections of the
+When present, behavioral models used under this profile must conform to the
+normative sections of the
 [Device Behavioral Model Standard](DEVICE_BEHAVIORAL_MODEL_STANDARD.md). Its
 remaining sections provide non-normative rationale and review guidance.
 
@@ -86,48 +158,108 @@ loading, undocumented reset behavior, and board topology.
 
 ## CI contract
 
-Pre-qualification CI establishes only modeled software claims. It should:
+Driver CI establishes only the software claims for the validation layers
+currently present. Every repository should:
 
 1. format and lint with warnings treated as failures;
 2. test pure codecs and error paths;
-3. run the public driver against the behavioral mock;
+3. test focused transaction construction, sequencing, and injected transport
+   failures where applicable;
 4. compile documented features and supported bare-metal targets;
 5. build documentation;
 6. audit dependencies and licenses where applicable;
-7. construct and inspect the package without publishing it.
+7. verify that a release candidate's manifest version matches its declared
+   prerelease or ordinary distribution state; and
+8. construct and inspect the package without publishing it.
 
-Passing CI means the driver remains compatible with the declared behavioral
-model. It does not mean the model matches silicon.
+The version check is required, but this profile does not prescribe a shared
+manifest-metadata schema or repository-local script. A prerelease candidate must
+fail its release gate when the package version lacks the intended prerelease
+component. Registry publication remains outside ordinary CI and requires the
+documented maintainer-controlled release process.
 
-## Surface provided to `ph-hil`
+Fixed datasheet-derived vectors in driver tests establish only the named local
+transformation. Unit and scripted transport tests must not emulate device state
+or be presented as model conformance merely because an independent behavioral
+model is not yet available.
+
+When a behavioral model exists, CI should additionally test the model's own
+declared behavior and run every public driver operation claimed as
+model-conformant against it. Model conformance is not required to exercise
+implementation-only branches that are more honestly covered by unit or
+scripted transport tests.
+
+Passing CI means only that the validation layers named by the repository remain
+green. When model conformance is present, it means the covered driver claims
+remain compatible with the declared behavioral model. It does not mean the
+model matches silicon.
+
+## Conditional surface provided to `ph-hil`
 
 The driver repository gives future `ph-hil` work a bounded, non-speculative
 surface:
 
 - the public driver operations and stated guarantees;
-- the behavioral model and its fidelity boundary;
-- deterministic test cases and expected observations;
+- the behavioral model and its fidelity boundary, when present;
+- deterministic model-conformance cases and expected observations, when
+  present;
 - named datasheet sources and inferred behavior;
 - unresolved ambiguities and physical-only claims;
 - supported target and feature scope.
 
-`ph-hil` owns the later physical execution, fixture, evidence, and assessment
-format. Those contracts are added when the `ph-hil` product defines them, not
-invented independently in each driver.
+`ph-hil` owns physical execution, fixture, evidence, and assessment mechanics
+when that integration is adopted. The driver repository owns its claims and
+semantic procedures. Do not invent those contracts independently in each
+driver.
 
-## Qualification and publication gate
+Model and physical procedures may preserve the same semantic question where
+useful, but they need not share an adapter, test binary, implementation, stable
+identity, or comparison artifact. Correspondence, identity fields, and a common
+model-versus-silicon artifact remain deferred by
+[DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+When a repository adopts a reviewed `ph-hil` contract, it follows that
+contract's catalogue authority rather than creating a parallel inventory.
 
-Before crates.io publication or promotion to `Active`:
+## Software publication gate
 
-- `ph-hil` must exercise the supported driver claims against physical silicon;
-- evidence must identify the exact driver revision, device, carrier, fixture,
-  tool versions, and test scope;
-- model-versus-silicon discrepancies must be resolved in the mock, driver,
-  contract, or documented limitation;
-- the reviewed evidence record must be linked from the repository;
-- the release artifact and changelog must be verified after the evidence-bound
-  changes are assembled.
+Intentional publication of any registry version triggers Sections 7 and 17 of
+the organization standards regardless of lifecycle. A published prerelease uses
+the full SemVer prerelease in its package version, Git tag, changelog heading,
+and release identity, and its GitHub Release is marked as a prerelease.
 
-There is no documentation-only or maintainer-approval override for this gate.
-The driver may remain public and useful as Experimental or Incubating while the
-qualification work is unavailable.
+An ordinary release is a software distribution decision. Before publishing a
+version without a prerelease component, the repository must have:
+
+- a bounded public API, documented limitations, and accurate lifecycle and
+  evidence status;
+- implementation-focused tests and supported-target compilation proportional
+  to the driver;
+- a passing canonical CI entry point;
+- a changelog and documented release process; and
+- a verified packaged artifact assembled through an intentional maintainer
+  release action.
+
+An ordinary release does not require a complete behavioral model, physical
+evidence, hardware qualification, `ph-hil` availability, or `ph-hil` adoption.
+It must not be described as establishing any of those claims. Registry versions
+are permanent and cannot be overwritten, so prerelease and ordinary publication
+remain deliberate release decisions rather than automatic CI side effects.
+
+## Conditional evidence and qualification
+
+Additional validation is claim-scoped:
+
+- model-conformant operations require an independent model whose accepted
+  domain covers those operations;
+- physically observed behavior requires reviewed evidence identifying the exact
+  driver revision, device, conditions, fixture, tools, and observation scope;
+- a `ph-hil`-qualified claim additionally requires reviewed `ph-hil` evidence
+  satisfying the adopted contract; and
+- where model and silicon evidence disagree, the affected model, driver,
+  contract, selected silicon variant, or limitation must be reconciled before
+  either result supports that claim.
+
+Publication and lifecycle promotion do not silently elevate evidence status.
+Hardware qualification is not a prerequisite for publication, and lack of one
+optional validation layer does not erase narrower evidence or block unrelated
+claims.

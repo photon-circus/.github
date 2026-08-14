@@ -270,7 +270,7 @@ Claims should be specific. Prefer “fixed-capacity, `no_std`, no heap allocatio
 | --- | --- |
 | `README.md` | Every repository |
 | `LICENSE` | Every repository |
-| `CHANGELOG.md` | Every non-Experimental repository |
+| `CHANGELOG.md` | Every non-Experimental repository and every repository with a published package or versioned deliverable |
 | `CONTRIBUTING.md` | Public Incubating, Active, and Maintenance repositories |
 | `SECURITY.md` | Public Active and Maintenance repositories |
 | `RELEASING.md` | Published packages and versioned deliverables |
@@ -320,7 +320,11 @@ When a release introduces a major new feature or substantial capability, it must
 
 A list of APIs is not a substitute for a value statement.
 
-Experimental repositories may maintain a changelog but are not required to do so. Establishing a changelog is part of leaving Experimental status.
+Unpublished Experimental repositories may maintain a changelog but are not
+required to do so. Intentional publication or another versioned deliverable
+triggers the changelog and release-documentation requirements regardless of
+lifecycle. Establishing a changelog is otherwise part of leaving Experimental
+status.
 
 Archived repositories without reliable historical release records must still provide a changelog. It may state that detailed history predates the standard and direct readers to tags or commit history.
 
@@ -385,54 +389,71 @@ The decision test is:
 
 > Behavior required to make one supported device operation truthful belongs to the driver. Concrete resources, scheduling, composition, and application response belong to integration.
 
-### 10.1 Pre-`ph-hil` peripheral-driver profile
+### 10.1 Peripheral-driver release and evidence profile
 
 This profile applies to organization-owned peripheral-driver repositories and
-crates that have not been published and do not yet have reviewed physical
-evidence from `ph-hil`.
+crates. It separates three dimensions that must not be collapsed:
 
-Before `ph-hil` qualification, a driver is a datasheet-derived executable
-hypothesis. It may be developed privately or made public, but it:
+- **Distribution:** unpublished, SemVer prerelease, or ordinary release.
+- **Software maturity:** repository lifecycle, API coherence, implementation
+  validation, and release readiness.
+- **Evidence:** implementation-tested, model-conformant, physically observed,
+  or qualified behavior, recorded per operation or claim.
 
-- must remain `Experimental` or `Incubating`;
-- must remain unpublished to crates.io, with Rust packages using
-  `publish = false`;
-- must state prominently that verification is against a datasheet-derived
-  behavioral mock and does not constitute hardware-in-the-loop or silicon
-  evidence;
-- must not claim physical-device support, electrical correctness, timing
-  accuracy, or silicon validation;
-- must not include MCU, BSP, board, or firmware examples before hardware
-  qualification;
-- must not carry speculative `ph-hil` firmware, fixture definitions, plans,
-  schemas, evidence policies, build shims, or capability inventories.
+Publication does not imply model conformance, physical observation, hardware
+qualification, or promotion to `Active`. Those claims require their own evidence
+but are not prerequisites for a crate to exist or for a software-ready crate to
+publish an ordinary release.
 
-The pre-qualification repository should contain only the narrow driver, its
-datasheet-derived behavioral mock, explicit assumptions and ambiguities,
-driver-versus-mock tests, supported-target compilation, documentation, and the
-ordinary repository policy required by its lifecycle.
+Normative requirements attach to claims and artifacts that actually exist. If a
+crate claims model conformance, physical behavior, or `ph-hil` qualification, it
+must satisfy the corresponding conditional contract. Missing additive
+validation limits that claim; it must not invalidate narrower evidence or force
+every crate to adopt the same model, fixture, schema, support library, or
+integration structure.
 
-The mock is an executable model of device-side behavior, not a second copy of
-the driver. It should be implemented independently from the datasheet contract
-and must not reuse driver codecs or sequencing logic in ways that make tests
-tautological. CI runs the public driver against this model and establishes only
-that driver changes remain compatible with the modeled behavior.
+Every newly created Rust peripheral-driver package must begin with a
+lifecycle-matching SemVer prerelease version such as
+`0.1.0-experimental.1` or `0.1.0-incubating.1`, even when
+`publish = false`. An existing unpublished package with an ordinary local
+version must replace it with the corresponding prerelease before its first
+durable release. If that ordinary version was already tagged or published, it
+remains grandfathered rather than being relabeled; any later prerelease must use
+a higher numeric core, while any later ordinary release follows the software
+release gate below. A lifecycle change must not decrease SemVer precedence.
 
-`ph-hil` qualification later compares the driver and behavioral model claims
-with physical silicon. Any discrepancy must update the contract, mock, driver,
-or stated limitation before qualification is accepted. Maintainer discretion,
-a passing host test, compilation, or a mock result is not a substitute for this
-physical evidence.
+Intentional registry publication triggers the documentation and release
+requirements in Sections 7 and 17 regardless of lifecycle. CI must verify the
+declared version state and inspect the package without publishing it; publication
+remains a separate maintainer-controlled release action. An ordinary release is
+a software distribution decision. It requires the ordinary repository release
+contract, accurate limitations and evidence status, and a verified packaged
+artifact, but not a complete behavioral model, `ph-hil` adoption, or hardware
+qualification.
 
-Crates.io publication and promotion to `Active` require reviewed `ph-hil`
-evidence tied to the exact driver revision and supported hardware scope. This
-gate is not waived because the crate is otherwise complete or useful. Existing
-already-published drivers are not retroactively unpublished, but should adopt
-the evidence boundary when making new support claims.
+A behavioral model and driver-versus-model conformance tests are additive. They
+become required only for behavior described as model-conformant. Physical
+evidence becomes required only for the physical or qualification claim it is
+offered to support. Where model and silicon evidence disagree, the affected
+contract, model, driver, selected variant, or limitation must be reconciled
+before either is used to support that claim.
 
-The reusable warning, minimal repository shape, CI contract, and qualification
-handoff are defined in the
-[`Pre-ph-hil Peripheral Driver Profile`](docs/PERIPHERAL_DRIVER_PROFILE.md).
+MCU, BSP, board, firmware, model, and physical-test artifacts are admitted only
+when they add current, bounded value. Their presence must not imply stronger
+driver or hardware support than the retained evidence establishes. Speculative
+`ph-hil` schemas, fixtures, build shims, or capability inventories remain
+forbidden before a reviewed consumer requires them.
+
+An additional universal driver requirement belongs in this profile only when it
+protects a current cross-driver responsibility or evidence boundary, applies
+proportionally across materially different devices, and does not depend on
+unavailable or unsettled tooling. Otherwise it must be conditional on the
+relevant claim or artifact, remain non-normative guidance, or be recorded as a
+deferred decision.
+
+The reusable status disclosure, minimal repository shape, CI contract, release
+gate, and conditional qualification handoff are defined in the
+[`Peripheral Driver Release and Evidence Profile`](docs/PERIPHERAL_DRIVER_PROFILE.md).
 
 ## 11. Contribution and hardware evidence
 
@@ -657,18 +678,26 @@ Repositories should:
 Published libraries and reusable components must:
 
 - Use semantic versioning where practical.
-- Use `vX.Y.Z` Git tags.
+- Use Git tags containing the full SemVer version, such as `v0.1.0` or
+  `v0.1.0-experimental.1`.
 - Maintain a changelog.
 - Document the release process.
 - Identify the supported toolchain or compatibility range.
 - Verify the packaged artifact, not only the working tree.
 - Create a GitHub Release containing the corresponding changelog section.
 
+A GitHub Release for a SemVer prerelease must be marked as a prerelease. The
+release tag and packaged version must match exactly apart from the tag's leading
+`v`.
+
 Before 1.0, a breaking change increments the minor version. When compatibility impact is uncertain, take the larger defensible bump.
 
 ### 17.1 Release branches
 
-A `release/X.Y.Z` branch is required when multiple accepted feature PRs must be assembled into one published version. A small release represented by one independently verified PR may use a simpler documented process.
+A `release/<semver>` branch, including the prerelease component when present,
+is required when multiple accepted feature PRs must be assembled into one
+published version. A small release represented by one independently verified PR
+may use a simpler documented process.
 
 The release process should:
 

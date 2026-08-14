@@ -117,16 +117,21 @@ architecture or an undocumented source of product requirements.
 ## Graduation into the driver repository
 
 Temporary artifacts enter the driver repository only when they become durable
-product evidence or guidance. Expected graduated artifacts include:
+product evidence or guidance. Expected base driver artifacts include:
 
 - a source registry;
 - a bounded README contract and lifecycle warning;
-- driver and independently implemented mock code;
-- public black-box and transport tests;
-- a reconciled behavioral-model contract;
+- driver code and implementation-focused tests;
 - durable design decisions and unresolved limitations;
 - canonical local CI and supported-target checks;
 - changelog entries describing observable value and constraints.
+
+When the independent model and validation lanes complete, additive graduated
+artifacts include:
+
+- independently implemented model code and model tests;
+- public driver-versus-model conformance tests; and
+- a reconciled behavioral-model contract and explicit coverage limitations.
 
 Agent roles, work assignments, scratch interpretations, duplicated source
 extracts, orchestration state, and temporary task prompts do not graduate.
@@ -155,10 +160,13 @@ change, or deletion of that repository remains a separate maintainer decision.
 
 Bootstrap completion does not qualify hardware. Before `ph-hil` is available,
 the result may be public as an Experimental or Incubating driver with an
-explicit datasheet-model warning and publication lock. The later physical
-evidence process validates whether the independent model reflects supported
-silicon; it does not retroactively justify speculative HIL scaffolding during
-bootstrap.
+explicit warning describing its actual validation. It may retain a publication
+lock or, through a separate maintainer decision, use an explicit SemVer
+prerelease for registry distribution. A later ordinary software release follows
+the release gate independently of model completeness or hardware qualification.
+Physical evidence validates only the supported claims it covers and, where a
+model exists, may test whether the independent model reflects supported silicon;
+it does not retroactively justify speculative HIL scaffolding during bootstrap.
 
 ## Non-goals of the first machinery
 
