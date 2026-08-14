@@ -15,6 +15,13 @@
 # Markdown checkboxes are a poor owner-review encoding. GitHub-flavored
 # `[ ]` cannot mean both "not yet reviewed" and "reviewed, sources silent."
 # Use an explicit `review` string on every row.
+#
+# `section` is the contract grouping, not a PDF heading. Vendor-source rows
+# should add optional locators as specific as the artifact allows: `page`,
+# `figure`, `table`, and `source_section`. Include only fields the artifact
+# actually has. Repository-declaration rows omit locators; do not invent
+# datasheet pages for host circuit choices. On adoption, reject `page = 0`
+# and any `REPLACE_WITH_*` locator sentinel.
 
 reviewed_utc = "YYYY-MM-DD"
 sources_registry = "docs/SOURCES.toml"
@@ -55,6 +62,10 @@ section = "photocurrent"
 review = "provisional"
 provenance = "vendor-source"
 source = "example-ex1234-datasheet-r1_0"
+page = 0
+figure = "REPLACE_WITH_FIGURE"
+table = "REPLACE_WITH_TABLE"
+source_section = "REPLACE_WITH_HEADING"
 claim = "Typical photocurrent is REPLACE_WITH_NOMINAL at the named test condition."
 notes = "Synthetic placeholder; owner review is required before treating this vendor-source row as accepted."
 
@@ -64,6 +75,9 @@ section = "device-interface"
 review = "confirmed"
 provenance = "vendor-source"
 source = "example-ex1234-datasheet-r1_0"
+page = 0
+table = "REPLACE_WITH_TABLE"
+source_section = "REPLACE_WITH_HEADING"
 claim = "The example output word is REPLACE_WITH_WIDTH bits."
 notes = "Synthetic placeholder illustrating a confirmed vendor-source row after owner review."
 
@@ -73,5 +87,7 @@ section = "device-interface"
 review = "omission"
 provenance = "vendor-source"
 source = "example-ex1234-datasheet-r1_0"
+page = 0
+source_section = "REPLACE_WITH_HEADING"
 claim = "The sources state no flag-clearing contract for REPLACE_WITH_STATUS_FIELD."
-notes = "Synthetic placeholder illustrating a reviewed silence. Do not encode this as an unchecked markdown box."
+notes = "Synthetic placeholder illustrating a reviewed silence. Do not encode this as an unchecked markdown box. Locators cite where the owner looked."

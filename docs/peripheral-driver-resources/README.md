@@ -107,14 +107,18 @@ The example `review` vocabulary is:
 
 Do not encode `omission` as an unchecked box with a footnote. `provenance`
 distinguishes `repository-declaration` from `vendor-source`. Cite a stable
-`docs/SOURCES.toml` ID on vendor-source rows when a registry exists.
+`docs/SOURCES.toml` ID on vendor-source rows when a registry exists. Cite the
+artifact as specifically as it allows with optional `page`, `figure`, `table`,
+and `source_section` (the source heading). `section` remains the contract
+grouping and is not a page locator. Repository-declaration rows omit those
+locators; do not invent datasheet pages for host circuit choices.
 
 At minimum, during adoption and review of a hardware-contract TOML:
 
 - parse the file as TOML;
 - reject every placeholder or sentinel copied from the example, including
-  synthetic identities, `YYYY-MM-DD`, `example.invalid`, and `REPLACE_WITH_*`
-  values; and
+  synthetic identities, `YYYY-MM-DD`, `example.invalid`, `page = 0`, and
+  `REPLACE_WITH_*` values; and
 - require every row to have a `review` value from the vocabulary above.
 
 These checks may be manual for a small contract. A repository that adds review
