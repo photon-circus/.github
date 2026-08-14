@@ -55,14 +55,16 @@ Last updated: 2026-08-14 UTC
 - Make pre-`ph-hil` driver validation progressive and claim-scoped. Permit
   honest Experimental or Incubating tagged, packaged, or crates.io-hosted
   SemVer prereleases before an independent behavioral model or physical tooling
-  exists. Retain the stable-publication and physical-claim qualification gate,
-  and make registry publication useful for name reservation, evaluation, and
-  collaboration without elevating evidence. Assign distinct oracle ownership
-  to driver unit tests, scripted transport tests, device-model tests,
-  driver-versus-model conformance, and `ph-hil`; require model coverage only for
-  behavior described as model-conformant; and preserve semantic claims across
-  software and physical execution without requiring duplicated implementations
-  or speculative HIL schemas.
+  exists. Require every newly created pre-qualified Rust driver package to carry
+  a lifecycle-matching prerelease identifier from its initial manifest version,
+  even when publication is disabled. Retain the ordinary-publication and
+  physical-claim qualification gate, and make registry publication useful for
+  name reservation, evaluation, and collaboration without elevating evidence.
+  Assign distinct oracle ownership to driver unit tests, scripted transport
+  tests, device-model tests, driver-versus-model conformance, and `ph-hil`;
+  require model coverage only for behavior described as model-conformant; and
+  preserve semantic claims across software and physical execution without
+  requiring duplicated implementations or speculative HIL schemas.
 - Refine the non-normative device-model implementation and review aids to
   require source-domain checks for minimum-trace values, explicit pre-frontier
   assertions and duration totals in temporal partition tests, and review of

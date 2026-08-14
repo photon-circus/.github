@@ -410,6 +410,14 @@ may be developed privately or made public, but it:
 - must not carry speculative `ph-hil` firmware, fixture definitions, plans,
   schemas, evidence policies, build shims, or capability inventories.
 
+A newly created Rust peripheral-driver package under this profile must use an
+explicit prerelease identifier in its initial manifest version, whether or not
+registry publication is enabled. The identifier should match the declared
+lifecycle, normally `0.1.0-experimental.1` or `0.1.0-incubating.1`. Every
+manifest and registry version remains a prerelease until the ordinary-release
+qualification gate is satisfied; changing the numeric version core does not
+waive that requirement.
+
 The initial pre-qualification repository should contain only the narrow driver,
 its implementation-focused tests, explicit assumptions and ambiguities,
 supported-target compilation, documentation, and the ordinary repository policy

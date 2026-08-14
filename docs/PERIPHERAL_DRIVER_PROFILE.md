@@ -22,6 +22,25 @@ A pre-qualification driver:
 - has no MCU, board, BSP, or firmware example;
 - makes no hardware-in-the-loop, electrical, timing, or silicon-support claim.
 
+A newly created Rust package begins with a manifest version whose prerelease
+identifier matches its lifecycle, normally:
+
+```toml
+version = "0.1.0-experimental.1"
+```
+
+or:
+
+```toml
+version = "0.1.0-incubating.1"
+```
+
+This applies even when `publish = false`. It keeps the package metadata honest
+from its first build and prevents an ordinary version from being published
+before its qualification boundary was recorded. Every later pre-qualification
+manifest and registry version retains a prerelease component; changing the
+numeric core does not bypass the gate.
+
 It may produce a tagged release, packaged crate artifact, or crates.io
 publication identified as an Experimental or Incubating prerelease. Publishing
 reserves the crate name, enables ordinary dependency-based evaluation, and
@@ -35,8 +54,8 @@ manifest contains:
 publish = false
 ```
 
-For an intentional crates.io prerelease, the manifest instead uses a complete
-SemVer version with a prerelease component and may name the registry explicitly:
+For an intentional crates.io prerelease, the manifest may additionally name the
+registry explicitly:
 
 ```toml
 version = "0.1.0-experimental.1"
@@ -46,7 +65,8 @@ publish = ["crates-io"]
 Identifiers such as `experimental.N` and `incubating.N` communicate lifecycle;
 the three-part numeric core remains required. A version such as `0.1.0` has no
 prerelease component and is not an experimental publication merely because its
-major version is zero.
+major version is zero. Removing the prerelease component is the explicit
+ordinary-release transition and requires the qualification gate below.
 
 ## Required public warning
 
