@@ -16,6 +16,12 @@ The
 [device model resource pack](docs/device-model-resources/README.md) provides
 non-normative procedural, declaration, and optional Rust workspace integration
 aids that apply those decisions without prescribing code structure.
+The portable
+[device behavioral model skill](skills/device-behavioral-model/SKILL.md)
+uses the [open Agent Skills directory format](https://agentskills.io/specification)
+to guide compatible AI agents through analysis, scoping, implementation, and
+review while loading those maintained standards and resources as their source
+of truth.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
