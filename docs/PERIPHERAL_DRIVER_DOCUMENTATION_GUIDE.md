@@ -56,7 +56,7 @@ belong in the crate README or rustdoc, not only behind a repository link.
 |       `-- src/lib.rs           # crate front page plus public item docs
 |-- docs/
 |   |-- SOURCES.toml             # when structured provenance adds value
-|   |-- HARDWARE_CONTRACT.md     # interpreted device facts and nonclaims
+|   |-- HARDWARE_CONTRACT.toml   # optional; .md remains adequate
 |   `-- DECISIONS.md             # only durable, non-obvious rationale
 `-- scripts/ci.sh                # canonical local verification entry point
 ```
@@ -88,7 +88,7 @@ file per concern is not a quality signal.
 |       `-- src/lib.rs
 |-- docs/
 |   |-- SOURCES.toml
-|   |-- HARDWARE_CONTRACT.md
+|   |-- HARDWARE_CONTRACT.toml   # optional; .md remains adequate
 |   |-- ARCHITECTURE.md          # when boundaries/dependency direction are non-obvious
 |   |-- INVARIANTS.md            # when review-blocking truths need stable IDs
 |   |-- TEST_PLAN.md             # when evidence layers are genuinely distinct
@@ -147,7 +147,7 @@ security guidance.
 | Driver crate `README.md` | Standalone package evaluation and quick start | Any user-facing or potentially publishable nested crate | Repository layout, maintainer release mechanics, or dependence on private/unpackaged links for essential limits |
 | Crate-level rustdoc | Compiled API front page | Every Rust library | A third, unchecked copy of the whole repository README |
 | `docs/SOURCES.toml` | Exact source identity, integrity, authority, and rights posture | Multiple or mutable specifications, behavioral models, source conflicts, or redistribution constraints | Interpreted device claims or physical-verification status |
-| Hardware contract | Interpreted register, protocol, timing, state, error, and nonclaim facts | Normally useful for a hardware-facing driver | Copying vendor prose wholesale or treating a digest as proof of correctness |
+| Hardware contract | Interpreted register, protocol, timing, state, error, analog-front-end, and nonclaim facts, with explicit owner-review state | Normally useful for a hardware-facing driver | Copying vendor prose wholesale, treating a digest as proof of correctness, or encoding review as markdown checkboxes that overload `[ ]` as both "not yet reviewed" and "reviewed omission" |
 | Architecture/design | Ownership and dependency direction | Multiple crates/layers, non-obvious state authority, or important integration boundary | Restating directory names or code that is self-explanatory |
 | API contract | Semantic compatibility contract or pre-implementation design | Contract-first incubation or unusually consequential semantic choices | Hand-maintained signatures already canonical in Rust code/rustdoc unless parity is checked |
 | Invariants | Stable review-blocking truths and coupled tests | Stateful, timing-sensitive, recovery-sensitive, unsafe, concurrent, or evidence-sensitive work | General style advice or a second architecture summary |
@@ -574,6 +574,13 @@ recommended path and example, metadata and ownership boundaries, revision and
 supersession handling, rights posture, vendor-file guidance, and proportional
 validation. Keep interpretations and claim evidence in their owning contract
 and evidence surfaces rather than the registry.
+
+The same pack includes an optional
+[hardware-contract TOML example](peripheral-driver-resources/HARDWARE_CONTRACT.toml.example)
+when owner-review state needs a machine-readable vocabulary (`declared`,
+`provisional`, `confirmed`, `omission`) instead of markdown checkboxes. It
+adds no organization-wide schema and does not require repositories with an
+adequate Markdown contract to migrate.
 
 ## 11. Manifest and package-documentation notes
 

@@ -2,19 +2,20 @@
 
 Status: **Non-normative implementation aids**
 
-These resources offer an optional, machine-readable way to record the exact
-source material used to derive a peripheral driver. They help apply the source
-and evidence expectations in the
+These resources offer optional, machine-readable ways to record the exact
+source material used to derive a peripheral driver and, separately, the
+owner-review state of interpreted hardware-contract rows. They help apply the
+source and evidence expectations in the
 [Peripheral Driver Release and Evidence Profile](../PERIPHERAL_DRIVER_PROFILE.md)
 and preserve the source-first intake described by the
 [Peripheral Driver Bootstrap Intent](../PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md).
 
 This pack adds no requirement, defines no organization-wide schema, and does
-not make a source registry part of every driver repository. It also does not
-replace reviewed interpretation, establish redistribution permission, or make
-a model or hardware-qualification claim. Every recommendation, imperative, and
-lower-case modal term in this pack is advisory; the linked normative documents
-remain the source of obligations.
+not make a source registry or hardware-contract TOML part of every driver
+repository. It also does not replace reviewed interpretation, establish
+redistribution permission, or make a model or hardware-qualification claim.
+Every recommendation, imperative, and lower-case modal term in this pack is
+advisory; the linked normative documents remain the source of obligations.
 
 ## Use only when it reduces a real risk
 
@@ -75,9 +76,78 @@ implementations from the accepted sources and decisions rather than from one
 another; their tests establish only the named software or conformance claims.
 Physical evidence remains separate.
 
-Not every repository needs a document named `HARDWARE_CONTRACT.md`, a decision
-log, or an independent model. The ownership boundaries still apply when those
-concerns are combined into fewer maintained artifacts.
+Not every repository needs a document named `HARDWARE_CONTRACT.md`,
+`HARDWARE_CONTRACT.toml`, a decision log, or an independent model. The
+ownership boundaries still apply when those concerns are combined into fewer
+maintained artifacts. An adequate Markdown contract does not have to migrate.
+
+## Hardware-contract review records
+
+Use a structured contract when owner-review state is easy to misread. Markdown
+checkboxes are a common failure: GitHub-flavored `[ ]` cannot mean both "not
+yet reviewed" and "reviewed, sources silent," and an unchecked
+repository-owned decision looks non-binding even when the README has already
+named it.
+
+Once that risk is real, copy [the example](HARDWARE_CONTRACT.toml.example),
+replace its sample records, and maintain it at `docs/HARDWARE_CONTRACT.toml`.
+The example uses synthetic claims so it does not disclose or accidentally
+canonize a current driver's interpretation. It is a starting point, not a
+requirement to migrate an adequate local Markdown contract or retain fields
+that have no current consumer.
+
+The example `review` vocabulary is:
+
+| Value | Meaning | Binding for later generation? |
+| --- | --- | --- |
+| `declared` | Repository-owned decision; no vendor-source verification is required | Yes, for this repository |
+| `provisional` | Recorded, not yet owner-reviewed; no claim either way | No |
+| `confirmed` | Owner reviewed against pinned sources and accepted | Yes, as a source-backed interpretation |
+| `omission` | Owner reviewed the recorded source and search scope; that scope does not state the fact | Yes, only as a confirmed silence within the recorded scope |
+
+Do not encode `omission` as an unchecked box with a footnote. `provenance`
+distinguishes `repository-declaration` from `vendor-source`. Every vendor-source
+row cites a stable `source` ID. Resolve that ID through `docs/SOURCES.toml` when
+a registry exists; otherwise define a concise inline `[[source]]` record that
+pins the source identity. Keep source identity in one of those locations, not
+both.
+
+Cite the artifact as specifically as it allows with optional `page`, `figure`,
+`table`, and `source_section` (the source heading). `section` remains the
+contract grouping and is not a page locator. Repository-declaration rows omit
+source IDs and locators; do not invent datasheet pages for host circuit
+choices.
+
+In this example, `declared` requires `repository-declaration`; `confirmed` and
+`omission` require `vendor-source` plus a resolvable, pinned source; and
+`provisional` may use either provenance, although a provisional vendor-source
+row still cites its source. An `omission` is binding only within its recorded
+source and `search_scope`. Use one omission row per reviewed source unless the
+local contract documents a multi-source representation.
+
+When `default_identity_row` is present, it resolves to one unique, declared
+repository-declaration row. That row's `value` is the canonical identity; do
+not repeat a second machine-readable identity at the document root.
+
+At minimum, during adoption and review of a hardware-contract TOML:
+
+- parse the file as TOML;
+- reject every placeholder or sentinel copied from the example, including
+  synthetic identities, `YYYY-MM-DD`, `page = 0`, and `REPLACE_WITH_*` values;
+- require unique row and inline source IDs, and make `default_identity_row`,
+  when present, resolve to one declared repository-declaration row with a
+  non-placeholder `value`;
+- require every row to use a `review` and `provenance` combination permitted
+  above;
+- require every vendor-source row to cite a source that resolves through the
+  referenced registry or an inline source record; and
+- require `confirmed` and `omission` rows to retain reproducible source evidence,
+  with each omission no broader than its recorded source and search scope.
+
+These checks may be manual for a small contract. A repository that adds review
+values documents their meanings locally in this recommended pattern. A driver
+does not need a custom schema validator merely because it adopted this
+example.
 
 ## Revisions and supersession
 
