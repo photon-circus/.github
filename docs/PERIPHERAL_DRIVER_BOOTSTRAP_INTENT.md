@@ -117,16 +117,21 @@ architecture or an undocumented source of product requirements.
 ## Graduation into the driver repository
 
 Temporary artifacts enter the driver repository only when they become durable
-product evidence or guidance. Expected graduated artifacts include:
+product evidence or guidance. Expected base driver artifacts include:
 
 - a source registry;
 - a bounded README contract and lifecycle warning;
-- driver and independently implemented mock code;
-- public black-box and transport tests;
-- a reconciled behavioral-model contract;
+- driver code and implementation-focused tests;
 - durable design decisions and unresolved limitations;
 - canonical local CI and supported-target checks;
 - changelog entries describing observable value and constraints.
+
+When the independent model and validation lanes complete, additive graduated
+artifacts include:
+
+- independently implemented model code and model tests;
+- public driver-versus-model conformance tests; and
+- a reconciled behavioral-model contract and explicit coverage limitations.
 
 Agent roles, work assignments, scratch interpretations, duplicated source
 extracts, orchestration state, and temporary task prompts do not graduate.

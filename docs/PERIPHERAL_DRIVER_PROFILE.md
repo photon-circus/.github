@@ -18,7 +18,8 @@ A pre-qualification driver:
 - is `Experimental` or `Incubating`;
 - may be private or public in the Photon Circus organization;
 - is either not published to a registry or is published only with an explicit
-  SemVer prerelease identifier;
+  SemVer prerelease identifier, except for ordinary versions already
+  grandfathered by the organization standards;
 - has no MCU, board, BSP, or firmware example;
 - makes no hardware-in-the-loop, electrical, timing, or silicon-support claim.
 
@@ -41,9 +42,15 @@ before its qualification boundary was recorded. Every later pre-qualification
 manifest and registry version retains a prerelease component; changing the
 numeric core does not bypass the gate.
 
+An existing unpublished package with an ordinary local version such as `0.1.0`
+replaces it with `0.1.0-experimental.1` or the lifecycle-matching equivalent
+before its first durable release. If `0.1.0` was already tagged or published,
+the next prerelease uses a higher numeric core such as
+`0.1.1-experimental.1`; the earlier durable version remains grandfathered.
+
 It may produce a tagged release, packaged crate artifact, or crates.io
 publication identified as an Experimental or Incubating prerelease. Publishing
-reserves the crate name, enables ordinary dependency-based evaluation, and
+reserves the crate name, enables explicit opt-in dependency evaluation, and
 invites collaboration. It does not authorize a physical-device support claim or
 elevate the validation status.
 
@@ -72,7 +79,8 @@ ordinary-release transition and requires the qualification gate below.
 
 The repository README and crate-level documentation place a warning near the
 status or usage introduction that reports the validation actually achieved. A
-driver with model-backed conformance may use:
+driver whose entire declared supported public surface has model-backed
+conformance may use:
 
 > [!WARNING]
 > **Incubating — datasheet-model verification only.**
@@ -84,6 +92,20 @@ driver with model-backed conformance may use:
 
 An Experimental repository substitutes **Experimental** without weakening the
 rest of the warning.
+
+A driver with partial model coverage uses a scoped warning instead:
+
+> [!WARNING]
+> **Incubating — partial datasheet-model verification.**
+> Model-conformant operations: *name the covered public operations*.
+> Not model-conformant: *name the remaining public operations or limitations*.
+> This driver does not yet have reviewed `ph-hil` evidence from physical
+> silicon. If published, it is available only as an explicit SemVer prerelease
+> and must not be treated as hardware-qualified.
+
+The scope statements must be concrete. They may link to a packaged coverage or
+limitations section when the complete lists do not fit in the warning; a link
+to an unpackaged issue or private record is insufficient.
 
 A driver that does not yet have a behavioral model must not use the preceding
 warning. It uses an equally prominent narrower warning, adapted for lifecycle
@@ -109,7 +131,7 @@ implemented driver contract:
 - supported-target compilation;
 - one canonical local CI entry point;
 - lifecycle-appropriate README, changelog, license, contribution, security,
-  release-lock, and agent guidance.
+  release guidance, and agent guidance.
 
 It does not bootstrap future `ph-hil` internals. Do not add placeholder firmware,
 MCU applications, fixture definitions, bench files, execution plans, capability
@@ -158,7 +180,7 @@ layers currently present. Every repository should:
 4. compile documented features and supported bare-metal targets;
 5. build documentation;
 6. audit dependencies and licenses where applicable;
-7. construct and inspect the package before any publication.
+7. construct and inspect the package without publishing it.
 
 Fixed datasheet-derived vectors in driver tests establish only the named local
 transformation. Unit and scripted transport tests must not emulate device state
@@ -202,11 +224,13 @@ exact-major `ph-hil` capability contract is the sole behavioral case catalogue.
 Before crates.io publication of a version without a SemVer prerelease component
 or promotion to `Active`:
 
+- every operation in the declared supported public surface must pass against an
+  independent behavioral model whose accepted domain covers that claim;
 - `ph-hil` must exercise the supported driver claims against physical silicon;
 - evidence must identify the exact driver revision, device, carrier, fixture,
   tool versions, and test scope;
-- model-versus-silicon discrepancies must be resolved in the mock, driver,
-  contract, or documented limitation;
+- model-versus-silicon discrepancies must be resolved in the model, driver,
+  contract, selected silicon variant, or documented limitation;
 - the reviewed evidence record must be linked from the repository;
 - the release artifact and changelog must be verified after the evidence-bound
   changes are assembled.
@@ -217,3 +241,7 @@ prerelease—as Experimental or Incubating while the qualification work is
 unavailable. Registry versions are permanent and cannot be overwritten, so a
 prerelease publication remains an intentional release decision rather than an
 automatic CI side effect.
+
+Ordinary versions already published before adoption of this profile remain
+grandfathered. This exception does not authorize another ordinary release or a
+new support claim without satisfying the current gate.

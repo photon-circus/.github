@@ -39,10 +39,9 @@ Last updated: 2026-08-14 UTC
 - Shared bug-report, feature-proposal, and pull-request templates that preserve bounded scope, evidence provenance, compatibility decisions, and explicit handoffs across repositories without local overrides.
 - Read-only repository standards auditor producing Markdown and JSON evidence without remediation authority or GitHub write operations.
 - Pre-`ph-hil` peripheral-driver profile allowing public Experimental or
-  Incubating driver development with validation-appropriate warnings and
-  optional explicit SemVer prerelease distribution while prohibiting MCU
-  examples, physical claims, stable publication, and speculative HIL
-  boilerplate until reviewed silicon evidence exists.
+  Incubating driver development against an independent datasheet-derived mock
+  while prohibiting crates.io publication, MCU examples, physical claims, and
+  speculative HIL boilerplate until reviewed silicon evidence exists.
 - Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining
   source-first intake, bounded task packets, independent driver/mock/validation
   lanes, temporary workspace boundaries, durable artifact graduation, and the
@@ -55,10 +54,11 @@ Last updated: 2026-08-14 UTC
 - Make pre-`ph-hil` driver validation progressive and claim-scoped. Permit
   honest Experimental or Incubating tagged, packaged, or crates.io-hosted
   SemVer prereleases before an independent behavioral model or physical tooling
-  exists. Require every newly created pre-qualified Rust driver package to carry
-  a lifecycle-matching prerelease identifier from its initial manifest version,
-  even when publication is disabled. Retain the ordinary-publication and
-  physical-claim qualification gate, and make registry publication useful for
+  exists. Require every newly created Rust driver package under the
+  pre-qualification profile to carry a lifecycle-matching prerelease identifier
+  from its initial manifest version, even when publication is disabled. Retain
+  the ordinary-publication and physical-claim qualification gate, and make
+  registry publication useful for
   name reservation, evaluation, and collaboration without elevating evidence.
   Assign distinct oracle ownership to driver unit tests, scripted transport
   tests, device-model tests, driver-versus-model conformance, and `ph-hil`;

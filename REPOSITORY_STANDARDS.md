@@ -398,9 +398,13 @@ answer different questions and do not substitute for one another. A repository
 may be developed privately or made public, but it:
 
 - must remain `Experimental` or `Incubating`;
-- must either disable registry publication with `publish = false` or use an
-  explicit SemVer prerelease identifier such as `0.1.0-experimental.1` or
-  `0.1.0-incubating.1` for every crates.io publication;
+- must give every newly created Rust peripheral-driver package an initial
+  lifecycle-matching SemVer prerelease version such as
+  `0.1.0-experimental.1` or `0.1.0-incubating.1`, even when
+  `publish = false`;
+- must either disable registry publication with `publish = false` or retain an
+  explicit SemVer prerelease component for every pre-qualification crates.io
+  publication;
 - must state prominently which validation layers actually exist and that no
   software-only result constitutes hardware-in-the-loop or silicon evidence;
 - must not claim physical-device support, electrical correctness, timing
@@ -410,13 +414,14 @@ may be developed privately or made public, but it:
 - must not carry speculative `ph-hil` firmware, fixture definitions, plans,
   schemas, evidence policies, build shims, or capability inventories.
 
-A newly created Rust peripheral-driver package under this profile must use an
-explicit prerelease identifier in its initial manifest version, whether or not
-registry publication is enabled. The identifier should match the declared
-lifecycle, normally `0.1.0-experimental.1` or `0.1.0-incubating.1`. Every
-manifest and registry version remains a prerelease until the ordinary-release
-qualification gate is satisfied; changing the numeric version core does not
-waive that requirement.
+An existing unpublished package whose manifest still contains an ordinary local
+version such as `0.1.0` should replace it with the corresponding prerelease
+before its first durable release. If that ordinary version was already tagged
+or published, the next prerelease must use a higher numeric core, such as
+`0.1.1-experimental.1`; the earlier durable version remains grandfathered.
+Every new manifest and registry version remains a prerelease until the
+ordinary-release qualification gate is satisfied. Changing the numeric version
+core does not waive that requirement.
 
 The initial pre-qualification repository should contain only the narrow driver,
 its implementation-focused tests, explicit assumptions and ambiguities,
@@ -436,8 +441,9 @@ claim rather than a single crate-wide badge.
 The mock is an executable model of device-side behavior, not a second copy of
 the driver. It should be implemented independently from the datasheet contract
 and must not reuse driver codecs or sequencing logic in ways that make tests
-tautological. CI runs the public driver against this model and establishes only
-that driver changes remain compatible with the modeled behavior.
+tautological. When a model exists, CI runs every public driver operation claimed
+as model-conformant against it and establishes only that those claims remain
+compatible with the modeled behavior.
 
 `ph-hil` qualification later exercises driver claims against physical silicon.
 Where a behavioral model exists, a discrepancy must update the contract, model,
@@ -446,12 +452,14 @@ is accepted. Maintainer discretion, a passing host test, compilation, or a model
 result is not a substitute for this physical evidence.
 
 Crates.io publication of a version without a SemVer prerelease component and
-promotion to `Active` require reviewed `ph-hil` evidence tied to the exact
-driver revision and supported hardware scope. A `0.x.y` version without a
+promotion to `Active` require both model conformance for every operation in the
+declared supported public surface and reviewed `ph-hil` evidence tied to the
+exact driver revision and supported hardware scope. A `0.x.y` version without a
 prerelease component is still an ordinary release for this policy. This gate is
 not waived because the crate is otherwise complete or useful. Existing
-already-published drivers are not retroactively unpublished, but should adopt
-the evidence boundary when making new support claims.
+already-published drivers and versions are not retroactively unpublished, but
+must satisfy the current evidence boundary before a future ordinary release or
+new support claim.
 
 The reusable warning, minimal repository shape, CI contract, and qualification
 handoff are defined in the
