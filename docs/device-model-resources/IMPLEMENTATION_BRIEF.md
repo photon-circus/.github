@@ -46,8 +46,10 @@ intake when useful. Before implementation:
    it available. Do not fill an undeclared value with zero, `false`, empty, or
    another convenient result merely to make the implementation deterministic.
    Check whether the establishing input covers the whole observable; if it
-   covers only part, keep the rest unavailable, report it distinguishably, or
-   declare an abstraction for it.
+   covers only part, keep the entire observable unavailable, expose only the
+   established components through a surface that identifies the unestablished
+   remainder without presenting a complete device value, or declare an
+   abstraction for the remainder and its observable consequence.
 6. Define the accepted input domain narrowly enough to implement that trace:
    operation and transaction shapes, addresses or commands, values, and field
    combinations, together with supported sequencing, repetition or cardinality,

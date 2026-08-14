@@ -57,8 +57,8 @@ still required; completing these prompts is not a substitute.
   deliberately redundant state and its invariant:
 - For each observable initial value, its source, explicit input, declared
   abstraction, or first establishing transition:
-- Where a first establishing transition covers only part of an observable, how
-  the remainder is handled, and its observable consequence:
+- Where any transition establishes or re-establishes only part of an
+  observable, how the remainder is handled, and its observable consequence:
 - Inputs that permit mutation:
 - Documented transport side effects:
 - Inputs rejected before mutation, and earlier-phase effects preserved when a

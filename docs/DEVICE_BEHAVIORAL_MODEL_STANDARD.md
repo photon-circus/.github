@@ -305,16 +305,19 @@ committed later and harder to see.
 When an establishing transition is partial, the model must do one of the
 following, and record which:
 
-- keep the observable unavailable until every field it reports is established;
-- report the established fields through a surface that distinguishes them from
-  the unestablished remainder; or
+- keep the entire observable unavailable until every component the observation
+  would report is established;
+- expose only the established components through a surface that identifies the
+  unestablished remainder and cannot be mistaken for a complete value produced
+  by the device; or
 - declare an abstraction covering the remainder, with its observable
   consequence, as this section already requires for an initial value.
 
 Choosing to keep an observable unavailable until fully established is honest but
-can make a documented device operation permanently untestable. Where that cost
-is real, a declared abstraction is preferred over silence; what is not
-acceptable is completing the observable without saying so.
+can make a documented device operation permanently untestable. Where that
+prevents the model's declared purpose, a purpose-driven abstraction may preserve
+current test value. Test convenience does not authorize silent completion; the
+abstraction and its observable consequence remain part of the model's claim.
 
 ### Transport transitions and visible effects
 
