@@ -53,7 +53,8 @@ still required; completing these prompts is not a substitute.
   abstraction, or first establishing transition:
 - Inputs that permit mutation:
 - Documented transport side effects:
-- Inputs rejected before mutation:
+- Inputs rejected before mutation, and earlier-phase effects preserved when a
+  limitation becomes knowable only later:
 - Stable behavior at an unchanged temporal frontier:
 
 ## Fidelity
@@ -89,7 +90,8 @@ available.
 ## Discrimination evidence
 
 - Model-only evidence for the minimum useful trace:
-- Unsupported-input evidence, including mutation-free rejection:
+- Unsupported-input evidence, distinguishing pre-commit rejection from
+  preservation of earlier accepted transport-phase effects:
 - Timing-sensitive evidence that would fail with no advancement, if applicable:
 - Why broader behavior is not needed by the current consumer:
 
