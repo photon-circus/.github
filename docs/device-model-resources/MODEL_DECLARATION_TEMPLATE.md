@@ -21,14 +21,13 @@ still required; completing these prompts is not a substitute.
 - What agreement with this model does not establish:
 - Concrete expansion trigger:
 
-## Sources
+## Evidence basis
 
-- Primary source URL, revision, and date:
-- Recorded digest and provenance or integrity record:
-- Additional evidence, if any:
-- Pinned source, recorded interpretation, or selected-variant evidence that
-  establishes the preconditions and expected result for each transition in the
-  minimum trace:
+- Stable proposition identifiers used by the minimum trace:
+- Confirmation that each identifier resolves to the canonical proposition and
+  evidence record, with provenance for retained evidence or explicit
+  none/undefined:
+- Model consequence of each proposition, including unsupported boundaries:
 
 ## Behavioral boundary
 
@@ -75,15 +74,15 @@ still required; completing these prompts is not a substitute.
 | Excluded | |
 | Unsupported | |
 
-## Source decisions
+## Model interpretation decisions
 
 Record only decisions needed to interpret genuine ambiguity or bound
-source-undeclared behavior. Include source locations and issue links where
-available.
+undefined behavior. Cite stable proposition identifiers instead of copying
+source passages, locations, or evidence records.
 
 - Decision:
-  - Source section or evidence:
-  - Interpretation:
+  - Stable proposition identifier:
+  - Model interpretation:
   - Observable consequence:
 
 ## Independence and proportionality

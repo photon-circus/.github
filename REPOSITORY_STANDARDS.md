@@ -455,6 +455,44 @@ The reusable status disclosure, minimal repository shape, CI contract, release
 gate, and conditional qualification handoff are defined in the
 [`Peripheral Driver Release and Evidence Profile`](docs/PERIPHERAL_DRIVER_PROFILE.md).
 
+### 10.2 Stable device propositions
+
+A peripheral-driver repository must assign a permanent, unambiguous identifier
+to every retained device or documentary proposition used to justify driver
+behavior, model behavior, a conformance expectation, a physical claim, or a bug
+disposition. The identifier names one stable referent. It must never be reused
+or redefined, and it must remain resolvable after the proposition is superseded
+or split. A changed meaning receives a new identifier.
+
+For existing repositories, this requirement applies when a proposition is
+introduced, materially changed, newly cited by a downstream artifact, or used
+to resolve a disagreement after adoption of this section. It does not require a
+retrospective inventory or migration of untouched legacy facts. Incomplete
+retrospective coverage is not by itself a release block.
+
+The identifier must resolve to one canonical proposition and to exact,
+resolvable provenance for every retained evidence item. When no retained item
+decides the proposition, the record states that honestly rather than treating
+missing evidence as approval, proof of the opposite behavior, or pending owner
+work. A located source omission can establish only a documentary proposition
+about that bounded search; it does not establish inverse device behavior.
+
+A checkbox, review owner, or promise such as "maintainer will validate" is
+workflow metadata. It must not substitute for proposition identity, provenance,
+or evidence and does not establish a claim. Driver, model, conformance, physical
+work, and bug disposition addressing the same proposition must cite the same
+identifier while independently owning their consequences and implementations.
+They state their local consequence and link to the canonical proposition rather
+than maintaining another copy of its wording or provenance. The citation may
+live in the nearest maintained contract or trace map; this section does not
+require an identifier at every code site or extraction of every implicit
+implementation fact.
+
+The existence of a proposition or a lack of deciding evidence does not by itself
+create a validation assignment or block a release. This section does not require
+a particular file name, identifier spelling, registry schema, evidence-state
+vocabulary, completeness audit, or exhaustive transcription of source material.
+
 ## 11. Contribution and hardware evidence
 
 Public Incubating, Active, and Maintenance repositories must support contributor bug reports and pull requests.
@@ -471,11 +509,18 @@ Embedded bug-report templates should request, where applicable:
 - Logs, traces, or register observations.
 - Whether evidence came from hardware, simulation, or a mock.
 
-Contributor reports are valuable field evidence. Documentation must remain clear about what maintainers have independently reproduced.
+Contributor reports are valuable field evidence. When a reported observation is
+retained or used as physical evidence, its record should state whether and how
+it was independently reproduced. "Not reproduced" is a sufficient status and
+does not create reproduction work or erase the report.
 
-Changes affecting registers, timing, reset, interrupts, electrical configuration, endianness, or bus behavior should identify their evidence source. Mock or simulated behavior must not silently become a universal hardware claim.
+Changes that rely on a device or documentary proposition follow Section 10.2.
+Mock or simulated behavior must not silently become a universal hardware claim.
 
-Unresolved observations may be accepted when the change is otherwise valuable, but they must be recorded as known limitations or follow-up work.
+Unresolved observations retain their evidence state. A repository may create a
+known limitation or follow-up when a current dependent claim or acceptance
+criterion needs one and a feasible, discriminating completion condition can be
+named; the evidence record itself does not require further work.
 
 Recurring verification gaps are organization-level design signals. When the same invariant-heavy tooling problem appears across repositories, maintainers should consider extracting shared infrastructure rather than building incompatible local solutions repeatedly.
 

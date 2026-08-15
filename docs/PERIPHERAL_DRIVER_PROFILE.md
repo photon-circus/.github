@@ -106,7 +106,10 @@ The minimum repository contains only what establishes its current driver
 contract:
 
 - the narrow driver implementation;
-- explicit datasheet revisions, interpretations, assumptions, and ambiguities;
+- stable proposition identifiers as they become applicable under the
+  [organization evidence rule](../REPOSITORY_STANDARDS.md#102-stable-device-propositions),
+  without a speculative inventory or retrospective migration of untouched
+  legacy facts;
 - implementation-focused unit and scripted transport tests appropriate to the
   code that exists;
 - supported-target compilation;
@@ -218,11 +221,12 @@ when that integration is adopted. The driver repository owns its claims and
 semantic procedures. Do not invent those contracts independently in each
 driver.
 
-Model and physical procedures may preserve the same semantic question where
-useful, but they need not share an adapter, test binary, implementation, stable
-identity, or comparison artifact. Correspondence, identity fields, and a common
-model-versus-silicon artifact remain deferred by
-[DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+Model and physical procedures that address the same device proposition cite the
+same stable proposition identifier. They need not share a procedure, case or
+trace identity, adapter, test binary, implementation, serialization schema, or
+comparison artifact. Correspondence between those execution artifacts remains
+deferred by [DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md); stable
+proposition identity does not.
 When a repository adopts a reviewed `ph-hil` contract, it follows that
 contract's catalogue authority rather than creating a parallel inventory.
 
@@ -269,3 +273,7 @@ Publication and lifecycle promotion do not silently elevate evidence status.
 Hardware qualification is not a prerequisite for publication, and lack of one
 optional validation layer does not erase narrower evidence or block unrelated
 claims.
+
+An undefined proposition creates no hardware-validation assignment or release
+gate. Optional bounded confirmation may be admitted for a named proposition;
+only a dependent physical or qualification claim can require that evidence.

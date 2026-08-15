@@ -17,9 +17,12 @@ requirement; consult the normative source for the exact obligation.
 
 ## 1. Recommended organizing rule
 
-Give each fact one canonical owner. Repeat a fact only where a different
-audience cannot reliably reach the canonical source, and protect necessary
-copies with generation or a check.
+Give each maintained fact one canonical owner. A documentary or device
+proposition belongs in one evidence record. Downstream surfaces cite its stable
+identifier and state only their local consequence; they do not copy the
+proposition, vendor wording, source coordinates, or physical observation.
+Repeat audience-specific status or API guidance only when necessary, and prefer
+a link or generated projection over another maintained prose copy.
 
 | Audience | Primary surface | It answers |
 | --- | --- | --- |
@@ -28,7 +31,7 @@ copies with generation or a check.
 | Rust API user | Crate-level rustdoc and item docs | How to use the API correctly, including errors, invariants, features, and examples |
 | Human contributor | `CONTRIBUTING.md` | How to propose, implement, verify, and submit a change |
 | Coding agent | `AGENTS.md` | What is expensive to infer, easy to get subtly wrong, or operationally protected |
-| Maintainer reviewing device claims | `docs/SOURCES.toml`, hardware contract, decisions | Which source bytes were used, what they mean, and how ambiguities were resolved |
+| Maintainer reviewing device claims | Source catalog and stable-proposition evidence registry | Which source bytes or observations bear on each proposition and whether they support, refute, or leave it undefined |
 
 The package boundary matters. When a package is published, Cargo uploads its
 package README and crates.io renders it; repository-root contracts are not
@@ -56,14 +59,16 @@ belong in the crate README or rustdoc, not only behind a repository link.
 |       `-- src/lib.rs           # crate front page plus public item docs
 |-- docs/
 |   |-- SOURCES.toml             # when structured provenance adds value
-|   |-- HARDWARE_CONTRACT.toml   # optional; .md remains adequate
+|   |-- DEVICE_EVIDENCE.md       # only propositions consumed by current work
 |   `-- DECISIONS.md             # only durable, non-obvious rationale
 `-- scripts/ci.sh                # canonical local verification entry point
 ```
 
-For a very small driver, source identity, interpreted hardware behavior,
-invariants, and decisions can be sections of one `docs/CONTRACT.md`. Creating a
-file per concern is not a quality signal.
+For a very small driver, source identity, device evidence, software invariants,
+and durable decisions can be clearly separated sections of one
+`docs/CONTRACT.md`. The evidence section remains the sole authority for each
+stable proposition; the other sections cite it and own only their local
+consequences. Creating a file per concern is not a quality signal.
 
 ### 2.2 Expanded driver with an independent model
 
@@ -88,7 +93,7 @@ file per concern is not a quality signal.
 |       `-- src/lib.rs
 |-- docs/
 |   |-- SOURCES.toml
-|   |-- HARDWARE_CONTRACT.toml   # optional; .md remains adequate
+|   |-- DEVICE_EVIDENCE.md       # stable propositions used by current consumers
 |   |-- ARCHITECTURE.md          # when boundaries/dependency direction are non-obvious
 |   |-- INVARIANTS.md            # when review-blocking truths need stable IDs
 |   |-- TEST_PLAN.md             # when evidence layers are genuinely distinct
@@ -121,9 +126,10 @@ remain authoritative.
 | `CODE_OF_CONDUCT.md` | Public repositories accepting community contributions |
 
 Driver-specific content obligations are broader than this filename list. A
-driver records the exact source revisions, interpretations, assumptions,
-ambiguities, supported targets, tests, limitations, and evidence behind its
-claims. The standards do not require each concern to have a separate file.
+driver records exact provenance and stable identities for the device
+propositions its behavior or public claims consume. The driver separately owns
+its interpretations, assumptions, supported targets, tests, and limitations.
+The standards do not require each concern to have a separate file.
 
 Published Experimental work is the important override: publication still
 triggers the repository's changelog and release-guidance requirements. Neither
@@ -146,11 +152,11 @@ security guidance.
 | Root `README.md` | Repository/workspace front door | Always | Long API inventory, full installation tutorial, or duplicated contract text |
 | Driver crate `README.md` | Standalone package evaluation and quick start | Any user-facing or potentially publishable nested crate | Repository layout, maintainer release mechanics, or dependence on private/unpackaged links for essential limits |
 | Crate-level rustdoc | Compiled API front page | Every Rust library | A third, unchecked copy of the whole repository README |
-| `docs/SOURCES.toml` | Exact source identity, integrity, authority, and rights posture | Multiple or mutable specifications, behavioral models, source conflicts, or redistribution constraints | Interpreted device claims or physical-verification status |
-| Hardware contract | Interpreted register, protocol, timing, state, error, analog-front-end, and nonclaim facts, with explicit owner-review state | Normally useful for a hardware-facing driver | Copying vendor prose wholesale, treating a digest as proof of correctness, or encoding review as markdown checkboxes that overload `[ ]` as both "not yet reviewed" and "reviewed omission" |
+| `docs/SOURCES.toml` | Exact source identity, integrity, applicability, and rights posture | Multiple or mutable specifications, behavioral models, source conflicts, or redistribution constraints | Acting as a global authority ranking or owning device propositions and their evidence state |
+| Evidence registry, including a remediated hardware contract | Atomic documentary or device propositions with permanent identifiers, scoped evidence state, and exact provenance | A proposition is consumed by driver behavior, model behavior, conformance, physical evidence, or a bug disposition | Implementation policy, copied downstream prose, review owners, checkboxes, future-validation promises, or an exhaustive inventory of unconsumed source facts |
 | Architecture/design | Ownership and dependency direction | Multiple crates/layers, non-obvious state authority, or important integration boundary | Restating directory names or code that is self-explanatory |
-| API contract | Semantic compatibility contract or pre-implementation design | Contract-first incubation or unusually consequential semantic choices | Hand-maintained signatures already canonical in Rust code/rustdoc unless parity is checked |
-| Invariants | Stable review-blocking truths and coupled tests | Stateful, timing-sensitive, recovery-sensitive, unsafe, concurrent, or evidence-sensitive work | General style advice or a second architecture summary |
+| API contract | Semantic compatibility contract or pre-implementation design | Contract-first incubation or unusually consequential semantic choices | Hand-maintained signatures already canonical in Rust code/rustdoc, or a second authority for device propositions |
+| Invariants | Stable software truths and coupled tests | Stateful, timing-sensitive, recovery-sensitive, unsafe, concurrent, or evidence-sensitive work | General style advice, a second architecture summary, or copied device evidence |
 | Test plan | Mapping from claims/failure modes to evidence | Distinct pure, transport, model, target, HIL, or qualification layers | A generic list of `cargo` commands already owned by CI |
 | Decisions/ADRs | Why a non-obvious choice was made, its consequences, and supersession | The rationale would otherwise be rediscovered or relitigated | Describing current code without a decision or copying issue discussion verbatim |
 | Documentation standards | Repository-specific claims and terminology delta | Device terminology is unusually easy to misstate | Generic prose style; prefer an organization guide or fold a short delta into invariants/CONTRIBUTING |
@@ -315,13 +321,21 @@ For crate README versus rustdoc synchronization, choose one of two patterns:
 
 Do not maintain three unchecked copies of a usage example or status claim.
 
+Rustdoc and the package README state the API or product consequence a user
+needs. When that consequence depends on a device proposition, cite its stable
+identifier and link to the canonical evidence record. Do not paste vendor
+tables, source coordinates, or registry prose into user documentation merely to
+show that research occurred.
+
 ### 6.1 Model crate README
 
 When an independent behavioral-model crate exists, keep one maintained model
 declaration in its README or crate front page. A useful order is:
 
 1. Purpose, intended consumers, and whether the crate is a user dependency.
-2. Source basis and independence from the driver implementation.
+2. Source basis, stable proposition identifiers, and independence from the
+   driver implementation. State model consequences without copying the
+   proposition or its provenance.
 3. Fidelity classification for relevant behavior as modeled, abstracted,
    injected, excluded, or unsupported, including the applied-stimulus boundary,
    assumptions, ambiguities, limitations, and explicit nonclaims.
@@ -560,29 +574,39 @@ Avoid duplicating installation instructions, public API inventories, generic
 style rules, or literal versions available from a manifest in AGENTS.
 Tool-specific files may redirect to AGENTS in one sentence.
 
-## 10. Source-document capture
+## 10. Source and evidence capture
 
-Source-document capture should be proportionate to the provenance risk. A small
-driver may keep a concise source table in its hardware contract or another
-maintained document; use a structured registry only when simpler documentation
-is likely to drift or obscure exact source identity.
+Capture should be proportionate and demand-driven. Survey a source to identify
+the peripheral's externally visible features, then select a driver or model
+consumer before promoting a source statement into a maintained proposition.
+An unconsumed source section does not need a registry row, validation plan,
+issue, test, or CI rule.
 
-For repositories that need a registry, the
-[peripheral-driver source-registry resource pack](peripheral-driver-resources/README.md)
-is the canonical non-normative implementation reference. It owns the
-recommended path and example, metadata and ownership boundaries, revision and
-supersession handling, rights posture, vendor-file guidance, and proportional
-validation. Keep interpretations and claim evidence in their owning contract
-and evidence surfaces rather than the registry.
+For repositories that retain device propositions, the
+[peripheral-driver evidence resource pack](peripheral-driver-resources/README.md)
+is the canonical non-normative implementation reference. It provides a small
+[evidence-registry example](peripheral-driver-resources/EVIDENCE_REGISTRY.example.md),
+source-catalog guidance, evidence semantics, physical-observation guidance, and
+a remediation path. Existing `HARDWARE_CONTRACT.md` files may be remediated in
+place; neither that filename nor a specific schema or identifier spelling is
+required.
 
-The same pack includes an optional
-[hardware-contract TOML example](peripheral-driver-resources/HARDWARE_CONTRACT.toml.example)
-when owner-review state needs a machine-readable vocabulary (`declared`,
-`provisional`, `confirmed`, `omission`) instead of markdown checkboxes. It
-adds no organization-wide schema and does not require repositories with an
-adequate Markdown contract to migrate.
+## 11. Existing-contract remediation
 
-## 11. Manifest and package-documentation notes
+Remediate on demand or when a contract is already causing contradictory claims,
+invented behavior, or speculative work. Preserve existing identifiers, turn
+changed or compound meanings into tombstones plus new atomic propositions, move
+driver and model consequences to their owning surfaces, and replace prose copies
+with local consequence plus stable-ID citations. Convert unchecked boxes,
+review-owner fields, and promises of future validation into the evidence state
+actually supported—often `undefined`. An undefined or currently unconsumed row
+creates no validation assignment, follow-up, or release block.
+
+Do not require an organization-wide migration or completeness audit. The full
+non-normative sequence and stopping conditions live in the
+[resource pack](peripheral-driver-resources/README.md#remediate-an-existing-hardware-contract).
+
+## 12. Manifest and package-documentation notes
 
 - Set `readme = "README.md"` in each user-facing nested package.
 - Keep `description`, `license`/`license-file`, `repository`, `rust-version`,

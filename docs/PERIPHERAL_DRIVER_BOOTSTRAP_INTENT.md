@@ -1,8 +1,12 @@
 # Peripheral Driver Bootstrap Intent
 
-Status: **Design intent — machinery not yet implemented**
+Status: **Non-normative design intent — machinery not yet implemented**
 
 Recorded: **2026-08-12 UTC**
+
+This document adds no repository requirement. Its imperatives and uses of
+"must" describe advisory constraints for any future machinery; the normative
+standards control if this design intent conflicts with them.
 
 This document preserves the constraints for future local machinery that helps a
 maintainer bootstrap a narrow peripheral-driver repository from vendor source
@@ -22,39 +26,61 @@ repository or allowing one implementation to validate itself.
 
 The workflow is supervised assistance. It may decompose work, assemble temporary
 workspaces, track bounded tasks, run checks, and prepare evidence for review. It
-must not independently authorize:
+may record what cited evidence supports, refutes, or leaves undefined. It must
+not turn that evidence state into driver or model policy, invent unsupported
+behavior, or create a validation assignment merely because information is
+missing. It also must not independently authorize:
 
-- source interpretations that affect supported behavior;
+- a new product scope or public guarantee;
 - lifecycle promotion;
 - hardware or silicon claims;
 - removal of a publication lock;
 - crates.io publication or a release;
 - repository visibility or organization-setting changes.
 
-Those remain explicit maintainer decisions supported by reviewed evidence.
+Those remain explicit maintainer decisions supported by evidence appropriate to
+the decision. Evidence state itself is not an approval state: an undefined
+proposition may remain undefined without being assigned to a maintainer.
 
-## Source-first intake
+## Feature survey, then consumer demand
 
 Every run begins with identified source material, not an inferred API or an old
-driver implementation. Intake records, where available:
+driver implementation. Its first result is a disposable feature survey: what
+externally observable capabilities the peripheral appears to provide and where
+the sources discuss them. The survey does not propose a Rust API, driver
+sequence, model state machine, test inventory, or stable proposition registry.
+It exists to support product-scope selection and is discarded after handoff.
+
+Only after selecting the current driver and model product slice should the
+workflow promote evidence into maintained propositions. Add the smallest atomic
+proposition only when current driver behavior, model behavior, conformance,
+scoped physical work, or a reported bug needs the referent. A source section
+with no consumer creates no repository fact, feature, test, issue, or validation
+obligation.
+
+For sources that a selected proposition actually cites, intake records where
+available:
 
 - the official source URL and issuing authority;
 - document identity, revision, and publication date;
 - retrieval date, exact byte length, and cryptographic digest;
 - redistribution rights or the absence of them;
-- supersession and conflict precedence;
-- known ambiguities and claims that require physical evidence.
+- supersession relationships and conflicts relevant to the proposition;
+- the exact locations used by the proposition; and
+- applicable ambiguity, conflict, and located-negative scope.
 
 Vendor material is not copied into a public repository without explicit
-redistribution permission. The resulting driver repository receives a
-machine-readable metadata registry, not unlicensed source documents.
+redistribution permission. The resulting driver repository retains only the
+source identity and provenance its propositions need, in a representation
+selected for actual consumers, not unlicensed source documents.
 
 ## Bounded work packets
 
-The supervisor decomposes the source into small packets with one reviewable
-outcome. A packet records:
+The supervisor decomposes selected consumer work into small packets with one
+reviewable outcome. A packet records:
 
-- a stable identifier and narrow question;
+- a temporary work identifier and narrow consumer question;
+- applicable stable proposition identifiers;
 - exact source sections or pages;
 - prerequisites and lane ownership;
 - the artifact or decision expected;
@@ -62,31 +88,36 @@ outcome. A packet records:
 - forbidden dependencies and explicit non-goals;
 - status, unresolved ambiguity, and review outcome.
 
-Packets normally follow observable behavior domains such as transport,
+Work identifiers are coordination labels, not evidence propositions, and do not
+graduate into the repository merely because a packet existed. Packets normally
+follow observable behavior domains such as transport,
 addressing, register access, data conversion, state transitions, interrupts,
 timing bounds, reset behavior, error recovery, and public operations. The
-decomposition must not assume that every source section becomes a feature.
+decomposition must not assume that every source section becomes a fact or
+feature.
 
 ## Independent work lanes
 
 The temporary workspace keeps three derivation lanes distinct:
 
-1. **Driver lane** — implements the transport-facing driver from the pinned
-   vendor sources and verifies exact operations with scripted transports.
-2. **Mock lane** — independently implements an observable device model from the
-   same pinned sources, without using driver behavioral logic.
-3. **Validation lane** — independently derives black-box scenarios and expected
-   observations from the sources.
+1. **Driver lane** — independently derives the transport-facing driver from the
+   shared propositions and verifies exact operations with scripted transports.
+2. **Model lane** — independently implements an observable device model from the
+   same shared propositions, without using driver behavioral logic.
+3. **Conformance lane** — independently derives black-box scenarios and expected
+   observations from the shared propositions selected for both components.
 
-The mock must not reuse driver register codecs, sequencing helpers, private
+The model must not reuse driver register codecs, sequencing helpers, private
 types, or scripted expectations for the behavior it is intended to challenge.
 Public value types may be shared when they express the API rather than its
-implementation. Agreement between driver and mock is evidence only when their
+implementation. Agreement between driver and model is evidence only when their
 derivation remains meaningfully independent.
 
-The validation lane compares public behavior. A disagreement becomes a bounded
-source-interpretation task; it is not resolved merely by changing one side until
-the test passes.
+The conformance lane compares public behavior. A disagreement returns to the
+shared proposition and becomes two local questions: what the driver can promise
+and what the model can support. Either may remain unsupported. It is not
+resolved merely by changing one side until the test passes or by inventing a
+repository-wide interpretation rule.
 
 ## Temporary workspace
 
@@ -99,8 +130,8 @@ bootstrap.toml
 sources/
 tasks/
 lanes/driver/
-lanes/mock/
-lanes/validation/
+lanes/model/
+lanes/conformance/
 decisions/
 evidence/
 handoff/
@@ -117,26 +148,29 @@ architecture or an undocumented source of product requirements.
 ## Graduation into the driver repository
 
 Temporary artifacts enter the driver repository only when they become durable
-product evidence or guidance. Expected base driver artifacts include:
+product evidence or guidance. Possible base driver artifacts, admitted only
+when currently consumed, include:
 
-- a source registry;
+- a source and stable-proposition evidence record;
 - a bounded README contract and lifecycle warning;
 - driver code and implementation-focused tests;
-- durable design decisions and unresolved limitations;
+- durable rationale whose recurrence justifies preserving it and limitations of
+  current public claims;
 - canonical local CI and supported-target checks;
 - changelog entries describing observable value and constraints.
 
-When the independent model and validation lanes complete, additive graduated
+When the independent model and conformance lanes complete, additive graduated
 artifacts include:
 
 - independently implemented model code and model tests;
 - public driver-versus-model conformance tests; and
-- a reconciled behavioral-model contract and explicit coverage limitations.
+- one model fidelity declaration and explicit coverage limitations.
 
 Agent roles, work assignments, scratch interpretations, duplicated source
-extracts, orchestration state, and temporary task prompts do not graduate.
-Unresolved work that needs durable coordination may become a bounded GitHub
-issue.
+extracts, orchestration state, temporary task prompts, and unconsumed source
+facts do not graduate. Uncertainty becomes a bounded GitHub issue only when it
+blocks a current acceptance criterion and a feasible completion condition can
+be named.
 
 ## Template and machinery home
 
@@ -164,15 +198,28 @@ explicit warning describing its actual validation. It may retain a publication
 lock or, through a separate maintainer decision, use an explicit SemVer
 prerelease for registry distribution. A later ordinary software release follows
 the release gate independently of model completeness or hardware qualification.
-Physical evidence validates only the supported claims it covers and, where a
-model exists, may test whether the independent model reflects supported silicon;
-it does not retroactively justify speculative HIL scaffolding during bootstrap.
+Physical evidence addresses only the stable propositions and supported claims
+named by its scope and, where a model exists, may test whether the independent
+model reflects supported silicon. Admit physical work only when a current
+driver, model, conformance, qualification, or bug consumer—or one explicitly
+selected bounded confirmation question—names the proposition, a feasible
+discriminating observation, the silicon and setup scope, and a durable evidence
+destination. Otherwise do not schedule or claim physical confirmation. Preserve
+the existing evidence record;
+an already-undefined proposition remains undefined. Missing physical work does
+not retroactively justify speculative HIL scaffolding during bootstrap.
 
 ## Non-goals of the first machinery
 
 The first implementation should not attempt to:
 
 - generate a complete driver without maintainer review;
+- inventory every data-sheet fact or promote the disposable feature survey into
+  a maintained contract;
+- create a proposition, issue, hardware task, decision record, or CI rule merely
+  because a source is silent or a future consumer might exist;
+- encode "maintainer will validate," an unchecked box, or a review owner as a
+  substitute for evidence;
 - infer electrical or board behavior from host tests;
 - create MCU examples or speculative fixture code;
 - enforce organization policy or remediate repositories;
@@ -181,6 +228,7 @@ The first implementation should not attempt to:
 - generalize beyond peripheral drivers before real repetition establishes a
   stable wider boundary.
 
-The intended result is modest: a local supervisor can repeatedly turn pinned
-source material into small, reviewable, independently derived work while the
-maintainer retains every consequential decision.
+The intended result is modest: a local supervisor can repeatedly turn selected
+capabilities and pinned source material into small, reviewable, independently
+derived work while evidence remains honest and product, visibility, lifecycle,
+and release decisions remain explicit.
