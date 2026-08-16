@@ -21,10 +21,11 @@ The
 non-normative procedural, declaration, and optional Rust workspace integration
 aids that apply those decisions without prescribing code structure.
 The
-[peripheral-driver source-registry resource pack](docs/peripheral-driver-resources/README.md)
-provides optional, non-normative metadata and handling guidance for exact vendor
-sources without requiring a registry in every driver or redistributing source
-documents.
+[peripheral-driver evidence resource pack](docs/peripheral-driver-resources/README.md)
+provides optional, non-normative guidance for demand-driven proposition capture,
+evidence state, physical observations, downstream citations, and remediation of
+legacy hardware contracts without requiring a particular registry schema or an
+organization-wide migration.
 
 The standards favor deterministic, bare-metal engineering; narrowly bounded responsibilities; honest evidence; and lifecycle-appropriate process. Existing repository and package names are grandfathered under v0.1.
 
@@ -54,9 +55,10 @@ The [read-only repository auditor](docs/STANDARDS_AUDIT.md) collects Markdown an
 The [Peripheral Driver Bootstrap Intent](docs/PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md)
 records the authority boundary, independent derivation lanes, temporary-workspace
 model, and durable handoff expected from future local tooling. It records design
-intent only; executable bootstrap machinery and workspace-generation templates
-do not yet exist. The non-executable device-model aids above do not implement
-that deferred tooling.
+intent only, including a disposable feature survey followed by consumer-driven
+promotion of the smallest needed propositions; executable bootstrap machinery
+and workspace-generation templates do not yet exist. The non-executable
+device-model aids above do not implement that deferred tooling.
 
 ## License
 

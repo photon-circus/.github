@@ -18,9 +18,9 @@ The resource pack intentionally has three aids:
   unpublished workspace model crate.
 
 The declaration template is content, not a required file or a parallel policy
-surface. It may begin as the body of the implementation issue. At handoff,
+surface. It may begin in the current work record when one exists. At handoff,
 prune it and move the durable answers into an existing crate README, module
-document, or other maintained model description. The issue remains discussion
+document, or other maintained model description. Any issue remains discussion
 history; it is not a second maintained declaration.
 
 Use the organization's ordinary feature issue and pull-request templates for
@@ -30,6 +30,7 @@ The standard's
 [working review prompts](../DEVICE_BEHAVIORAL_MODEL_STANDARD.md#11-working-review-prompts-non-normative)
 remain the single non-normative review surface.
 
-When a device exposes a seam the standard does not settle, preserve the source
-evidence and propose a standards change or deferred decision. Do not resolve a
-shared coordination concern privately inside the model.
+When evidence does not settle a device behavior, return to the shared stable
+proposition and record the model's local consequence, including unsupported.
+Propose a standards change only when repeated repository experience identifies
+a genuinely shared coordination gap; a local disagreement does not create one.

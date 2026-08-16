@@ -1,236 +1,211 @@
-# Peripheral-driver source-registry resources
+# Peripheral-driver evidence resources
 
-Status: **Non-normative implementation aids**
+Status: **Non-normative implementation and remediation guidance**
 
-These resources offer optional, machine-readable ways to record the exact
-source material used to derive a peripheral driver and, separately, the
-owner-review state of interpreted hardware-contract rows. They help apply the
-source and evidence expectations in the
-[Peripheral Driver Release and Evidence Profile](../PERIPHERAL_DRIVER_PROFILE.md)
-and preserve the source-first intake described by the
-[Peripheral Driver Bootstrap Intent](../PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md).
+These resources help repositories apply the normative
+[stable-device-proposition rule](../../REPOSITORY_STANDARDS.md#102-stable-device-propositions)
+without prescribing a file name, identifier spelling, schema, workflow, or CI
+implementation. Every recommendation and template in this directory is
+advisory.
 
-This pack adds no requirement, defines no organization-wide schema, and does
-not make a source registry or hardware-contract TOML part of every driver
-repository. It also does not replace reviewed interpretation, establish
-redistribution permission, or make a model or hardware-qualification claim.
-Every recommendation, imperative, and lower-case modal term in this pack is
-advisory; the linked normative documents remain the source of obligations.
+The user-facing result is a driver whose behavior can be trusted. The evidence
+record, driver, model, conformance suite, and physical observations are distinct
+projections of that claim. Shared proposition identity gives those projections a
+common referent while preserving independent interpretation; a model that fills
+an evidence gap with plausible behavior does not add trustworthy coverage.
 
-## Use only when it reduces a real risk
+The stable identity belongs to the proposition, not to this representation. A
+small repository may use a Markdown section; another may have a machine-readable
+consumer that justifies a structured registry. Do not adopt a format merely
+because another driver uses it.
 
-A registry is useful when a driver depends on multiple or mutable documents,
-exact source bytes matter to an independently derived model, sources conflict,
-or redistribution constraints need an explicit record. A small driver may keep
-a concise source table in its hardware contract or another maintained document
-when that is sufficient.
+## Start with demand, not an evidence inventory
 
-Do not add an empty registry merely to resemble another repository. Once a
-registry is useful, copy [the example](SOURCES.toml.example), replace its sample
-records, and maintain it at exactly `docs/SOURCES.toml`. The uppercase
-`SOURCES` spelling matters on case-sensitive systems and in packaged links.
+The non-normative
+[bootstrap intent](../PERIPHERAL_DRIVER_BOOTSTRAP_INTENT.md#feature-survey-then-consumer-demand)
+owns the recommended disposable feature survey and product-scope selection.
+Once a current consumer is selected:
 
-The example evolves an earlier driver source-registry pattern and uses synthetic
-source records so it does not disclose or accidentally canonize a current
-driver's provenance. It is a starting point, not a requirement to migrate an
-adequate local registry or retain fields that have no current consumer.
+1. Add the smallest truth-apt proposition only when current driver behavior,
+   model behavior, conformance, scoped physical work, or a reported bug needs
+   the shared referent.
+2. Let driver and model derive their own consequences while citing the same
+   proposition identifier.
+3. Test only the honestly supported intersection. Unsupported or incomplete
+   coverage is a valid result.
+4. Add physical work only for a named proposition with a current consumer and a
+   feasible discriminating observation.
+5. When evidence changes, update the evidence record, inspect direct citations,
+   and edit only local consequences that became stale. Keep that propagation in
+   one bounded transaction, then stop.
 
-## What the registry owns
+A source section with no current consumer does not create a maintained fact,
+feature, test, issue, decision record, hardware task, or CI rule. Electrical or
+board-integration data is not automatically a driver or model proposition merely
+because a source lists it; capture it only when a current component claim or
+scoped physical activity consumes it. A retained legacy proposition may be
+marked not currently relevant; that is metadata, not a backlog.
 
-| Concern | Registry record | What the record establishes |
-| --- | --- | --- |
-| Identity | Publisher, title, document number, revision, publication date, applicability, and URLs | Which named source was reviewed |
-| Integrity | Retrieval date, media type, exact byte count, and SHA-256 digest | Which exact artifact bytes the record describes |
-| Authority | Stable ID, role, kind, status, and explicit precedence | Which source is primary when claims overlap or conflict |
-| Rights posture | Per-source tri-state value and repository redistribution policy | What has been established about copying the artifact and what the repository chooses to track |
+## Keep source identity and proposition identity separate
 
-A digest identifies bytes. It does not prove that the artifact is authoritative,
-that a claim was interpreted correctly, that redistribution is permitted, or
-that physical silicon behaves as described. Likewise, a precedence number
-orders overlapping sources; it does not turn a supplemental source into a
-universal device claim.
+A **source record** identifies exact input bytes: publisher, title, document,
+revision, retrieval, digest, and rights posture. A **proposition record** says
+what one documentary or device proposition is and what evidence addresses it.
 
-Keep interpreted register, protocol, timing, state, and error claims out of
-free-form registry notes. Those claims need source locations, review context,
-and explicit nonclaims in a maintained hardware contract or equivalent.
+Use [the optional source example](SOURCES.toml.example) when multiple or mutable
+documents, source conflicts, exact-byte integrity, or redistribution constraints
+make a separate registry valuable. Add a source only when a current proposition
+cites it or another actual integrity or rights consumer needs it. A digest
+identifies bytes; it does not verify an interpretation or establish silicon
+behavior.
 
-## Ownership chain
+Source IDs and proposition IDs are different namespaces. A global source
+ranking must not silently decide a proposition when sources conflict. Record
+each relevant source as evidence on that proposition and preserve the conflict.
 
-```text
-vendor artifact
-  -> docs/SOURCES.toml
-       identity, exact bytes, authority, retrieval, and rights posture
-  -> hardware contract or equivalent maintained contract
-       interpreted claim, source ID, page or section, assumption, and nonclaim
-  -> decisions
-       ambiguity, conflict, inference, deviation, and supersession rationale
-  -> driver, independent model, and tests
-       executable behavior and claim-scoped evidence
-```
+## Evidence-registry semantics
 
-Use the stable registry ID when another document cites a source. The hardware
-contract owns what the source means for supported behavior. A decision record
-owns durable reasoning where the sources are ambiguous, conflict, or leave a
-gap needing an explicit boundary. Prefer deriving driver and model
-implementations from the accepted sources and decisions rather than from one
-another; their tests establish only the named software or conformance claims.
-Physical evidence remains separate.
+The [Markdown example](EVIDENCE_REGISTRY.example.md) demonstrates one small
+representation. Its field names and `S-nn` spelling are not organization
+requirements.
 
-Not every repository needs a document named `HARDWARE_CONTRACT.md`,
-`HARDWARE_CONTRACT.toml`, a decision log, or an independent model. The
-ownership boundaries still apply when those concerns are combined into fewer
-maintained artifacts. An adequate Markdown contract does not have to migrate.
+Useful distinctions are:
 
-## Hardware-contract review records
+- **Documentary proposition:** what a pinned source states, omits within a named
+  search scope, or contradicts.
+- **Device proposition:** behavior attributed to scoped silicon.
+- **Evidence relation:** an item supports, refutes, or does not resolve the
+  proposition.
+- **Knowledge state:** a concise summary may say supported, refuted, or
+  undefined. When retained same-scope evidence conflicts, preserve every item;
+  a three-state representation remains undefined until the proposition is
+  narrowed or the conflict is resolved.
+- **Relevance:** optional mutable metadata saying whether a current driver,
+  model, conformance, physical, or reported-bug consumer exists.
 
-Use a structured contract when owner-review state is easy to misread. Markdown
-checkboxes are a common failure: GitHub-flavored `[ ]` cannot mean both "not
-yet reviewed" and "reviewed, sources silent," and an unchecked
-repository-owned decision looks non-binding even when the README has already
-named it.
+Keep observation type separate from its relation to the proposition. An
+affirmative observation or a negative result may support or refute a proposition
+depending on what that proposition says. A located-negative review supports the
+documentary proposition that a bounded search found no statement; it does not
+resolve the corresponding device behavior. Mere absence of evidence leaves the
+proposition undefined. Undefined is a knowledge state, not evidence polarity and
+not the opposite behavior.
 
-Once that risk is real, copy [the example](HARDWARE_CONTRACT.toml.example),
-replace its sample records, and maintain it at `docs/HARDWARE_CONTRACT.toml`.
-The example uses synthetic claims so it does not disclose or accidentally
-canonize a current driver's interpretation. It is a starting point, not a
-requirement to migrate an adequate local Markdown contract or retain fields
-that have no current consumer.
+Hardware cannot refute that a document contains particular wording. When
+silicon appears to contradict vendor guidance, preserve the documentary
+proposition and record a separate device proposition linked to it. Likewise, a
+located negative establishes source silence only within its search scope; it
+does not establish the inverse silicon behavior.
 
-The example `review` vocabulary is:
+Keep one identifier attached to one atomic proposition. If a proposition changes
+meaning or splits, retain the old identifier as a tombstone and allocate new
+identifiers. Never reuse an identifier. Conflicting evidence remains visible;
+do not overwrite an earlier observation merely because a later one differs.
 
-| Value | Meaning | Binding for later generation? |
-| --- | --- | --- |
-| `declared` | Repository-owned decision; no vendor-source verification is required | Yes, for this repository |
-| `provisional` | Recorded, not yet owner-reviewed; no claim either way | No |
-| `confirmed` | Owner reviewed against pinned sources and accepted | Yes, as a source-backed interpretation |
-| `omission` | Owner reviewed the recorded source and search scope; that scope does not state the fact | Yes, only as a confirmed silence within the recorded scope |
+## Downstream projections
 
-Do not encode `omission` as an unchecked box with a footnote. `provenance`
-distinguishes `repository-declaration` from `vendor-source`. Every vendor-source
-row cites a stable `source` ID. Resolve that ID through `docs/SOURCES.toml` when
-a registry exists; otherwise define a concise inline `[[source]]` record that
-pins the source identity. Keep source identity in one of those locations, not
-both.
+The evidence registry records no driver policy, model policy, test expectation,
+or judgment that evidence is sufficient for a downstream guarantee. Downstream
+code and documentation cite the proposition identifier and state only their
+local consequence, for example:
 
-Cite the artifact as specifically as it allows with optional `page`, `figure`,
-`table`, and `source_section` (the source heading). `section` remains the
-contract grouping and is not a page locator. Repository-declaration rows omit
-source IDs and locators; do not invent datasheet pages for host circuit
-choices.
+- the driver promises, rejects, masks, waits, or exposes uncertainty;
+- the model implements, abstracts, injects, excludes, or reports unsupported;
+- conformance covers only the overlap between those declared boundaries; and
+- physical work records a scoped observation without deciding which component
+  must change.
 
-In this example, `declared` requires `repository-declaration`; `confirmed` and
-`omission` require `vendor-source` plus a resolvable, pinned source; and
-`provisional` may use either provenance, although a provisional vendor-source
-row still cites its source. An `omission` is binding only within its recorded
-source and `search_scope`. Use one omission row per reviewed source unless the
-local contract documents a multi-source representation.
+Do not copy the proposition, vendor passage, source coordinates, or physical
+observation into those downstream surfaces. A citation shares evidence identity,
+not interpretation or implementation logic.
 
-When `default_identity_row` is present, it resolves to one unique, declared
-repository-declaration row. That row's `value` is the canonical identity; do
-not repeat a second machine-readable identity at the document root.
+## Admit physical work narrowly
 
-At minimum, during adoption and review of a hardware-contract TOML:
+A useful physical-observation request names:
 
-- parse the file as TOML;
-- reject every placeholder or sentinel copied from the example, including
-  synthetic identities, `YYYY-MM-DD`, `page = 0`, and `REPLACE_WITH_*` values;
-- require unique row and inline source IDs, and make `default_identity_row`,
-  when present, resolve to one declared repository-declaration row with a
-  non-placeholder `value`;
-- require every row to use a `review` and `provenance` combination permitted
-  above;
-- require every vendor-source row to cite a source that resolves through the
-  referenced registry or an inline source record; and
-- require `confirmed` and `omission` rows to retain reproducible source evidence,
-  with each omission no broader than its recorded source and search scope.
+- one stable device proposition;
+- the current driver, model, conformance, qualification claim, or bug disposition
+  that will consume the result, or one explicitly selected bounded confirmation
+  question;
+- an observation that could discriminate support from refutation;
+- device and silicon identity, reset history, voltage, temperature, fixture,
+  tools, and software revision as applicable; and
+- the durable raw artifact or digest that will receive the result.
 
-These checks may be manual for a small contract. A repository that adds review
-values documents their meanings locally in this recommended pattern. A driver
-does not need a custom schema validator merely because it adopted this
-example.
+If those fields cannot be stated from the current information, do not create the
+physical request or claim confirmation. Preserve the existing evidence record;
+an already-undefined proposition remains undefined. Do not write `owner will
+validate`, `maintainer blocked`, `hardware validation required`, an unchecked
+box, or a due date as a substitute for evidence. Confirmation of one selected
+proposition is different from broad validation of a document or repository.
 
-## Revisions and supersession
+## Remediate an existing hardware contract
 
-Treat one entry as the identity of one exact document revision and artifact.
-Do not silently replace its revision, byte count, or digest when a vendor
-publishes new bytes.
+Existing hardware-contract files, including `HARDWARE_CONTRACT.md` and
+`HARDWARE_CONTRACT.toml`, may be repaired in place so links and history remain
+useful. No rename or schema migration is required, regardless of the existing
+filename or representation.
 
-- Add a new entry with a new stable ID for a later revision.
-- Use `supersedes` on the new entry and, when useful, `superseded_by` plus a
-  `superseded` status on the retained old entry.
-- Retain an older entry while a maintained claim still depends on it. A newer
-  source does not retroactively change that claim.
-- If bytes change without a visible revision change, preserve both identities,
-  distinguish the replacement in the IDs, and record the reconciliation in the
-  decision owner.
-- Update `reviewed_utc` when the registry as a whole is reviewed. It is not the
-  source publication date, artifact retrieval date, or hardware-test date.
+1. Stop new issue, decision, HIL, and CI fan-out while the contract is being
+   classified.
+2. Preserve every existing stable identifier. If rows lack identifiers, assign
+   them only to propositions with a current consumer or a retained external
+   reference.
+3. Classify each row as a documentary proposition, device proposition,
+   component policy, task, duplicate, or non-truth-apt note.
+4. Keep atomic propositions. Tombstone and replace compound or changed meanings;
+   never silently redefine an identifier.
+5. Replace checkbox, `provisional`, owner-review, and future-validation states
+   with the evidence actually present. Often the honest state is undefined.
+6. Move driver and model reactions into their owning component documentation and
+   cite the proposition identifier from each.
+7. Mark retained propositions with no current consumer as not currently
+   relevant. This creates no coverage gap, issue, hardware task, or release
+   blocker.
+8. Replace duplicated proposition and provenance prose elsewhere with the local
+   consequence plus the stable citation.
+9. Remove validators, checklists, and work items that exist only to protect or
+   complete speculative records.
+10. Re-run existing technical tests and disclose unsupported coverage honestly.
 
-Supersession describes the document relationship. A maintained claim that cites
-a stable source ID continues to select that exact retained entry until the claim
-is reviewed; a newer source does not silently replace it. When selecting a
-source for a new or re-reviewed claim, exclude `superseded` entries before
-applying conflict precedence among the remaining entries. In the example, the
-lower positive `authority` number then wins for an overlapping claim unless a
-reviewed decision records a narrower exception. A tie between overlapping
-eligible entries is ambiguous and requires corrected precedence or a reviewed
-decision.
+Move a current component policy to its owning component. Remove obsolete tasks,
+duplicate prose, and non-truth-apt scaffolding; retain a tombstone only when an
+existing identifier or external reference must continue to resolve.
 
-The example uses a small, local `status` vocabulary: `active` means the entry is
-eligible for current claim review, while `superseded` means it is retained for
-history or for claims that cite its stable ID but is not selected by default for
-new review. A repository that does not need that distinction may omit `status`;
-a repository that adds values documents their meanings locally in this
-recommended pattern.
+One evidence correction remains one bounded change even when it requires a
+registry update and local consequence changes in the driver, model, or
+conformance. Do not edit an unaffected layer or split the propagation into an
+issue graph merely because several layers cite the proposition.
 
-## Redistribution and local source copies
+Remediation is complete when retained identifiers resolve, evidence is honestly
+represented, current citations have been inspected, stale duplicate authorities
+are gone, existing technical checks pass, and no unrelated source section has
+been promoted into new work.
 
-Use a string rather than a Boolean for each source's redistribution posture:
+## Proportionate automation
 
-- `not-established`: no applicable redistribution grant has been confirmed;
-- `permitted`: an applicable grant or license has been reviewed and recorded;
-- `prohibited`: reviewed terms prohibit redistribution.
+Automation is useful for closed structural invariants such as:
 
-Unknown is not the same as prohibited, and a public download URL is not a grant
-to redistribute. The example sets `redistribution_policy = "metadata-only"`:
-the repository records metadata and does not redistribute vendor PDFs. Keep
-local review copies untracked and outside published packages. Even a
-`permitted` entry does not override that repository policy; changing it would
-require a separate, explicit review for the exact artifact and terms.
-For `permitted` or `prohibited`, identify the reviewed grant, license, or terms
-in the entry notes or a referenced decision rather than recording a bare
-conclusion.
+- proposition identifiers are unique;
+- retired identifiers still resolve;
+- downstream citations resolve; and
+- tracked or packaged vendor artifacts follow the recorded rights posture.
 
-When a repository has `docs/vendor/README.md`, use it only for local retrieval,
-storage, hashing, ignore, and packaging instructions. Link back to
-`docs/SOURCES.toml` instead of copying URLs, revisions, sizes, and digests into a
-second catalog.
+Avoid using CI to classify prose, decide whether a statement needs a
+proposition, judge evidence sufficiency, infer source meaning, demand a hardware
+run, or generate issues and follow-ups. Keep semantic review bounded to the
+current change and its consumers.
 
-## Proportionate validation
+## Source revisions and local artifacts
 
-At minimum, during adoption and review:
+Do not silently replace the revision, byte count, or digest of a source record.
+Add a new source identity for changed bytes and retain an older identity while a
+proposition still cites it. Conflicting revisions become proposition-scoped
+evidence rather than a global winner chosen in advance.
 
-- parse the registry as TOML;
-- reject every placeholder or sentinel copied from the example, including
-  synthetic identities and notes, `YYYY-MM-DD`, `example.invalid`, zero byte
-  counts, and the replacement digest text; and
-- require every retained source to have a positive byte count and a SHA-256
-  value matching exactly 64 lower-case hexadecimal digits.
-
-These checks may be manual for a small registry. When the number of sources,
-references, or releases makes drift plausible, automate them and add checks
-that:
-
-- source IDs are unique and downstream source IDs resolve;
-- redistribution values use the three states defined here, and any local
-  `status` vocabulary is documented and applied consistently;
-- authority precedence is unambiguous where sources overlap;
-- optional supersession links resolve and do not form cycles; and
-- vendor artifacts are excluded from tracking and packaging unless both the
-  reviewed rights posture and repository policy explicitly permit them.
-
-An authorized maintainer may separately compare a local artifact's byte count
-and digest with the registry. A clean CI path need not download or possess a
-vendor document that the repository does not redistribute. A single-source
-repository does not need a custom schema validator or source-management
-framework merely because it adopted this example.
+Use `not-established`, `permitted`, or `prohibited` for redistribution posture
+when that distinction is useful. A public URL is not permission to redistribute.
+Keep unlicensed local vendor files untracked and outside published packages. A
+`docs/vendor/README.md`, when needed, contains only retrieval, local storage,
+hashing, ignore, and packaging instructions; it links to the source record
+instead of becoming a second metadata catalog.

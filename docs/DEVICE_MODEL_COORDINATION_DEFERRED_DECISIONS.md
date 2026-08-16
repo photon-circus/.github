@@ -289,6 +289,8 @@ replay, state branching, or failure atomicity across participants.
 ### Preserved findings
 
 - Model success is not physical evidence.
+- Stable device-proposition identity is required by the organization evidence
+  rule. This decision does not defer that shared referent.
 - A silicon disagreement may implicate the driver, model, source
   interpretation, contract, fixture, instrument, sample, or test
   discrimination.
@@ -300,8 +302,10 @@ replay, state branching, or failure atomicity across participants.
 - trace schema and serialization;
 - correspondence between model inputs and physical observations;
 - clock alignment, tolerances, and observation resolution;
-- fixture, instrument, sample, source, and software identity fields; and
-- storage, retention, and review protocol.
+- representation and schema for per-execution fixture, instrument, sample,
+  source-artifact, and software identity fields; and
+- storage, retention, and review protocol beyond the stable-proposition
+  provenance floor.
 
 ### Reopening trigger
 

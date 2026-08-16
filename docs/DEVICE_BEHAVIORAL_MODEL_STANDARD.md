@@ -510,9 +510,9 @@ the same source, ownership, exclusion, and nonclaim prose across several files.
 
 ### Datasheet baseline and silicon variants
 
-The default model should remain an independently derived interpretation of its
-pinned sources. Later physical evidence may correct that interpretation or
-demonstrate behavior specific to a silicon family member, revision, lot, or
+The default model should remain an independently derived consequence of the
+canonical evidence record. Later physical evidence may correct that consequence
+or demonstrate behavior specific to a silicon family member, revision, lot, or
 other recorded identity.
 
 A silicon-specific observation must not silently replace the datasheet
@@ -522,11 +522,11 @@ claim under test. This specification does not prescribe whether variants use
 parameters, profiles, constructors, tables, shared implementation, or separate
 implementations with common conformance tests.
 
-Each departure from the baseline should record:
+Each departure from the baseline should cite its stable device proposition and
+record only the model-specific consequence, including:
 
-- the affected silicon identity and tested conditions;
-- whether the change corrects a source interpretation or introduces a variant;
-- the physical evidence and review decision supporting it;
+- the selected evidence-backed variant or baseline;
+- whether the model treats the change as a correction or a variant;
 - the precise behavior that differs; and
 - the variants and baseline behavior that remain preserved.
 
@@ -538,9 +538,12 @@ until they agree.
 
 ## 6. Independence from the driver (normative)
 
-Driver and model may use the same pinned source material, but their
-interpretations and implementations must remain independently reviewable. The
-model should not reuse the driver's private:
+Driver and model must cite the same stable proposition identifiers for device or
+documentary behavior they both address, following the
+[organization evidence rule](../REPOSITORY_STANDARDS.md#102-stable-device-propositions).
+A shared citation establishes one referent and provenance, not one downstream
+conclusion. Their interpretations and implementations must remain independently
+reviewable. The model should not reuse the driver's private:
 
 - register masks and command encoders;
 - response decoders;
@@ -575,9 +578,11 @@ repository is not required to add a dedicated independence script when its
 existing package boundary, dependency graph, and review make the prohibited
 dependencies directly inspectable.
 
-When driver and model disagree, the resolution should return to pinned source
-evidence and record an explicit contract decision. Editing either side merely
-to make the test green creates a self-confirming system.
+When driver and model disagree, review starts from the shared proposition and
+its evidence record. Each component then records its own consequence, including
+an unsupported boundary where appropriate; convergence is not required when the
+evidence does not justify it. Editing either side merely to make the test green
+creates a self-confirming system.
 
 ## 7. Validation layers (normative)
 
@@ -641,9 +646,10 @@ erase narrower evidence already established.
 
 Model and physical procedures may preserve the same semantic question where
 practical: preconditions, public driver action, and expected device-observable
-result. This does not define their correspondence, stable identity, comparison
-artifact, or evidence schema; those concerns remain deferred by
-[DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
+result. Procedures addressing the same device proposition cite the same stable
+proposition identifier. Their procedure, case, trace, or execution identity,
+correspondence, comparison artifact, and evidence serialization remain deferred
+by [DMC-009](DEVICE_MODEL_COORDINATION_DEFERRED_DECISIONS.md).
 They are not required to share a Rust test binary, adapter, or implementation.
 Before `ph-hil` adoption, repositories must not add speculative HIL schemas.
 After a repository adopts a reviewed `ph-hil` contract, it follows that
@@ -663,16 +669,21 @@ risk is not already exercised by ordinary model and conformance tests.
 
 Each model must identify:
 
-- the vendor documents and revisions from which it was derived;
-- source URLs and recorded digests without redistributing unlicensed vendor
-  documents;
+- the stable proposition identifiers used by each evidence-derived observable
+  behavior and by each unsupported boundary whose rationale depends on a device
+  or documentary proposition, resolving to the canonical proposition and its
+  evidence record;
 - its purpose and applied-stimulus boundary;
 - behavior classified as modeled, abstracted, injected, excluded, or
   unsupported;
 - assumptions, ambiguities, explicit nonclaims, and deliberately excluded
   behavior; and
 - corrections to the datasheet baseline and evidence-backed silicon variants,
-  with their distinct provenance and supported identities.
+  citing their distinct stable device propositions and supported identities.
+
+The model declaration owns model purpose, fidelity, behavior, and consequences.
+It links to evidence propositions rather than copying their wording, vendor
+passages, or source coordinates into a competing authority.
 
 A material change to observable model behavior is a contract change and should
 be reviewed as such. Packaging is selected for the repository's current

@@ -28,22 +28,24 @@ intake when useful. Before implementation:
    would justify expanding it. Use the trace to bound semantic behavior, not as
    a queue of expected driver calls; source-equivalent operation sequences
    remain valid unless ordering itself is part of the declared device behavior.
-2. Identify the exact device identity, behavioral selection, source revision,
-   source URL, and recorded digest.
-3. Audit the proposed trace against those sources and the explicit behavioral
-   selection. For every selected value and transition, identify the pinned
-   source, recorded interpretation, or reviewed evidence-backed silicon variant
-   that establishes its precondition and expected observable result. A vector
-   is not authorized merely because it distinguishes two plausible
-   implementations; if no accepted source, decision, or variant evidence
-   establishes its result, choose an established trace or declare the behavior
-   unsupported.
+2. Identify the exact device identity, behavioral selection, and stable
+   proposition identifiers. Confirm that each identifier resolves through the
+   canonical evidence record, that every retained evidence item has exact
+   source or physical provenance, and that absence of deciding evidence is
+   explicit; do not copy that provenance into the model declaration.
+3. Audit the proposed trace against those propositions and the explicit
+   behavioral selection. For every selected value and transition, cite the
+   proposition that establishes its precondition and expected observable result
+   and record only the model's local consequence. A vector is not authorized
+   merely because it distinguishes two plausible implementations; if the
+   evidence record does not establish its result, choose an established trace
+   or declare the behavior unsupported.
 4. Define observable outputs and explicit ordered inputs: transport operations,
    applied stimuli, relative duration where behavior depends on it, and any
    injected events.
-5. Audit every observable initial value. Record its source-backed default,
+5. Audit every observable initial value. Record its supporting proposition,
    explicit initial input, declared abstraction, or the input that first makes
-   it available. Do not fill an undeclared value with zero, `false`, empty, or
+   it available. Do not fill an undefined value with zero, `false`, empty, or
    another convenient result merely to make the implementation deterministic.
    Check whether the establishing input covers the whole observable; if it
    covers only part, keep the entire observable unavailable, expose only the
@@ -61,11 +63,19 @@ intake when useful. Before implementation:
    again.
 7. Classify relevant behavior as modeled, abstracted, injected, excluded, or
    unsupported.
-8. Record genuine source ambiguity and the selected interpretation. Do not
-   invent behavior for a source-undeclared sequence.
+8. Record genuine evidence ambiguity, cite the affected proposition, and state
+   the selected model interpretation. Do not invent behavior for an undefined
+   sequence.
+
+Prefer the exact nominal or ideal value supported by the selected proposition
+for the default model. A documented physical tolerance is normally a driver
+robustness concern, not permission for the model to add timing jitter or choose
+an arbitrary point inside the range. When a current test genuinely needs a
+boundary or variant, make it an explicit, reproducible selection or injection
+and declare that local model consequence.
 
 During implementation, apply the normative core and reason locally only about
-behavior specific to the selected device and pinned sources. Keep additional
+behavior specific to the selected device and cited propositions. Keep additional
 artifacts proportional to a current behavior, consumer, or false-pass risk.
 Implement only the retained state and transitions required by the minimum
 useful trace. An operation is not supported merely because the model can store

@@ -4,18 +4,18 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-14 UTC
+Last updated: 2026-08-15 UTC
 
 ### Added
 
-- Add a non-normative hardware-contract TOML example to the peripheral-driver
-  resource pack so owner review can use explicit `declared`, `provisional`,
-  `confirmed`, and `omission` states instead of markdown checkboxes that
-  overload `[ ]`. Vendor-source rows cite a resolvable source and may add
-  optional `page`, `figure`, `table`, and `source_section` locators; omission
-  rows bind confirmed silence to a recorded `search_scope`, and a default
-  identity points to one canonical row value. Adoption is optional; this does
-  not add a Repository Standards requirement or an organization-wide schema.
+- Add a non-normative peripheral-driver evidence-registry example and
+  remediation guide. They demonstrate atomic documentary and device
+  propositions; affirmative and located-negative observations; supporting,
+  refuting, or unresolved evidence; honest undefined states; shared provenance
+  with independent downstream consequences;
+  demand-driven capture; scoped physical observations; permanent tombstones;
+  and structural-only automation without prescribing a filename, schema,
+  identifier spelling, completeness audit, or organization-wide migration.
 - Add non-normative Rust peripheral-driver documentation guidance for
   proportional file decomposition, repository and package README roles, status
   disclosures, source capture, and contributor and agent documentation.
@@ -62,19 +62,44 @@ Last updated: 2026-08-14 UTC
 - Peripheral-driver release and evidence profile defining a proportional base
   repository, explicit validation status, additive model and physical evidence,
   and a non-speculative handoff to future shared tooling.
-- Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining
-  source-first intake, bounded task packets, independent driver/mock/validation
-  lanes, temporary workspace boundaries, durable artifact graduation, and the
-  future home for reusable local tooling. This preserves a repeatable path from
-  data sheet to reviewable driver without making temporary agent coordination or
-  self-validating implementations part of the product repository.
-- Add a non-normative peripheral-driver source-registry resource pack with a
-  conditional `docs/SOURCES.toml` example, exact-byte provenance, authority and
-  supersession guidance, tri-state redistribution posture, explicit ownership
-  boundaries, and proportionate validation.
+- Peripheral-driver bootstrap design intent (2026-08-12 UTC) defining a
+  disposable feature survey, consumer-driven proposition promotion, bounded
+  task packets, independent driver/model/conformance lanes, temporary workspace
+  boundaries, durable artifact graduation, and the future home for reusable
+  local tooling. This preserves a repeatable path from data sheet to reviewable
+  driver without preloading speculative artifacts, turning uncertainty into
+  maintainer work, or making self-validating implementations part of the product
+  repository.
+- Add a non-normative peripheral-driver evidence resource pack with a
+  conditional `docs/SOURCES.toml` example, exact-byte provenance, stable
+  proposition guidance, tri-state redistribution posture, explicit ownership
+  boundaries, demand-driven physical evidence, and legacy-contract remediation.
 
 ### Changed
 
+- Normatively require every applicable retained device or documentary
+  proposition consumed by driver behavior, model behavior, conformance,
+  physical evidence, or bug disposition to have one permanent identifier
+  resolving to a stable referent and to exact provenance for retained evidence.
+  Downstream artifacts share that identity while owning
+  their interpretations independently; the normative behavioral-model standard
+  now requires shared proposition identity without shared implementation or
+  execution-artifact identity. A checkbox, review owner, or promise such as
+  `maintainer will validate` is not evidence and cannot establish a claim. The
+  rule applies prospectively and on touch; it creates no retrospective
+  completeness audit or release block.
+- Non-normatively align the peripheral-driver bootstrap, documentation guide,
+  model aids, and resource pack around demand-driven proposition capture and the
+  distinction between supporting, refuting, unresolved, and undefined evidence.
+  An unconsumed source fact creates no maintained artifact, and an unsupported
+  model behavior may remain honestly unsupported until a current consumer has a
+  feasible discriminating question.
+- Withdraw the non-normative hardware-contract TOML example whose approval
+  states and owner-review fields could turn missing evidence into maintainer
+  work. Replace it with the smaller Markdown evidence example. Existing
+  contracts may be remediated in place when a proposition is touched or the
+  contract is already causing contradictory claims; this change requires no
+  organization-wide migration or completeness audit.
 - Make the inherited root contribution and security files safe organization-wide
   fallbacks that defer to repository-local guidance, preserve the
   standards-repository workflow in a dedicated guide, and provide a safe

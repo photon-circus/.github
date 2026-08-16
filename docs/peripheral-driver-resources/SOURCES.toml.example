@@ -3,24 +3,23 @@
 # The records below are synthetic placeholders, not reviewed source identities.
 # Replace every placeholder value when copying this file. Retain a structural,
 # vocabulary, or policy value only after confirming that it describes the local
-# repository. The structure identifies source bytes and authority; it does not
-# verify interpretations, redistribution rights, silicon behavior, or hardware
-# qualification. The accompanying resource guide requires adoption review to
-# reject every placeholder or sentinel, including the zero byte counts and
+# repository. The structure identifies source bytes and their local role; it
+# does not verify interpretations, redistribution rights, silicon behavior, or
+# hardware qualification. Add a source only when a current proposition or
+# another real integrity or rights consumer cites it. Source IDs are not
+# proposition IDs. The accompanying resource guide recommends checking and
+# replacing every placeholder or sentinel, including the zero byte counts and
 # non-hex digests below.
 #
 # This example does not define a shared schema. A repository may add and version
 # its own format only when a machine consumer needs a compatibility contract.
 
-reviewed_utc = "YYYY-MM-DD"
 redistribution_policy = "metadata-only"
 
 [[source]]
 id = "example-ex1234-datasheet-r1_0"
 status = "active"
 kind = "datasheet"
-role = "primary"
-authority = 1
 
 publisher = "Example Semiconductor"
 title = "EX1234 Ambient Light Sensor"
@@ -42,33 +41,10 @@ sha256 = "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"
 redistribution = "not-established"
 notes = "Synthetic placeholder; replace with the review note for the exact local artifact."
 
-[[source]]
-id = "example-ex1234-application-note-r2"
-status = "active"
-kind = "application-note"
-role = "supplemental"
-authority = 2
-
-publisher = "Example Semiconductor"
-title = "Designing the EX1234 Into an Application"
-document = "EX1234-AN"
-revision = "2"
-published = "YYYY-MM-DD"
-applies_to = ["EX1234"]
-
-artifact_url = "https://example.invalid/docs/ex1234-application-note.pdf"
-retrieved_utc = "YYYY-MM-DD"
-media_type = "application/pdf"
-bytes = 0
-sha256 = "REPLACE_WITH_64_LOWERCASE_HEX_DIGITS"
-
-redistribution = "not-established"
-notes = "Synthetic placeholder; replace with the reviewed precedence and local-copy note."
-
 # For a later exact revision, add a new active entry instead of silently
-# replacing the old identity. Current-source selection excludes superseded
-# entries before comparing authority. Optional relationship fields may be used
-# once a real consumer needs them:
+# replacing the old identity. A proposition records how each relevant source
+# bears on it; this registry does not choose a global winner. Optional
+# relationship fields may be used once a real consumer needs them:
 #
 # supersedes = "vendor-document-older-revision"
 # superseded_by = "vendor-document-newer-revision"
