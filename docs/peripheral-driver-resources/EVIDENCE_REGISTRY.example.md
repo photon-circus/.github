@@ -4,8 +4,9 @@ Status: **Non-normative representation example with synthetic propositions**
 
 This example demonstrates linkable stable propositions without defining a file
 name, identifier spelling, field vocabulary, or machine-readable schema. Replace
-every `EXAMPLE-*` value when adapting it. Do not copy propositions that lack a
-current consumer.
+or remove every placeholder when adapting it, including `EXAMPLE-*` values,
+dates, locators, and digest text. Do not copy propositions that lack a current
+consumer.
 
 States report evidence, not approval or future work. `Undefined` is not an
 unchecked task and does not assign validation to anyone.

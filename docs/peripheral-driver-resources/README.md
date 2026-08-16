@@ -141,8 +141,10 @@ proposition is different from broad validation of a document or repository.
 
 ## Remediate an existing hardware contract
 
-Existing `HARDWARE_CONTRACT.md` files may be repaired in place so links and
-history remain useful. No rename or schema migration is required.
+Existing hardware-contract files, including `HARDWARE_CONTRACT.md` and
+`HARDWARE_CONTRACT.toml`, may be repaired in place so links and history remain
+useful. No rename or schema migration is required, regardless of the existing
+filename or representation.
 
 1. Stop new issue, decision, HIL, and CI fan-out while the contract is being
    classified.
