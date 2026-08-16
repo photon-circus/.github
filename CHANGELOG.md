@@ -4,10 +4,12 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-15 UTC
+Last updated: 2026-08-16 UTC
 
 ### Added
 
+- Add `env` as the peripheral-driver class token for environmental sensors that
+  combine barometric pressure and temperature, with optional humidity.
 - Add a non-normative peripheral-driver evidence-registry example and
   remediation guide. They demonstrate atomic documentary and device
   propositions; affirmative and located-negative observations; supporting,

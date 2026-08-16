@@ -198,6 +198,7 @@ Initial class tokens:
 | --- | --- |
 | `adc` | Analog-to-digital converter |
 | `als` | Ambient-light sensor |
+| `env` | Environmental sensor combining barometric pressure and temperature, with optional humidity |
 | `gpio` | General-purpose digital I/O expander |
 | `hts` | Humidity and temperature sensor |
 | `imu` | Inertial measurement unit |
