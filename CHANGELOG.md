@@ -4,10 +4,16 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-16 UTC
+Last updated: 2026-08-20 UTC
 
 ### Added
 
+- Add an explicitly non-normative Rust xtask field guide based on three
+  peripheral-driver migrations. It records cross-platform and single-entry-point
+  benefits; workspace-boundary options; configuration, self-test, dependency,
+  partial-run, path-safety, generated-evidence, and hosted-CI tradeoffs; observed
+  failures; and a bounded migration approach without prescribing an xtask
+  layout, command set, configuration format, dependency set, or migration.
 - Add `env` as the peripheral-driver class token for environmental sensors that
   combine barometric pressure and temperature, with optional humidity.
 - Add a non-normative peripheral-driver evidence-registry example and
@@ -79,6 +85,14 @@ Last updated: 2026-08-16 UTC
 
 ### Changed
 
+- Make the canonical-local-CI requirement technology-neutral: a technical
+  repository still has one documented implementation with honest outcomes, but
+  it may expose a POSIX script, `cargo xtask ci`, or another justified local
+  entry point. Align driver documentation and contribution examples, and teach
+  the read-only structural auditor to surface conventional Cargo xtask paths for
+  semantic review instead of treating the absence of `scripts/ci.sh` as a
+  failure. This does not make xtask or any xtask architecture an organization
+  requirement.
 - Normatively require every applicable retained device or documentary
   proposition consumed by driver behavior, model behavior, conformance,
   physical evidence, or bug disposition to have one permanent identifier

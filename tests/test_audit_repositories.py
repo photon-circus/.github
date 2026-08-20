@@ -90,6 +90,69 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(checks["branch_protection"]["status"], audit.PASS)
         self.assertEqual(checks["public_ci_hardening"]["status"], audit.MANUAL_REVIEW)
 
+    def test_conventional_cargo_xtask_shape_requires_semantic_review(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].extend([".cargo/config.toml", "xtask/Cargo.toml"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertEqual(
+            local_ci["evidence"],
+            "conventional cargo xtask paths present; inspect the Cargo alias, "
+            "documented command, and gate semantics",
+        )
+
+    def test_shell_and_cargo_xtask_entry_points_require_review(self):
+        candidate = snapshot()
+        candidate["paths"].extend([".cargo/config.toml", "xtask/Cargo.toml"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("multiple apparent canonical entry points", local_ci["evidence"])
+
+    def test_shell_and_partial_cargo_xtask_shape_require_review(self):
+        candidate = snapshot()
+        candidate["paths"].append("xtask/Cargo.toml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("possible cargo xtask entry point", local_ci["evidence"])
+
+    def test_multiple_shell_entry_points_require_review(self):
+        candidate = snapshot()
+        candidate["paths"].append("scripts/check.sh")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("multiple apparent shell entry points", local_ci["evidence"])
+
+    def test_truncated_tree_prevents_local_ci_pass(self):
+        candidate = snapshot()
+        candidate["tree_truncated"] = True
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("cannot determine", local_ci["evidence"])
+
+    def test_partial_cargo_xtask_shape_requires_review(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].append("xtask/Cargo.toml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("possible cargo xtask entry point", local_ci["evidence"])
+
+    def test_unrecognized_entry_point_is_not_treated_as_missing(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].append("Justfile")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("not machine-inferable", local_ci["evidence"])
+
     def test_experimental_missing_release_documents_require_manual_review(self):
         result = audit.evaluate_repository(
             snapshot(

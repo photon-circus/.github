@@ -283,7 +283,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     checks.append(check("default_branch", branch_status, branch_evidence, "Section 15.1 Default branch"))
 
     technical = bool(set(domains) & TECHNICAL_DOMAINS)
-    canonical_ci = "scripts/ci.sh" in paths
+    shell_ci = "scripts/ci.sh" in paths
+    cargo_xtask_configs = sorted(path for path in paths if path in {".cargo/config", ".cargo/config.toml"})
+    cargo_xtask_manifest = "xtask/Cargo.toml" in paths
+    cargo_xtask_shape = bool(cargo_xtask_configs) and cargo_xtask_manifest
     shell_alternatives = sorted(
         path for path in paths if path in {"tools/check.sh", "ci.sh", "scripts/check.sh"}
     )
@@ -296,30 +299,54 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif not lifecycle_known:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = "lifecycle is unavailable, so applicability cannot be determined"
-    elif canonical_ci and powershell_alternatives:
+    elif tree_incomplete:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = f"cannot determine ({tree_reason})"
+    elif shell_ci and cargo_xtask_shape:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = (
+            "multiple apparent canonical entry points; verify all but one are thin launchers: "
+            "scripts/ci.sh plus conventional cargo xtask paths"
+        )
+    elif shell_ci and (cargo_xtask_manifest or cargo_xtask_configs):
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = (
+            "scripts/ci.sh plus a possible cargo xtask entry point; "
+            "inspect repository documentation and Cargo configuration"
+        )
+    elif shell_ci and powershell_alternatives:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
             "scripts/ci.sh plus a PowerShell entry point; verify PowerShell is only a thin launcher: "
             f"{', '.join(powershell_alternatives)}"
         )
-    elif canonical_ci:
+    elif shell_ci and shell_alternatives:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = (
+            "multiple apparent shell entry points; verify all but one are thin launchers: "
+            f"scripts/ci.sh, {', '.join(shell_alternatives)}"
+        )
+    elif shell_ci:
         local_ci_status = PASS
         local_ci_evidence = "scripts/ci.sh"
-    elif tree_incomplete:
+    elif cargo_xtask_shape:
         local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = f"cannot determine ({tree_reason})"
+        local_ci_evidence = (
+            "conventional cargo xtask paths present; inspect the Cargo alias, "
+            "documented command, and gate semantics"
+        )
+    elif cargo_xtask_manifest or cargo_xtask_configs:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = "possible cargo xtask entry point; inspect repository documentation and Cargo configuration"
     elif shell_alternatives:
-        local_ci_status = WARN
-        local_ci_evidence = f"noncanonical shell entry point: {', '.join(shell_alternatives)}; verify documented exception"
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = f"possible shell entry point: {', '.join(shell_alternatives)}; inspect repository documentation"
     elif powershell_alternatives:
         local_ci_status = WARN
         local_ci_evidence = f"PowerShell-only entry point: {', '.join(powershell_alternatives)}"
-    elif lifecycle in {"Active", "Maintenance"}:
-        local_ci_status = FAIL
-        local_ci_evidence = "no recognized reproducible local CI entry point"
     else:
-        local_ci_status = WARN
-        local_ci_evidence = "no recognized local CI entry point; required before promotion to Active"
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = "canonical local entry point is not machine-inferable from the repository tree"
     checks.append(check("local_ci", local_ci_status, local_ci_evidence, "Section 14.1 Canonical local CI"))
 
     contributing_present = has_root(roots, ("CONTRIBUTING", "CONTRIBUTING.md"))

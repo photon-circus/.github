@@ -51,9 +51,10 @@ hardware claim. Include the relevant package version or commit, toolchain,
 target, features, and test environment when they affect reproducibility.
 
 Run the relevant focused tests and the repository's canonical verification gate
-when one is documented, normally `scripts/ci.sh` in technical repositories.
-Report the exact commands and results. A skipped or unavailable check is not a
-passing check; record the limitation and any remaining risk.
+when one is documented, using the command named by that repository, such as
+`cargo xtask ci` or `scripts/ci.sh`. Report the exact commands and results. A
+skipped or unavailable check is not a passing check; record the limitation and
+any remaining risk.
 
 ## Keep contracts and history aligned
 

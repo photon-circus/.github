@@ -57,6 +57,8 @@ A skipped or unobservable condition is never reported as `PASS`.
 The first version checks only facts that can be gathered safely from repository metadata, custom properties, trees, and default-branch protection. It does not claim to prove:
 
 - documentation quality;
+- whether a recognized script or Cargo alias actually implements the documented
+  canonical gate;
 - whether a repository is actually published;
 - whether an `AGENTS.md` or code of conduct is warranted;
 - workflow pinning, permissions, boundedness, or semantic coverage;

@@ -16,6 +16,10 @@ The explicitly non-normative
 [Rust Peripheral-Driver Documentation Guide](docs/PERIPHERAL_DRIVER_DOCUMENTATION_GUIDE.md)
 offers proportional structures for repository, package, source, contribution,
 and agent documentation without adding requirements.
+The explicitly non-normative
+[Rust xtask field guide for peripheral-driver repositories](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
+records what several native cross-platform verification gates made better,
+what failed during adoption, and which design choices remain local.
 The
 [device model resource pack](docs/device-model-resources/README.md) provides
 non-normative procedural, declaration, and optional Rust workspace integration
