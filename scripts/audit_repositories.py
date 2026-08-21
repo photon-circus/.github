@@ -293,6 +293,33 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     powershell_alternatives = sorted(
         path for path in paths if path in {"scripts/local-ci.ps1", "scripts/ci.ps1", "tools/check.ps1"}
     )
+    task_runner_files = sorted(
+        path
+        for path in roots
+        if path.casefold()
+        in {
+            "justfile",
+            ".justfile",
+            "makefile",
+            "gnumakefile",
+            "makefile.toml",
+            "taskfile.yml",
+            "taskfile.yaml",
+        }
+    )
+
+    # Every apparent entry point other than scripts/ci.sh, so that no candidate is
+    # shadowed by an earlier match. Section 14.1 cares about a single implementation,
+    # not about which technology each candidate uses.
+    alternatives: list[str] = []
+    if cargo_xtask_shape:
+        alternatives.append("conventional cargo xtask paths")
+    elif cargo_xtask_manifest:
+        alternatives.append("xtask/Cargo.toml")
+    alternatives.extend(shell_alternatives)
+    alternatives.extend(powershell_alternatives)
+    alternatives.extend(task_runner_files)
+
     if not technical or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
         local_ci_status = NOT_APPLICABLE
         local_ci_evidence = "not a maintained technical repository"
@@ -302,51 +329,36 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif tree_incomplete:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = f"cannot determine ({tree_reason})"
-    elif shell_ci and cargo_xtask_shape:
+    elif shell_ci and alternatives:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
-            "multiple apparent canonical entry points; verify all but one are thin launchers: "
-            "scripts/ci.sh plus conventional cargo xtask paths"
-        )
-    elif shell_ci and cargo_xtask_manifest:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "scripts/ci.sh plus a possible cargo xtask entry point; "
-            "inspect repository documentation and Cargo configuration"
-        )
-    elif shell_ci and powershell_alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "scripts/ci.sh plus a PowerShell entry point; verify PowerShell is only a thin launcher: "
-            f"{', '.join(powershell_alternatives)}"
-        )
-    elif shell_ci and shell_alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "multiple apparent shell entry points; verify all but one are thin launchers: "
-            f"scripts/ci.sh, {', '.join(shell_alternatives)}"
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            f"{', '.join(['scripts/ci.sh', *alternatives])}"
         )
     elif shell_ci:
         local_ci_status = PASS
         local_ci_evidence = "scripts/ci.sh"
+    elif len(alternatives) > 1:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = (
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            f"{', '.join(alternatives)}"
+        )
     elif cargo_xtask_shape:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
             "conventional cargo xtask paths present; inspect the Cargo alias, "
             "documented command, and gate semantics"
         )
-    elif cargo_xtask_manifest:
+    elif alternatives:
         local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = "possible cargo xtask entry point; inspect repository documentation and Cargo configuration"
-    elif shell_alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = f"possible shell entry point: {', '.join(shell_alternatives)}; inspect repository documentation"
-    elif powershell_alternatives:
-        local_ci_status = WARN
-        local_ci_evidence = f"PowerShell-only entry point: {', '.join(powershell_alternatives)}"
+        local_ci_evidence = f"one possible entry point: {alternatives[0]}; inspect repository documentation"
     else:
         local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = "canonical local entry point is not machine-inferable from the repository tree"
+        local_ci_evidence = (
+            "no candidate local entry point is present in the tree; a documented gate "
+            "may still be a bare tool invocation, so absence is not machine-inferable"
+        )
     checks.append(check("local_ci", local_ci_status, local_ci_evidence, "Section 14.1 Canonical local CI"))
 
     contributing_present = has_root(roots, ("CONTRIBUTING", "CONTRIBUTING.md"))

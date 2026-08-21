@@ -109,7 +109,11 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
-        self.assertIn("multiple apparent canonical entry points", local_ci["evidence"])
+        self.assertEqual(
+            local_ci["evidence"],
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            "scripts/ci.sh, conventional cargo xtask paths",
+        )
 
     def test_shell_and_partial_cargo_xtask_shape_require_review(self):
         candidate = snapshot()
@@ -117,7 +121,11 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
-        self.assertIn("possible cargo xtask entry point", local_ci["evidence"])
+        self.assertEqual(
+            local_ci["evidence"],
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            "scripts/ci.sh, xtask/Cargo.toml",
+        )
 
     def test_cargo_config_without_xtask_manifest_still_passes(self):
         candidate = snapshot()
@@ -142,7 +150,67 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
-        self.assertIn("multiple apparent shell entry points", local_ci["evidence"])
+        self.assertEqual(
+            local_ci["evidence"],
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            "scripts/ci.sh, scripts/check.sh",
+        )
+
+    def test_shell_and_powershell_entry_points_do_not_shadow_a_second_shell(self):
+        candidate = snapshot()
+        candidate["paths"].extend(["tools/check.ps1", "tools/check.sh"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertEqual(
+            local_ci["evidence"],
+            "multiple apparent entry points; verify all but one are thin launchers: "
+            "scripts/ci.sh, tools/check.sh, tools/check.ps1",
+        )
+
+    def test_powershell_only_entry_point_requires_review_not_warning(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].append("scripts/local-ci.ps1")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertEqual(
+            local_ci["evidence"],
+            "one possible entry point: scripts/local-ci.ps1; inspect repository documentation",
+        )
+
+    def test_absent_entry_point_is_distinguishable_from_an_unrecognized_one(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertEqual(
+            local_ci["evidence"],
+            "no candidate local entry point is present in the tree; a documented gate "
+            "may still be a bare tool invocation, so absence is not machine-inferable",
+        )
+
+    def test_local_ci_never_reports_warn_or_fail(self):
+        shapes = [
+            [],
+            ["scripts/ci.sh"],
+            ["scripts/local-ci.ps1"],
+            ["tools/check.sh"],
+            ["Makefile"],
+            ["xtask/Cargo.toml", ".cargo/config.toml"],
+            ["scripts/ci.sh", "tools/check.ps1", "tools/check.sh"],
+        ]
+        for entry_points in shapes:
+            for lifecycle in ("Incubating", "Active", "Maintenance"):
+                with self.subTest(entry_points=entry_points, lifecycle=lifecycle):
+                    candidate = snapshot(lifecycle=lifecycle)
+                    candidate["paths"].remove("scripts/ci.sh")
+                    candidate["paths"].extend(entry_points)
+                    result = audit.evaluate_repository(candidate, self.policy)
+                    local_ci = self.by_id(result)["local_ci"]
+                    self.assertNotIn(local_ci["status"], (audit.WARN, audit.FAIL))
 
     def test_truncated_tree_prevents_local_ci_pass(self):
         candidate = snapshot()
@@ -159,7 +227,10 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
-        self.assertIn("possible cargo xtask entry point", local_ci["evidence"])
+        self.assertEqual(
+            local_ci["evidence"],
+            "one possible entry point: xtask/Cargo.toml; inspect repository documentation",
+        )
 
     def test_unrecognized_entry_point_is_not_treated_as_missing(self):
         candidate = snapshot()
@@ -168,7 +239,10 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
-        self.assertIn("not machine-inferable", local_ci["evidence"])
+        self.assertEqual(
+            local_ci["evidence"],
+            "one possible entry point: Justfile; inspect repository documentation",
+        )
 
     def test_experimental_missing_release_documents_require_manual_review(self):
         result = audit.evaluate_repository(
