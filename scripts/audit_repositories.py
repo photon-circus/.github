@@ -284,9 +284,9 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     technical = bool(set(domains) & TECHNICAL_DOMAINS)
     shell_ci = "scripts/ci.sh" in paths
-    cargo_xtask_configs = sorted(path for path in paths if path in {".cargo/config", ".cargo/config.toml"})
+    cargo_config = bool(paths & {".cargo/config", ".cargo/config.toml"})
     cargo_xtask_manifest = "xtask/Cargo.toml" in paths
-    cargo_xtask_shape = bool(cargo_xtask_configs) and cargo_xtask_manifest
+    cargo_xtask_shape = cargo_config and cargo_xtask_manifest
     shell_alternatives = sorted(
         path for path in paths if path in {"tools/check.sh", "ci.sh", "scripts/check.sh"}
     )
@@ -308,7 +308,7 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
             "multiple apparent canonical entry points; verify all but one are thin launchers: "
             "scripts/ci.sh plus conventional cargo xtask paths"
         )
-    elif shell_ci and (cargo_xtask_manifest or cargo_xtask_configs):
+    elif shell_ci and cargo_xtask_manifest:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
             "scripts/ci.sh plus a possible cargo xtask entry point; "
@@ -335,7 +335,7 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
             "conventional cargo xtask paths present; inspect the Cargo alias, "
             "documented command, and gate semantics"
         )
-    elif cargo_xtask_manifest or cargo_xtask_configs:
+    elif cargo_xtask_manifest:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = "possible cargo xtask entry point; inspect repository documentation and Cargo configuration"
     elif shell_alternatives:

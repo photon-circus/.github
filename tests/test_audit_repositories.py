@@ -119,6 +119,23 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertIn("possible cargo xtask entry point", local_ci["evidence"])
 
+    def test_cargo_config_without_xtask_manifest_still_passes(self):
+        candidate = snapshot()
+        candidate["paths"].append(".cargo/config.toml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.PASS)
+        self.assertEqual(local_ci["evidence"], "scripts/ci.sh")
+
+    def test_cargo_config_alone_is_not_an_xtask_signal(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].append(".cargo/config.toml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertIn("not machine-inferable", local_ci["evidence"])
+
     def test_multiple_shell_entry_points_require_review(self):
         candidate = snapshot()
         candidate["paths"].append("scripts/check.sh")
