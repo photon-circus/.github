@@ -617,20 +617,31 @@ Photon Circus distinguishes authoritative local verification from bounded hosted
 
 ### 14.1 Canonical local CI
 
-Technical repositories should provide one canonical verification script, normally:
+Technical repositories should provide one canonical verification entry point.
+Common forms include:
 
 ```text
 scripts/ci.sh
+cargo xtask ci
 ```
 
-The script should:
+The entry point should:
 
-- Use a POSIX-compatible shell.
-- Run on Linux and under Git Bash on Windows.
+- Run on the contributor platforms documented by the repository.
+- State any tools or environment it requires.
 - Be the single implementation of the routine verification gate.
 - Report pass, failure, and skipped checks distinctly.
 
-Parallel Bash and PowerShell implementations of the same gate should not be maintained. A skipped check is not a passed check.
+A shell implementation should use a POSIX-compatible shell and run on Linux
+and under Git Bash on Windows. A repository may keep a thin compatibility
+launcher, but routine gate logic should live in only one implementation.
+Parallel Bash and PowerShell implementations of the same gate should not be
+maintained. A skipped check is not a passed check.
+
+The explicitly non-normative
+[`Rust xtask field guide for peripheral-driver repositories`](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
+records experience from several driver gates without prescribing an xtask
+layout, command set, configuration format, or migration.
 
 ### 14.2 Private repositories
 
@@ -669,7 +680,7 @@ Remote CI must say when it covers only part of the release gate.
 
 Complex repositories may provide a pinned Docker or equivalent reference environment. A useful reference environment pins otherwise drifting tools, stamps versions, and can be distributed prebuilt.
 
-This is optional. A pinned toolchain and one reliable local script are sufficient for simpler projects. `ph-eventing` is the public reference for the more rigorous model.
+This is optional. A pinned toolchain and one reliable local entry point are sufficient for simpler projects. `ph-eventing` is the public reference for the more rigorous model.
 
 ## 15. Default branch and protection
 

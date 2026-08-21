@@ -86,8 +86,8 @@ defect, not for declared unsupported fidelity.
 
 ## Bounded verification
 
-Extend the repository's existing local gate rather than adding a second policy
-script. Useful checks for this packaging include:
+Extend the repository's existing local gate rather than adding a second gate
+implementation. Useful checks for this packaging include:
 
 ```text
 model-only tests without the production driver

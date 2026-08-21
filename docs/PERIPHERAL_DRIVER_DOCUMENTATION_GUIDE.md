@@ -61,7 +61,7 @@ belong in the crate README or rustdoc, not only behind a repository link.
 |   |-- SOURCES.toml             # when structured provenance adds value
 |   |-- DEVICE_EVIDENCE.md       # only propositions consumed by current work
 |   `-- DECISIONS.md             # only durable, non-obvious rationale
-`-- scripts/ci.sh                # canonical local verification entry point
+`-- <canonical verification>     # one documented local entry point
 ```
 
 For a very small driver, source identity, device evidence, software invariants,
@@ -99,8 +99,15 @@ consequences. Creating a file per concern is not a quality signal.
 |   |-- TEST_PLAN.md             # when evidence layers are genuinely distinct
 |   |-- DECISIONS.md
 |   `-- vendor/README.md         # only for local, untracked vendor-file handling
-`-- scripts/ci.sh
+`-- <canonical verification>
 ```
+
+A `<canonical verification>` label represents one documented command, not a
+literal filename. A Rust repository might expose `cargo xtask ci`; another
+repository might keep `scripts/ci.sh`. Do not infer a second implementation
+from these examples. The explicitly non-normative
+[Rust xtask field guide](PERIPHERAL_DRIVER_XTASK_GUIDE.md) records observed
+tradeoffs without making either form required.
 
 A separate model crate, `docs/README.md`, API inventory, architecture file,
 invariant file, test-plan file, and local documentation-style file are all
@@ -228,7 +235,7 @@ See the [driver package README](crates/<part>/README.md).
 
 ## Verification
 
-`./scripts/ci.sh`
+`<the repository's canonical command, such as cargo xtask ci or ./scripts/ci.sh>`
 
 <Explain any bounded hosted subset.>
 
