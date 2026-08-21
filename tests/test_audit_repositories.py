@@ -87,6 +87,11 @@ class PolicyTests(unittest.TestCase):
         checks = self.by_id(result)
         self.assertEqual(checks["license"]["status"], audit.PASS)
         self.assertEqual(checks["local_ci"]["status"], audit.PASS)
+        self.assertEqual(
+            checks["local_ci"]["evidence"],
+            "scripts/ci.sh at the canonical path; "
+            "contents and documented command not inspected",
+        )
         self.assertEqual(checks["branch_protection"]["status"], audit.PASS)
         self.assertEqual(checks["public_ci_hardening"]["status"], audit.MANUAL_REVIEW)
 
@@ -133,7 +138,11 @@ class PolicyTests(unittest.TestCase):
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
         self.assertEqual(local_ci["status"], audit.PASS)
-        self.assertEqual(local_ci["evidence"], "scripts/ci.sh")
+        self.assertEqual(
+            local_ci["evidence"],
+            "scripts/ci.sh at the canonical path; "
+            "contents and documented command not inspected",
+        )
 
     def test_cargo_config_alone_is_not_an_xtask_signal(self):
         candidate = snapshot()

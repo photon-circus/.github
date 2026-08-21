@@ -58,7 +58,10 @@ The first version checks only facts that can be gathered safely from repository 
 
 - documentation quality;
 - whether a recognized script or Cargo alias actually implements the documented
-  canonical gate;
+  canonical gate; a `local_ci` `PASS` therefore asserts only that exactly one
+  candidate entry point is present and that it sits at the canonical path named
+  in Section 14.1, never that the file is the documented gate, that it is the
+  single implementation, or that its outcomes are honest;
 - whether a repository with no recognized entry-point file has no canonical gate,
   because a documented command can be a bare tool invocation that leaves no
   distinctive path in the tree; `local_ci` therefore reports `MANUAL_REVIEW`

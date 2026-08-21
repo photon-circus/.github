@@ -337,7 +337,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         )
     elif shell_ci:
         local_ci_status = PASS
-        local_ci_evidence = "scripts/ci.sh"
+        local_ci_evidence = (
+            "scripts/ci.sh at the canonical path; "
+            "contents and documented command not inspected"
+        )
     elif len(alternatives) > 1:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
