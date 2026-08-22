@@ -42,10 +42,10 @@ hardware, credential, and publication effects.
 The original review covered two public implementations at pinned revisions and
 one private implementation. The 2026-08-22 follow-up enumerated recursive
 default-branch trees across 35 accessible organization repositories, then
-classified every observed `*/xtask/Cargo.toml` through its manifest,
-documentation, source, and workflow role. It found 11 xtask crates: nine
-canonical verification gates and two operational utilities. These counts are a
-time-bounded census, not a target or adoption metric.
+classified every manifest whose path ended in `xtask/Cargo.toml` through its
+manifest, documentation, source, and workflow role. It found 11 xtask crates:
+nine canonical verification gates and two operational utilities. These counts
+are a time-bounded census, not a target or adoption metric.
 
 Private repository identity and details are intentionally not reproduced here;
 only lessons that can be stated without disclosing private content are
@@ -94,10 +94,10 @@ locally. Its migration and later evidence refinements are recorded in
 
 ## Crate-boundary choices
 
-The two public implementations already show that an xtask can be an ordinary
-workspace member or a separate excluded workspace. A non-default workspace
-member is another available tradeoff; the table describes choices rather than
-inventorying the private implementation.
+The three public snapshots show that an xtask can be an ordinary workspace
+member, a member outside `default-members`, or a separate excluded workspace.
+The table describes choices rather than templates and does not inventory the
+private implementation.
 
 | Available relationship | Useful when | Cost to make explicit |
 | --- | --- | --- |
@@ -262,11 +262,11 @@ repository-specific gates.
 
 ### Migration did not imply all scripting moved
 
-The public examples replaced their local verification scripts. They did not
-thereby automate release authorization, version selection, tagging,
-publication, secrets, hardware operation, or every maintainer command. Moving a
-task into xtask is useful when it improves a bounded workflow; “no scripts” is
-not itself an engineering outcome.
+The original public migration examples replaced their local verification
+scripts. They did not thereby automate release authorization, version
+selection, tagging, publication, secrets, hardware operation, or every
+maintainer command. Moving a task into xtask is useful when it improves a
+bounded workflow; “no scripts” is not itself an engineering outcome.
 
 ## Questions worth answering locally
 

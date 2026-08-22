@@ -244,6 +244,70 @@ class PolicyTests(unittest.TestCase):
                     local_ci = self.by_id(result)["local_ci"]
                     self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
 
+    def test_unknown_domain_keeps_observed_local_ci_candidate_visible(self):
+        for domains in ([], ["Unrecognized"]):
+            with self.subTest(domains=domains):
+                candidate = snapshot()
+                candidate["properties"]["Domain"] = domains
+                result = audit.evaluate_repository(candidate, self.policy)
+                checks = self.by_id(result)
+                self.assertEqual(checks["domain"]["status"], audit.FAIL)
+                self.assertEqual(checks["local_ci"]["status"], audit.MANUAL_REVIEW)
+                self.assertIn(
+                    "Domain metadata is unavailable or unrecognized",
+                    checks["local_ci"]["evidence"],
+                )
+                self.assertIn("scripts/ci.sh", checks["local_ci"]["evidence"])
+                self.assertEqual(
+                    checks["agent_guidance"]["status"], audit.MANUAL_REVIEW
+                )
+                self.assertEqual(
+                    checks["hosted_ci"]["status"], audit.MANUAL_REVIEW
+                )
+                self.assertIn("Domain metadata", checks["hosted_ci"]["evidence"])
+
+    def test_recognized_technical_domain_establishes_applicability(self):
+        candidate = snapshot(domains=["Libraries", "Unrecognized"])
+        candidate["paths"].remove(".github/workflows/ci.yml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        checks = self.by_id(result)
+        self.assertEqual(checks["domain"]["status"], audit.FAIL)
+        self.assertEqual(checks["hosted_ci"]["status"], audit.FAIL)
+        self.assertNotIn("applicability cannot be determined", checks["local_ci"]["evidence"])
+
+    def test_unknown_domain_prevents_branch_protection_pass(self):
+        candidate = snapshot(domains=[])
+        candidate["protection"]["required_checks"] = []
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.MANUAL_REVIEW,
+        )
+
+        candidate["paths"].remove(".github/workflows/ci.yml")
+        candidate["tree_truncated"] = True
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.MANUAL_REVIEW,
+        )
+
+    def test_known_hosted_ci_nonapplicability_precedes_unknown_metadata(self):
+        cases = (
+            ("Experimental", []),
+            (None, ["Documentation"]),
+        )
+        for lifecycle, domains in cases:
+            with self.subTest(lifecycle=lifecycle, domains=domains):
+                result = audit.evaluate_repository(
+                    snapshot(lifecycle=lifecycle, domains=domains),
+                    self.policy,
+                )
+                hosted_ci = self.by_id(result)["hosted_ci"]
+                self.assertEqual(hosted_ci["status"], audit.MANUAL_REVIEW)
+                self.assertIn("optional workflow", hosted_ci["evidence"])
+                self.assertNotIn("applicability cannot be determined", hosted_ci["evidence"])
+
     def test_truncated_tree_prevents_local_ci_pass(self):
         candidate = snapshot()
         candidate["tree_truncated"] = True
@@ -335,6 +399,7 @@ class PolicyTests(unittest.TestCase):
             self.policy,
         )
         checks = self.by_id(result)
+        self.assertEqual(checks["local_ci"]["status"], audit.NOT_APPLICABLE)
         self.assertEqual(checks["hosted_ci"]["status"], audit.NOT_APPLICABLE)
 
     def test_findings_do_not_become_execution_failures(self):

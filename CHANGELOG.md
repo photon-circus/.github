@@ -113,6 +113,8 @@ Last updated: 2026-08-22 UTC
   than presenting `scripts/ci.sh` filename presence as standards compliance.
   Discover nested `*/xtask/Cargo.toml` candidates and report exact paths so
   operational tools and thin launchers can be distinguished during review.
+  Distinguish missing or unrecognized Domain metadata from a valid nontechnical
+  classification when audit applicability depends on Domain.
 - Make the canonical-local-CI requirement technology-neutral: a technical
   repository still has one documented implementation with honest outcomes, but
   it may expose a POSIX script, `cargo xtask ci`, or another justified local
