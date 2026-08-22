@@ -97,6 +97,12 @@ Last updated: 2026-08-22 UTC
   invocation scope, working-directory support, partial profiles, aggregate
   success, skipped or indeterminate work, fail-fast summaries, and the exact
   release-candidate invocation.
+- Require an ordinary peripheral-driver software release to rest on a passing,
+  documented release-candidate invocation of the canonical CI entry point that
+  includes every applicable check in the profile's CI contract, rather than on
+  any passing canonical-CI run. Declare the Peripheral Driver Release and
+  Evidence Profile an adopted normative profile in its own header so its
+  obligations are not read as guidance.
 - Broaden the non-normative xtask field guide to Rust technical repositories,
   including reusable capability libraries, and add current organization-pattern
   review, task-command classification, side-effect boundaries, alias bootstrap

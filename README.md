@@ -2,7 +2,7 @@
 
 This repository contains the shared repository, contribution, release, and engineering standards for the Photon Circus GitHub organization.
 
-Start with [Photon Circus Repository Standards v0.1](REPOSITORY_STANDARDS.md).
+Start with the [Photon Circus Repository Standards](REPOSITORY_STANDARDS.md).
 
 Peripheral drivers also follow the
 [Peripheral Driver Release and Evidence Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).

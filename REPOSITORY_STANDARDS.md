@@ -655,7 +655,8 @@ stop at the first failure, but it must not claim that later work ran or that its
 summary is exhaustive. A verification invocation that establishes no passing
 check must not report aggregate `PASS`.
 
-A POSIX-shell implementation should run on Linux and under Git Bash on Windows.
+A shell implementation should use a POSIX-compatible shell and should run on
+Linux and under Git Bash on Windows.
 A repository may keep a thin compatibility launcher, but routine gate logic
 should live in only one implementation. Parallel Bash and PowerShell
 implementations of the same gate should not be maintained.
