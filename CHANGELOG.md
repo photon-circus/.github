@@ -4,10 +4,17 @@ All notable changes to the Photon Circus organization standards are documented i
 
 ## Unreleased
 
-Last updated: 2026-08-20 UTC
+Last updated: 2026-08-22 UTC
 
 ### Added
 
+- Add explicitly non-normative repository-contract guidance for every
+  repository and material component type. It covers bounded responsibility,
+  consumers and handoffs, component classification, claim-to-evidence mapping,
+  proportional document placement, and controlled contract evolution,
+  including a provisional initial development contract with a named
+  evidence-triggered re-examination, without requiring a filename, schema,
+  repository migration, or new organization-wide rule.
 - Add an explicitly non-normative Rust xtask field guide based on three
   peripheral-driver migrations. It records cross-platform and single-entry-point
   benefits; workspace-boundary options; configuration, self-test, dependency,
