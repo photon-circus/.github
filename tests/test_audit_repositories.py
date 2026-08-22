@@ -82,15 +82,30 @@ class PolicyTests(unittest.TestCase):
     def by_id(self, result):
         return {item["id"]: item for item in result["checks"]}
 
+    @staticmethod
+    def single_surface(path):
+        return (
+            f"possible local verification surface: {path}; determine whether it "
+            "owns the documented canonical gate and inspect its invocation scope "
+            "and semantics"
+        )
+
+    @staticmethod
+    def multiple_surfaces(*paths):
+        return (
+            f"possible local verification surfaces: {', '.join(paths)}; determine "
+            "which command owns routine verification, which paths are thin "
+            "launchers or operational tools, and inspect gate semantics"
+        )
+
     def test_active_reference_profile(self):
         result = audit.evaluate_repository(snapshot(), self.policy)
         checks = self.by_id(result)
         self.assertEqual(checks["license"]["status"], audit.PASS)
-        self.assertEqual(checks["local_ci"]["status"], audit.PASS)
+        self.assertEqual(checks["local_ci"]["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             checks["local_ci"]["evidence"],
-            "scripts/ci.sh at the canonical path; "
-            "contents and documented command not inspected",
+            self.single_surface("scripts/ci.sh"),
         )
         self.assertEqual(checks["branch_protection"]["status"], audit.PASS)
         self.assertEqual(checks["public_ci_hardening"]["status"], audit.MANUAL_REVIEW)
@@ -104,8 +119,19 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "conventional cargo xtask paths present; inspect the Cargo alias, "
-            "documented command, and gate semantics",
+            self.single_surface("xtask/Cargo.toml"),
+        )
+
+    def test_nested_cargo_xtask_manifest_is_discovered(self):
+        candidate = snapshot()
+        candidate["paths"].remove("scripts/ci.sh")
+        candidate["paths"].extend([".cargo/config.toml", "tools/xtask/Cargo.toml"])
+        result = audit.evaluate_repository(candidate, self.policy)
+        local_ci = self.by_id(result)["local_ci"]
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+        self.assertEqual(
+            local_ci["evidence"],
+            self.single_surface("tools/xtask/Cargo.toml"),
         )
 
     def test_shell_and_cargo_xtask_entry_points_require_review(self):
@@ -116,8 +142,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            "scripts/ci.sh, conventional cargo xtask paths",
+            self.multiple_surfaces("scripts/ci.sh", "xtask/Cargo.toml"),
         )
 
     def test_shell_and_partial_cargo_xtask_shape_require_review(self):
@@ -128,20 +153,18 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            "scripts/ci.sh, xtask/Cargo.toml",
+            self.multiple_surfaces("scripts/ci.sh", "xtask/Cargo.toml"),
         )
 
-    def test_cargo_config_without_xtask_manifest_still_passes(self):
+    def test_cargo_config_without_xtask_manifest_does_not_strengthen_shell_evidence(self):
         candidate = snapshot()
         candidate["paths"].append(".cargo/config.toml")
         result = audit.evaluate_repository(candidate, self.policy)
         local_ci = self.by_id(result)["local_ci"]
-        self.assertEqual(local_ci["status"], audit.PASS)
+        self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "scripts/ci.sh at the canonical path; "
-            "contents and documented command not inspected",
+            self.single_surface("scripts/ci.sh"),
         )
 
     def test_cargo_config_alone_is_not_an_xtask_signal(self):
@@ -161,8 +184,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            "scripts/ci.sh, scripts/check.sh",
+            self.multiple_surfaces("scripts/ci.sh", "scripts/check.sh"),
         )
 
     def test_shell_and_powershell_entry_points_do_not_shadow_a_second_shell(self):
@@ -173,8 +195,9 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            "scripts/ci.sh, tools/check.sh, tools/check.ps1",
+            self.multiple_surfaces(
+                "scripts/ci.sh", "tools/check.sh", "tools/check.ps1"
+            ),
         )
 
     def test_powershell_only_entry_point_requires_review_not_warning(self):
@@ -186,7 +209,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "one possible entry point: scripts/local-ci.ps1; inspect repository documentation",
+            self.single_surface("scripts/local-ci.ps1"),
         )
 
     def test_absent_entry_point_is_distinguishable_from_an_unrecognized_one(self):
@@ -201,7 +224,7 @@ class PolicyTests(unittest.TestCase):
             "may still be a bare tool invocation, so absence is not machine-inferable",
         )
 
-    def test_local_ci_never_reports_warn_or_fail(self):
+    def test_local_ci_candidate_shapes_require_manual_review(self):
         shapes = [
             [],
             ["scripts/ci.sh"],
@@ -219,7 +242,71 @@ class PolicyTests(unittest.TestCase):
                     candidate["paths"].extend(entry_points)
                     result = audit.evaluate_repository(candidate, self.policy)
                     local_ci = self.by_id(result)["local_ci"]
-                    self.assertNotIn(local_ci["status"], (audit.WARN, audit.FAIL))
+                    self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
+
+    def test_unknown_domain_keeps_observed_local_ci_candidate_visible(self):
+        for domains in ([], ["Unrecognized"]):
+            with self.subTest(domains=domains):
+                candidate = snapshot()
+                candidate["properties"]["Domain"] = domains
+                result = audit.evaluate_repository(candidate, self.policy)
+                checks = self.by_id(result)
+                self.assertEqual(checks["domain"]["status"], audit.FAIL)
+                self.assertEqual(checks["local_ci"]["status"], audit.MANUAL_REVIEW)
+                self.assertIn(
+                    "Domain metadata is unavailable or unrecognized",
+                    checks["local_ci"]["evidence"],
+                )
+                self.assertIn("scripts/ci.sh", checks["local_ci"]["evidence"])
+                self.assertEqual(
+                    checks["agent_guidance"]["status"], audit.MANUAL_REVIEW
+                )
+                self.assertEqual(
+                    checks["hosted_ci"]["status"], audit.MANUAL_REVIEW
+                )
+                self.assertIn("Domain metadata", checks["hosted_ci"]["evidence"])
+
+    def test_recognized_technical_domain_establishes_applicability(self):
+        candidate = snapshot(domains=["Libraries", "Unrecognized"])
+        candidate["paths"].remove(".github/workflows/ci.yml")
+        result = audit.evaluate_repository(candidate, self.policy)
+        checks = self.by_id(result)
+        self.assertEqual(checks["domain"]["status"], audit.FAIL)
+        self.assertEqual(checks["hosted_ci"]["status"], audit.FAIL)
+        self.assertNotIn("applicability cannot be determined", checks["local_ci"]["evidence"])
+
+    def test_unknown_domain_prevents_branch_protection_pass(self):
+        candidate = snapshot(domains=[])
+        candidate["protection"]["required_checks"] = []
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.MANUAL_REVIEW,
+        )
+
+        candidate["paths"].remove(".github/workflows/ci.yml")
+        candidate["tree_truncated"] = True
+        result = audit.evaluate_repository(candidate, self.policy)
+        self.assertEqual(
+            self.by_id(result)["branch_protection"]["status"],
+            audit.MANUAL_REVIEW,
+        )
+
+    def test_known_hosted_ci_nonapplicability_precedes_unknown_metadata(self):
+        cases = (
+            ("Experimental", []),
+            (None, ["Documentation"]),
+        )
+        for lifecycle, domains in cases:
+            with self.subTest(lifecycle=lifecycle, domains=domains):
+                result = audit.evaluate_repository(
+                    snapshot(lifecycle=lifecycle, domains=domains),
+                    self.policy,
+                )
+                hosted_ci = self.by_id(result)["hosted_ci"]
+                self.assertEqual(hosted_ci["status"], audit.MANUAL_REVIEW)
+                self.assertIn("optional workflow", hosted_ci["evidence"])
+                self.assertNotIn("applicability cannot be determined", hosted_ci["evidence"])
 
     def test_truncated_tree_prevents_local_ci_pass(self):
         candidate = snapshot()
@@ -238,7 +325,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "one possible entry point: xtask/Cargo.toml; inspect repository documentation",
+            self.single_surface("xtask/Cargo.toml"),
         )
 
     def test_unrecognized_entry_point_is_not_treated_as_missing(self):
@@ -250,7 +337,7 @@ class PolicyTests(unittest.TestCase):
         self.assertEqual(local_ci["status"], audit.MANUAL_REVIEW)
         self.assertEqual(
             local_ci["evidence"],
-            "one possible entry point: Justfile; inspect repository documentation",
+            self.single_surface("Justfile"),
         )
 
     def test_experimental_missing_release_documents_require_manual_review(self):
@@ -312,6 +399,7 @@ class PolicyTests(unittest.TestCase):
             self.policy,
         )
         checks = self.by_id(result)
+        self.assertEqual(checks["local_ci"]["status"], audit.NOT_APPLICABLE)
         self.assertEqual(checks["hosted_ci"]["status"], audit.NOT_APPLICABLE)
 
     def test_findings_do_not_become_execution_failures(self):

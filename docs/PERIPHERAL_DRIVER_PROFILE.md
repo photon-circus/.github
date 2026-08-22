@@ -1,5 +1,7 @@
 # Peripheral Driver Release and Evidence Profile
 
+Status: **Adopted normative profile**
+
 This profile lets a Photon Circus peripheral driver become coherent, testable,
 useful, and publishable without making unfinished models, physical tooling, or
 shared integration contracts prerequisites for its existence or release.
@@ -244,10 +246,15 @@ version without a prerelease component, the repository must have:
   evidence status;
 - implementation-focused tests and supported-target compilation proportional
   to the driver;
-- a passing canonical CI entry point;
+- a passing, documented release-candidate invocation of the canonical CI entry
+  point that includes every applicable check in the CI contract above;
 - a changelog and documented release process; and
 - a verified packaged artifact assembled through an intentional maintainer
   release action.
+
+When the canonical entry point exposes profiles or selectors, release guidance
+must name the exact release-candidate invocation and distinguish it from any
+routine, partial, or hosted subset.
 
 An ordinary release does not require a complete behavioral model, physical
 evidence, hardware qualification, `ph-hil` availability, or `ph-hil` adoption.

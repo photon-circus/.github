@@ -209,10 +209,26 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     invalid_domains = sorted(set(domains) - ALLOWED_DOMAINS)
     domain_status = PASS if domains and not invalid_domains else FAIL
+    domain_known = domain_status == PASS
+    technical = bool(set(domains) & TECHNICAL_DOMAINS)
+    explicitly_nontechnical = domain_known and not technical
+    domain_applicability_known = technical or explicitly_nontechnical
     domain_evidence = ", ".join(domains) if domains else "missing"
     if invalid_domains:
         domain_evidence += f"; unrecognized: {', '.join(invalid_domains)}"
     checks.append(check("domain", domain_status, domain_evidence, "Section 3.2 Domain values"))
+
+    unknown_profile_fields = []
+    if not lifecycle_known:
+        unknown_profile_fields.append("Lifecycle")
+    if not domain_applicability_known:
+        unknown_profile_fields.append("Domain")
+    profile_uncertainty = (
+        "applicability cannot be determined because "
+        f"{' and '.join(unknown_profile_fields)} metadata is unavailable or unrecognized"
+        if unknown_profile_fields
+        else ""
+    )
 
     checks.append(
         check(
@@ -282,11 +298,12 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         branch_status, branch_evidence = MANUAL_REVIEW, f"{default_branch or 'missing'}; creation date and migration intent require review"
     checks.append(check("default_branch", branch_status, branch_evidence, "Section 15.1 Default branch"))
 
-    technical = bool(set(domains) & TECHNICAL_DOMAINS)
     shell_ci = "scripts/ci.sh" in paths
-    cargo_config = bool(paths & {".cargo/config", ".cargo/config.toml"})
-    cargo_xtask_manifest = "xtask/Cargo.toml" in paths
-    cargo_xtask_shape = cargo_config and cargo_xtask_manifest
+    cargo_xtask_manifests = sorted(
+        path
+        for path in paths
+        if path.casefold().split("/")[-2:] == ["xtask", "cargo.toml"]
+    )
     shell_alternatives = sorted(
         path for path in paths if path in {"tools/check.sh", "ci.sh", "scripts/check.sh"}
     )
@@ -308,60 +325,51 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         }
     )
 
-    # Every apparent entry point other than scripts/ci.sh, so that no candidate is
-    # shadowed by an earlier match. Section 14.1 cares about a single implementation,
-    # not about which technology each candidate uses.
-    alternatives: list[str] = []
-    if cargo_xtask_shape:
-        alternatives.append("conventional cargo xtask paths")
-    elif cargo_xtask_manifest:
-        alternatives.append("xtask/Cargo.toml")
-    alternatives.extend(shell_alternatives)
-    alternatives.extend(powershell_alternatives)
-    alternatives.extend(task_runner_files)
+    # Paths are candidate-discovery evidence only. A tree cannot determine which
+    # command is documented as canonical, whether a file is a thin launcher or an
+    # operational tool, or whether the gate's outcomes are honest.
+    candidates: list[str] = []
+    if shell_ci:
+        candidates.append("scripts/ci.sh")
+    candidates.extend(cargo_xtask_manifests)
+    candidates.extend(shell_alternatives)
+    candidates.extend(powershell_alternatives)
+    candidates.extend(task_runner_files)
 
-    if not technical or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
-        local_ci_status = NOT_APPLICABLE
-        local_ci_evidence = "not a maintained technical repository"
-    elif not lifecycle_known:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = "lifecycle is unavailable, so applicability cannot be determined"
-    elif tree_incomplete:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = f"cannot determine ({tree_reason})"
-    elif shell_ci and alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            f"{', '.join(['scripts/ci.sh', *alternatives])}"
+    if len(candidates) > 1:
+        candidate_evidence = (
+            f"possible local verification surfaces: {', '.join(candidates)}; "
+            "determine which command owns routine verification, which paths are "
+            "thin launchers or operational tools, and inspect gate semantics"
         )
-    elif shell_ci:
-        local_ci_status = PASS
-        local_ci_evidence = (
-            "scripts/ci.sh at the canonical path; "
-            "contents and documented command not inspected"
+    elif candidates:
+        candidate_evidence = (
+            f"possible local verification surface: {candidates[0]}; determine "
+            "whether it owns the documented canonical gate and inspect its "
+            "invocation scope and semantics"
         )
-    elif len(alternatives) > 1:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            f"{', '.join(alternatives)}"
-        )
-    elif cargo_xtask_shape:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "conventional cargo xtask paths present; inspect the Cargo alias, "
-            "documented command, and gate semantics"
-        )
-    elif alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = f"one possible entry point: {alternatives[0]}; inspect repository documentation"
     else:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
+        candidate_evidence = (
             "no candidate local entry point is present in the tree; a documented gate "
             "may still be a bare tool invocation, so absence is not machine-inferable"
         )
+
+    if explicitly_nontechnical or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
+        local_ci_status = NOT_APPLICABLE
+        local_ci_evidence = "not a maintained technical repository"
+    elif unknown_profile_fields:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = profile_uncertainty
+        if candidates:
+            local_ci_evidence += f"; {candidate_evidence}"
+    elif tree_incomplete:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = f"cannot determine complete candidate inventory ({tree_reason})"
+        if candidates:
+            local_ci_evidence += f"; {candidate_evidence}"
+    else:
+        local_ci_status = MANUAL_REVIEW
+        local_ci_evidence = candidate_evidence
     checks.append(check("local_ci", local_ci_status, local_ci_evidence, "Section 14.1 Canonical local CI"))
 
     contributing_present = has_root(roots, ("CONTRIBUTING", "CONTRIBUTING.md"))
@@ -423,10 +431,10 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     checks.append(check("releasing", releasing_status, releasing_evidence, "Sections 7 and 17 Releases"))
 
     agents_present = has_root(roots, ("AGENTS.md",))
-    if not technical or (lifecycle_known and lifecycle != "Active"):
+    if explicitly_nontechnical or (lifecycle_known and lifecycle != "Active"):
         agents_status, agents_evidence = NOT_APPLICABLE, "not deterministically required"
-    elif not lifecycle_known:
-        agents_status, agents_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif unknown_profile_fields:
+        agents_status, agents_evidence = MANUAL_REVIEW, profile_uncertainty
     elif agents_present:
         agents_status, agents_evidence = PASS, "present"
     elif lifecycle == "Active" and technical:
@@ -437,16 +445,21 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     workflows = sorted(path for path in paths if path.startswith(".github/workflows/") and path.endswith((".yml", ".yaml")))
     hosted_required = visibility == "public" and lifecycle in {"Active", "Maintenance"} and technical
+    hosted_not_required = visibility != "public" or explicitly_nontechnical or (lifecycle_known and lifecycle not in {"Active", "Maintenance"})
+    hosted_applicability_unknown = not hosted_not_required and bool(unknown_profile_fields)
     if workflows and hosted_required:
         hosted_status = PASS
         hosted_evidence = f"{len(workflows)} workflow file(s); boundedness and pinning require content review"
     elif workflows:
         hosted_status = MANUAL_REVIEW
-        hosted_evidence = f"{len(workflows)} optional workflow file(s); private cost or nontechnical value requires review"
-    elif visibility != "public" or not technical or (lifecycle_known and lifecycle not in {"Active", "Maintenance"}):
+        if hosted_applicability_unknown:
+            hosted_evidence = f"{len(workflows)} workflow file(s); {profile_uncertainty}"
+        else:
+            hosted_evidence = f"{len(workflows)} optional workflow file(s); private cost or nontechnical value requires review"
+    elif hosted_not_required:
         hosted_status, hosted_evidence = NOT_APPLICABLE, "hosted CI not required by visibility/lifecycle profile"
-    elif not lifecycle_known:
-        hosted_status, hosted_evidence = MANUAL_REVIEW, "lifecycle is unavailable, so applicability cannot be determined"
+    elif hosted_applicability_unknown:
+        hosted_status, hosted_evidence = MANUAL_REVIEW, profile_uncertainty
     elif tree_incomplete:
         hosted_status, hosted_evidence = MANUAL_REVIEW, f"cannot determine ({tree_reason})"
     elif hosted_required:
@@ -472,6 +485,9 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         force_pushes = protection.get("allow_force_pushes")
         deletions = protection.get("allow_deletions")
         stable_ci_required = hosted_required and bool(workflows)
+        stable_ci_possibly_required = hosted_applicability_unknown and bool(
+            workflows or tree_incomplete
+        )
         has_stable_ci = any(
             context.casefold() == "ci" or context.casefold().endswith(" / ci")
             for context in required_checks
@@ -481,6 +497,8 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
             protection_status = WARN
         elif stable_ci_required and not has_stable_ci:
             protection_status = WARN
+        elif stable_ci_possibly_required and not has_stable_ci:
+            protection_status = MANUAL_REVIEW
         elif hosted_required and tree_incomplete and not has_stable_ci:
             protection_status = MANUAL_REVIEW
         else:
