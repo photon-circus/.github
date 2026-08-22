@@ -2,14 +2,18 @@
 
 All notable changes to the Photon Circus organization standards are documented in this file.
 
+Entries under `Unreleased` are effective when merged to `main`; the heading
+means that they have not yet been collected into a later numbered snapshot.
+
 ## Unreleased
 
-Last updated: 2026-08-20 UTC
+Last updated: 2026-08-22 UTC
 
 ### Added
 
 - Add an explicitly non-normative Rust xtask field guide based on three
-  peripheral-driver migrations. It records cross-platform and single-entry-point
+  peripheral-driver migrations and current task-runner patterns across Rust
+  technical repositories. It records cross-platform and single-entry-point
   benefits; workspace-boundary options; configuration, self-test, dependency,
   partial-run, path-safety, generated-evidence, and hosted-CI tradeoffs; observed
   failures; and a bounded migration approach without prescribing an xtask
@@ -85,6 +89,24 @@ Last updated: 2026-08-20 UTC
 
 ### Changed
 
+- Clarify that the live `main` branch is the adopted authority, that normative
+  changes take effect on merge, and that `Unreleased` means not yet collected
+  into a later numbered snapshot. Rename the `0.1.0` header metadata as a
+  numbered baseline so it is not mistaken for the full current contents.
+- Tighten technology-neutral canonical-verification guidance around documented
+  invocation scope, working-directory support, partial profiles, aggregate
+  success, skipped or indeterminate work, fail-fast summaries, and the exact
+  release-candidate invocation.
+- Broaden the non-normative xtask field guide to Rust technical repositories,
+  including reusable capability libraries, and add current organization-pattern
+  review, task-command classification, side-effect boundaries, alias bootstrap
+  and root identity, runner self-verification, generated-evidence finalization,
+  and copied-tooling maintenance choices without prescribing an xtask layout or
+  requiring implementation migrations.
+- Treat every structurally detected local-CI candidate as manual review rather
+  than presenting `scripts/ci.sh` filename presence as standards compliance.
+  Discover nested `*/xtask/Cargo.toml` candidates and report exact paths so
+  operational tools and thin launchers can be distinguished during review.
 - Make the canonical-local-CI requirement technology-neutral: a technical
   repository still has one documented implementation with honest outcomes, but
   it may expose a POSIX script, `cargo xtask ci`, or another justified local

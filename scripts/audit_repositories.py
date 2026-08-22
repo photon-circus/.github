@@ -284,9 +284,11 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
 
     technical = bool(set(domains) & TECHNICAL_DOMAINS)
     shell_ci = "scripts/ci.sh" in paths
-    cargo_config = bool(paths & {".cargo/config", ".cargo/config.toml"})
-    cargo_xtask_manifest = "xtask/Cargo.toml" in paths
-    cargo_xtask_shape = cargo_config and cargo_xtask_manifest
+    cargo_xtask_manifests = sorted(
+        path
+        for path in paths
+        if path.casefold().split("/")[-2:] == ["xtask", "cargo.toml"]
+    )
     shell_alternatives = sorted(
         path for path in paths if path in {"tools/check.sh", "ci.sh", "scripts/check.sh"}
     )
@@ -308,17 +310,16 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
         }
     )
 
-    # Every apparent entry point other than scripts/ci.sh, so that no candidate is
-    # shadowed by an earlier match. Section 14.1 cares about a single implementation,
-    # not about which technology each candidate uses.
-    alternatives: list[str] = []
-    if cargo_xtask_shape:
-        alternatives.append("conventional cargo xtask paths")
-    elif cargo_xtask_manifest:
-        alternatives.append("xtask/Cargo.toml")
-    alternatives.extend(shell_alternatives)
-    alternatives.extend(powershell_alternatives)
-    alternatives.extend(task_runner_files)
+    # Paths are candidate-discovery evidence only. A tree cannot determine which
+    # command is documented as canonical, whether a file is a thin launcher or an
+    # operational tool, or whether the gate's outcomes are honest.
+    candidates: list[str] = []
+    if shell_ci:
+        candidates.append("scripts/ci.sh")
+    candidates.extend(cargo_xtask_manifests)
+    candidates.extend(shell_alternatives)
+    candidates.extend(powershell_alternatives)
+    candidates.extend(task_runner_files)
 
     if not technical or (lifecycle_known and lifecycle not in MAINTAINED_LIFECYCLES):
         local_ci_status = NOT_APPLICABLE
@@ -329,33 +330,20 @@ def evaluate_repository(snapshot: dict[str, Any], policy: Policy) -> dict[str, A
     elif tree_incomplete:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = f"cannot determine ({tree_reason})"
-    elif shell_ci and alternatives:
+    elif len(candidates) > 1:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            f"{', '.join(['scripts/ci.sh', *alternatives])}"
+            f"possible local verification surfaces: {', '.join(candidates)}; "
+            "determine which command owns routine verification, which paths are "
+            "thin launchers or operational tools, and inspect gate semantics"
         )
-    elif shell_ci:
-        local_ci_status = PASS
-        local_ci_evidence = (
-            "scripts/ci.sh at the canonical path; "
-            "contents and documented command not inspected"
-        )
-    elif len(alternatives) > 1:
+    elif candidates:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (
-            "multiple apparent entry points; verify all but one are thin launchers: "
-            f"{', '.join(alternatives)}"
+            f"possible local verification surface: {candidates[0]}; determine "
+            "whether it owns the documented canonical gate and inspect its "
+            "invocation scope and semantics"
         )
-    elif cargo_xtask_shape:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = (
-            "conventional cargo xtask paths present; inspect the Cargo alias, "
-            "documented command, and gate semantics"
-        )
-    elif alternatives:
-        local_ci_status = MANUAL_REVIEW
-        local_ci_evidence = f"one possible entry point: {alternatives[0]}; inspect repository documentation"
     else:
         local_ci_status = MANUAL_REVIEW
         local_ci_evidence = (

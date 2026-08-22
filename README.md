@@ -17,7 +17,7 @@ The explicitly non-normative
 offers proportional structures for repository, package, source, contribution,
 and agent documentation without adding requirements.
 The explicitly non-normative
-[Rust xtask field guide for peripheral-driver repositories](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
+[Rust xtask field guide for Photon Circus technical repositories](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
 records what several native cross-platform verification gates made better,
 what failed during adoption, and which design choices remain local.
 The
@@ -35,7 +35,10 @@ The standards favor deterministic, bare-metal engineering; narrowly bounded resp
 
 ## Status
 
-Version 0.1.0 was adopted on 2026-08-11 UTC.
+The numbered `0.1.0` baseline was adopted on 2026-08-11 UTC. The live `main`
+branch is the current adopted authority; the
+[normative-language section](REPOSITORY_STANDARDS.md#1-normative-language)
+defines effectivity and reproducible pinning.
 
 Changes to normative requirements are documented in [CHANGELOG.md](CHANGELOG.md).
 

@@ -2,9 +2,9 @@
 
 Status: **Adopted**
 
-Version: **0.1.0**
+Numbered baseline: **0.1.0**
 
-Adopted: **2026-08-11 UTC**
+Baseline adopted: **2026-08-11 UTC**
 
 Applies to: repositories owned by the Photon Circus GitHub organization
 
@@ -19,6 +19,13 @@ The terms **must**, **must not**, **required**, **should**, **should not**, and 
 - **Must** and **required** identify an obligation.
 - **Should** identifies the expected default; deviations require a documented reason.
 - **May** identifies an optional practice.
+
+The live default branch (`main`) is the adopted authority. A normative change
+takes effect when it is merged to `main`. `Unreleased` in the changelog means
+that the change has not yet been collected into a later numbered snapshot; it
+does not mean the change is ineffective. A review, migration, or evidence
+record that needs a reproducible authority should identify the exact commit
+reviewed.
 
 ## 2. Governing principles
 
@@ -625,6 +632,9 @@ scripts/ci.sh
 cargo xtask ci
 ```
 
+The repository should document the exact invocation, its supported working
+directory or directories, and the scope it establishes.
+
 The entry point should:
 
 - Run on the contributor platforms documented by the repository.
@@ -632,15 +642,27 @@ The entry point should:
 - Be the single implementation of the routine verification gate.
 - Report pass, failure, and skipped checks distinctly.
 
-A shell implementation should use a POSIX-compatible shell and run on Linux
-and under Git Bash on Windows. A repository may keep a thin compatibility
-launcher, but routine gate logic should live in only one implementation.
-Parallel Bash and PowerShell implementations of the same gate should not be
-maintained. A skipped check is not a passed check.
+A repository may expose local verification profiles or selectors through that
+one implementation. Each documented verification invocation must identify the
+scope it establishes and any work it may skip; profile names remain
+repository-local.
+
+An aggregate verification `PASS` asserts only the named invocation scope and
+only when every check that scope claims to establish ran and passed. A partial
+profile or selection must not be presented as complete or release verification.
+Skipped and indeterminate work do not count as passed. A fail-fast runner may
+stop at the first failure, but it must not claim that later work ran or that its
+summary is exhaustive. A verification invocation that establishes no passing
+check must not report aggregate `PASS`.
+
+A POSIX-shell implementation should run on Linux and under Git Bash on Windows.
+A repository may keep a thin compatibility launcher, but routine gate logic
+should live in only one implementation. Parallel Bash and PowerShell
+implementations of the same gate should not be maintained.
 
 The explicitly non-normative
-[`Rust xtask field guide for peripheral-driver repositories`](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
-records experience from several driver gates without prescribing an xtask
+[`Rust xtask field guide for Photon Circus technical repositories`](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
+records experience from several Rust repositories without prescribing an xtask
 layout, command set, configuration format, or migration.
 
 ### 14.2 Private repositories
