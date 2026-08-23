@@ -239,6 +239,12 @@ the organization standards regardless of lifecycle. A published prerelease uses
 the full SemVer prerelease in its package version, Git tag, changelog heading,
 and release identity, and its GitHub Release is marked as a prerelease.
 
+Every driver registry publication follows the common
+[Rust registry publication contract](../REPOSITORY_STANDARDS.md#172-rust-registry-publication).
+This section adds driver-specific lifecycle, status, target, and evidence
+requirements; it does not define a parallel Cargo packaging or publication
+procedure.
+
 An ordinary release is a software distribution decision. Before publishing a
 version without a prerelease component, the repository must have:
 
