@@ -11,6 +11,13 @@ Last updated: 2026-08-24 UTC
 
 ### Added
 
+- Add explicitly non-normative repository-contract guidance for every
+  repository and material component type. It covers bounded responsibility,
+  consumers and handoffs, component classification, claim-to-evidence mapping,
+  proportional document placement, and controlled contract evolution,
+  including a provisional initial development contract with a named
+  evidence-triggered re-examination, without requiring a filename, schema,
+  repository migration, or new organization-wide rule.
 - Add a normative Rust registry publication contract for every intentionally
   published organization-owned Cargo package, including capability libraries,
   tools, and peripheral drivers. It requires an exact clean candidate, a

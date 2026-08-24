@@ -4,6 +4,14 @@ This repository contains the shared repository, contribution, release, and engin
 
 Start with the [Photon Circus Repository Standards](REPOSITORY_STANDARDS.md).
 
+The explicitly non-normative
+[Repository Contract Guide](docs/REPOSITORY_CONTRACT_GUIDE.md) offers
+category-neutral guidance for expressing repository-local responsibility,
+consumer handoffs, evidence boundaries, component roles, and controlled
+contract evolution across all repository and material component types. It
+includes a provisional initial development contract and a concrete,
+evidence-triggered re-examination once the first usable surface exists.
+
 Peripheral drivers also follow the
 [Peripheral Driver Release and Evidence Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
 The
