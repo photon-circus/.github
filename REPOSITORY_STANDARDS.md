@@ -311,13 +311,24 @@ The changelog follows the `ph-eventing` model:
 
 - Begin with `# Changelog`.
 - Maintain an `## Unreleased` section.
-- Use release headings in the form `## X.Y.Z - YYYY-MM-DD`.
+- For one published package or a synchronized package set, use release headings
+  in the form `## X.Y.Z - YYYY-MM-DD`.
 - Dates use UTC and ISO 8601 format.
 - Organize entries under applicable headings: `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`, `Documentation`, and `Known issues`.
 - Mark breaking changes explicitly with `**Breaking:**`.
 - Describe observable behavior and engineering consequences, not merely filenames or commit activity.
 - Preserve known limitations until they are resolved.
 - Move accumulated `Unreleased` entries into the release when publishing.
+
+A workspace that versions published packages independently must make changelog
+ownership unambiguous. It may use package-qualified root headings such as
+`## <package> X.Y.Z - YYYY-MM-DD` with package-scoped entries under
+`Unreleased`, or package-local changelogs using the ordinary heading form and
+linked from the required root changelog. The repository must document the
+chosen scheme. Each package release moves only its own accumulated entries and
+maps them to the same package and version identified by its tag and GitHub
+Release. The scheme applies prospectively; existing release headings are not
+rewritten merely to adopt it.
 
 When a release introduces a major new feature or substantial capability, it must include a value statement immediately below the release heading. The statement explains:
 
@@ -758,8 +769,11 @@ Repositories should:
 Published libraries and reusable components must:
 
 - Use semantic versioning where practical.
-- Use Git tags containing the full SemVer version, such as `v0.1.0` or
-  `v0.1.0-experimental.1`.
+- Use Git tags that identify the package and full SemVer version. A repository
+  with one published package or a synchronized package set uses tags such as
+  `v0.1.0` or `v0.1.0-experimental.1`. A workspace that versions published
+  packages independently must document an unambiguous package-qualified form
+  such as `<package>-v<semver>`.
 - Maintain a changelog.
 - Document the release process.
 - Identify the supported toolchain or compatibility range.
@@ -767,17 +781,44 @@ Published libraries and reusable components must:
 - Create a GitHub Release containing the corresponding changelog section.
 
 A GitHub Release for a SemVer prerelease must be marked as a prerelease. The
-release tag and packaged version must match exactly apart from the tag's leading
-`v`.
+SemVer component of the release tag and the packaged version must match exactly.
+A synchronized package set sharing one tag must share that version.
 
 Before 1.0, a breaking change increments the minor version. When compatibility impact is uncertain, take the larger defensible bump.
 
 ### 17.1 Release branches
 
+After a repository has published a package or versioned deliverable, each
+substantial feature intended for a later published version under that release
+boundary must be developed and reviewed on its own feature branch and pull
+request. Accepted feature work must integrate into a `release/<semver>` branch
+and must not enter the default branch except through that release branch's
+merge-back after the verified release. This routing applies even when the
+release contains only one substantial feature and does not replace Section
+12.3.
+
+This routing governs substantial feature work accepted after adoption of this
+paragraph. It does not require rewriting default-branch history or reopening a
+completed release. Work accepted before adoption and already present on the
+default branch may enter the next release when the release record identifies
+the transition; substantial work accepted afterward follows the routing above.
+
 A `release/<semver>` branch, including the prerelease component when present,
-is required when multiple accepted feature PRs must be assembled into one
-published version. A small release represented by one independently verified PR
-may use a simpler documented process.
+is also required whenever multiple accepted feature PRs must be assembled into
+one published version. A bounded correction, documentation-only release, or
+release-machinery change represented by one independently verified PR may use a
+simpler documented process only when the release contains no substantial
+feature work.
+
+References to `release/<semver>` in this section may use a documented,
+unambiguous package-qualified form such as `release/<package>-<semver>` when a
+workspace versions and releases published packages independently.
+
+While a release branch accepts changes, pull requests into it must receive every
+aggregate hosted check and conversation-resolution requirement applicable under
+Section 15.2. Force pushes and premature deletion must be prohibited. Maintainer
+or administrator bypass may remain available for recovery and for deliberate
+branch deletion after release completion.
 
 The release process should:
 
@@ -787,15 +828,177 @@ The release process should:
 4. Keep later work outside the release branch.
 5. Apply shared fixes upstream-first.
 6. Close the changelog only after release changes are assembled.
-7. Run the complete matrix against the combined release.
-8. Record the evidence environment.
-9. Inspect exact package and artifact contents.
-10. Tag the verified release commit.
-11. Publish and create the GitHub Release.
-12. Merge the release branch back promptly.
-13. Reopen `Unreleased` and remove the completed release branch.
+7. Freeze one exact release-candidate commit; any later change invalidates its
+   release evidence.
+8. Run the complete matrix against the combined release.
+9. Record the evidence environment.
+10. Inspect exact package and artifact contents.
+11. Tag the verified release commit before irreversible publication.
+12. Publish and create the GitHub Release.
+13. Record the applicable publication or distribution outcome and GitHub
+    Release before merge-back.
+14. Merge the release branch back promptly.
+15. Finalize the durable release record, reopen `Unreleased`, and remove the
+    completed release branch.
 
 The exact artifact being released—not its individual component PRs—is what must be verified.
+
+### 17.2 Rust registry publication
+
+This subsection applies to every organization-owned Cargo package intentionally
+published to a registry, including shared capability libraries, tools, and
+peripheral drivers. It applies to first releases, prereleases, and ordinary
+releases regardless of repository lifecycle. An adopted organization profile
+or stricter repository release contract may add claim-specific obligations, but
+it must not replace or weaken this common software publication contract.
+
+Before the first registry upload in a release, the release process must:
+
+- Identify one clean release-candidate commit and the exact package set,
+  versions, registries, and tags being released. A candidate change invalidates
+  prior release evidence.
+- Align each package version with its corresponding changelog heading, Git tag,
+  GitHub Release identity, and any committed lockfile or release metadata that
+  records it.
+- Run the documented complete release-candidate invocation of the canonical
+  verification entry point. Every applicable baseline check from Section 13
+  and every repository-specific check designated by the release contract or
+  needed for a supported release claim must run and pass. A failure, skipped
+  applicable check, or indeterminate result blocks publication.
+- Record the candidate commit, exact invocation, relevant environment and tool
+  versions, and the result. A hosted subset or pull-request merge-result check
+  must not be represented as exact-candidate release evidence.
+
+Before uploading each selected package, the release process must:
+
+- Run a publication dry run, then inspect and hash the resulting candidate
+  `.crate` archive. Its digest identifies the inspected candidate; it does not
+  by itself prove which bytes a later publication command uploads. Package
+  construction, dry run, and upload must not use `--allow-dirty` or
+  `--no-verify`; they use `--locked` when the repository declares its lockfile
+  a release input.
+- Use an upload mechanism that either transmits the inspected archive without
+  reconstructing it or establishes deterministic reconstruction from unchanged
+  inputs. A source-directory `cargo publish` invocation reconstructs the
+  archive, even when it follows `cargo publish --dry-run`, so the dry run alone
+  does not establish byte identity. The reconstruction path must use the same
+  frozen candidate, Cargo version, package and registry selection, Cargo
+  configuration, feature and lock options, and dependency resolution. No
+  package input may change between inspection and upload, including an included
+  generated or ignored file or a generated lockfile. If those controls cannot
+  be established, the package must not be uploaded through a reconstructing
+  client.
+- Make package selection and the destination registry unambiguous in the
+  documented invocation and manifest. A workspace release must not depend on
+  an incidental working directory or default-member selection.
+- Inspect the archive's file set, normalized manifest, README and license
+  material, registry metadata, packaged links, dependency sources and version
+  requirements, packaged lockfile when present, and Cargo-reported VCS metadata
+  when Cargo emits it. When present, the VCS metadata must name the frozen
+  candidate commit and expected repository-relative `path_in_vcs` and must not
+  report a dirty worktree. Cargo documents this file as best-effort consistency
+  evidence, not verified provenance. Retain a SHA-256 digest of the inspected
+  candidate archive.
+- Exercise supported consumer-visible claims from the packaged artifact where
+  packaging can affect them, including documentation, examples, declared
+  features, compatibility range, targets, or downstream consumption as
+  applicable.
+
+A workspace release must identify every package selected for publication,
+every package deliberately excluded, each version and registry, internal
+dependency order, and the tag or release identity associated with each
+package. Each published package must satisfy the artifact checks independently.
+The release process should use a workspace-aware dry run of the complete set
+before the first upload when the documented release toolchain supports it.
+Otherwise it must record the non-atomic partial-release risk and perform each
+dependent package's construction and dry run after its predecessors are
+available but before its own upload. Packages must be uploaded in dependency
+order. A dependent package must not be uploaded until the registry serves the
+intended dependency version named by the release record and that version
+satisfies the packaged dependency requirement. Its dry run must resolve that
+intended version, and the predecessor's registry artifact and checksum must be
+verified before the dependent upload. Each completed upload must be recorded.
+If a later package fails, stop, record the non-atomic partial release, and
+resolve it without reusing or retargeting a published identity.
+
+Every release identity must receive an annotated tag at the verified candidate
+before its corresponding upload. The release process must push each tag and
+resolve it back to the candidate commit before the upload begins. Canonical CI
+and ordinary hosted contributor CI must not publish. Tagging, credentials,
+upload, and GitHub Release creation are separately authorized release actions
+performed manually by a maintainer or by a documented protected publishing
+workflow bound to the verified candidate.
+
+A publication-client timeout or ambiguous response must not be treated as proof
+that no upload occurred. Before retrying, query the registry record and index
+for the package and version. If publication remains uncertain, stop and record
+the state rather than risk a duplicate or contradictory release action.
+
+After upload, the release process must:
+
+- Retrieve the registry's record and exact published archive, verify its digest
+  against the inspected candidate, and repeat the material archive inspection
+  required above on the published bytes. A digest mismatch means the inspected
+  candidate was not the published artifact and fails release verification; a
+  content inspection performed only before a reconstructing upload must not be
+  attributed to the published archive. Compare Cargo-reported VCS metadata,
+  when present, with the verified candidate commit as supporting evidence.
+- Verify version availability and yank state, current package metadata, and
+  ownership. For crates.io packages, verify the intended docs.rs result when
+  documentation is part of the supported distribution surface. After a first
+  publication, assign and verify every intended additional owner as soon as the
+  registry permits.
+- Exercise a fresh exact-version registry consumer for a reusable library when
+  that check establishes supported downstream use not already proven from the
+  packaged artifact.
+- Create each GitHub Release from its existing tag, then complete the merge-back
+  and branch cleanup in Section 17.1.
+- Before merge-back, update a durable release record with the registry URL,
+  published checksum, documentation and consumer results, GitHub Release, and
+  every unavailable or failed post-publication check. Record the merge result
+  when completing the release.
+
+A release must not be given a GitHub Release or represented as verified until
+every applicable post-publication check passes. When an irreversible upload
+cannot be resolved in place, the process may close only as failed or incomplete
+with the affected check and registry state recorded. Its branch may merge back
+only to preserve the truthful published state and recovery work; it must not be
+presented as a successful release. Correction uses a new version. A deliberate
+decision to accept the release despite the failed check follows Section 19 and
+must not retarget the tag or reuse the version.
+
+A published version or tag must not be overwritten or retargeted. A correction
+uses a new version; yanking a registry version does not make its identifier
+reusable.
+
+Before a package's first registry publication, the release process must also
+confirm that its registry name and normalized forms are intended and available,
+that publication metadata is complete, that the intended publishing principal
+or team can authenticate, that at least one documented backup-owner,
+registry-administrator, or registry-support recovery route is available, and
+that the intended post-publication owners are named. When publication
+accompanies a private-to-public visibility transition, the intended public Git
+history must be reviewed for secrets and exposed identities. Installed GitHub
+Apps, webhooks, deploy keys, Actions environments, stored secrets, and other
+integrations whose access or exposure changes with that transition must be
+reviewed. Public repository metadata, CI,
+protection, and security settings must be confirmed against the lifecycle and
+visibility requirements applicable under Sections 3, 14, and 15. These
+transition checks need not be repeated for every later release unless the
+relevant state changes.
+
+This subsection governs publication actions performed after its adoption.
+Existing registry versions, GitHub Releases, public tags, and completed release
+records remain historical facts and must not be rewritten or recreated merely
+to resemble this process. Existing repositories must align their documented
+release process and applicable release-branch protection before their next
+substantial post-publication feature cycle or registry publication, or record
+an exception under Section 19.
+
+The additional Rust, embedded, model, physical, and qualification checks in
+Section 18 and adopted profiles remain claim-scoped. A repository must run them
+when its release depends on those claims; their absence must not be turned into
+an unrelated universal publication prerequisite.
 
 ## 18. Rust and embedded profile
 

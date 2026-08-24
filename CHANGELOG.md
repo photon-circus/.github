@@ -7,10 +7,23 @@ means that they have not yet been collected into a later numbered snapshot.
 
 ## Unreleased
 
-Last updated: 2026-08-22 UTC
+Last updated: 2026-08-24 UTC
 
 ### Added
 
+- Add a normative Rust registry publication contract for every intentionally
+  published organization-owned Cargo package, including capability libraries,
+  tools, and peripheral drivers. It requires an exact clean candidate, a
+  complete release invocation with no failure or skipped applicable work,
+  inspection and hashing of each package archive, byte-preserving upload or
+  controlled deterministic reconstruction, inspection of the published bytes,
+  explicit workspace publication order and package/tag identity, an annotated
+  tag before upload,
+  separately authorized publication, registry and documentation verification,
+  exact-version consumer evidence where applicable, and durable release
+  closure. First-publication and visibility-transition checks remain additive
+  rather than burdening every later release. Independently versioned workspaces
+  receive unambiguous package-scoped changelog, tag, and release identities.
 - Add an explicitly non-normative Rust xtask field guide based on three
   peripheral-driver migrations and current task-runner patterns across Rust
   technical repositories. It records cross-platform and single-entry-point
@@ -89,6 +102,16 @@ Last updated: 2026-08-22 UTC
 
 ### Changed
 
+- Require a repository that has published a package or deliverable to integrate
+  later substantial feature work through `release/<semver>` rather than enter
+  it into the default branch ahead of its release, including when only one
+  substantial feature is present. Release branches accepting changes inherit
+  applicable aggregate-CI and conversation-resolution requirements. Make the
+  peripheral-driver profile inherit the common Rust publication contract while
+  retaining its driver-specific status and evidence requirements. The changes
+  are prospective: completed releases and existing Git and registry history are
+  not rewritten, while repository runbooks and release-branch settings must
+  align before the next applicable feature cycle or publication.
 - Clarify that the live `main` branch is the adopted authority, that normative
   changes take effect on merge, and that `Unreleased` means not yet collected
   into a later numbered snapshot. Rename the `0.1.0` header metadata as a
