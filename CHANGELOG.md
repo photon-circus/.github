@@ -2,9 +2,12 @@
 
 All notable changes to the Photon Circus organization standards are documented in this file.
 
+Entries under `Unreleased` are effective when merged to `main`; the heading
+means that they have not yet been collected into a later numbered snapshot.
+
 ## Unreleased
 
-Last updated: 2026-08-22 UTC
+Last updated: 2026-08-24 UTC
 
 ### Added
 
@@ -15,8 +18,22 @@ Last updated: 2026-08-22 UTC
   including a provisional initial development contract with a named
   evidence-triggered re-examination, without requiring a filename, schema,
   repository migration, or new organization-wide rule.
+- Add a normative Rust registry publication contract for every intentionally
+  published organization-owned Cargo package, including capability libraries,
+  tools, and peripheral drivers. It requires an exact clean candidate, a
+  complete release invocation with no failure or skipped applicable work,
+  inspection and hashing of each package archive, byte-preserving upload or
+  controlled deterministic reconstruction, inspection of the published bytes,
+  explicit workspace publication order and package/tag identity, an annotated
+  tag before upload,
+  separately authorized publication, registry and documentation verification,
+  exact-version consumer evidence where applicable, and durable release
+  closure. First-publication and visibility-transition checks remain additive
+  rather than burdening every later release. Independently versioned workspaces
+  receive unambiguous package-scoped changelog, tag, and release identities.
 - Add an explicitly non-normative Rust xtask field guide based on three
-  peripheral-driver migrations. It records cross-platform and single-entry-point
+  peripheral-driver migrations and current task-runner patterns across Rust
+  technical repositories. It records cross-platform and single-entry-point
   benefits; workspace-boundary options; configuration, self-test, dependency,
   partial-run, path-safety, generated-evidence, and hosted-CI tradeoffs; observed
   failures; and a bounded migration approach without prescribing an xtask
@@ -92,6 +109,42 @@ Last updated: 2026-08-22 UTC
 
 ### Changed
 
+- Require a repository that has published a package or deliverable to integrate
+  later substantial feature work through `release/<semver>` rather than enter
+  it into the default branch ahead of its release, including when only one
+  substantial feature is present. Release branches accepting changes inherit
+  applicable aggregate-CI and conversation-resolution requirements. Make the
+  peripheral-driver profile inherit the common Rust publication contract while
+  retaining its driver-specific status and evidence requirements. The changes
+  are prospective: completed releases and existing Git and registry history are
+  not rewritten, while repository runbooks and release-branch settings must
+  align before the next applicable feature cycle or publication.
+- Clarify that the live `main` branch is the adopted authority, that normative
+  changes take effect on merge, and that `Unreleased` means not yet collected
+  into a later numbered snapshot. Rename the `0.1.0` header metadata as a
+  numbered baseline so it is not mistaken for the full current contents.
+- Tighten technology-neutral canonical-verification guidance around documented
+  invocation scope, working-directory support, partial profiles, aggregate
+  success, skipped or indeterminate work, fail-fast summaries, and the exact
+  release-candidate invocation.
+- Require an ordinary peripheral-driver software release to rest on a passing,
+  documented release-candidate invocation of the canonical CI entry point that
+  includes every applicable check in the profile's CI contract, rather than on
+  any passing canonical-CI run. Declare the Peripheral Driver Release and
+  Evidence Profile an adopted normative profile in its own header so its
+  obligations are not read as guidance.
+- Broaden the non-normative xtask field guide to Rust technical repositories,
+  including reusable capability libraries, and add current organization-pattern
+  review, task-command classification, side-effect boundaries, alias bootstrap
+  and root identity, runner self-verification, generated-evidence finalization,
+  and copied-tooling maintenance choices without prescribing an xtask layout or
+  requiring implementation migrations.
+- Treat every structurally detected local-CI candidate as manual review rather
+  than presenting `scripts/ci.sh` filename presence as standards compliance.
+  Discover nested `*/xtask/Cargo.toml` candidates and report exact paths so
+  operational tools and thin launchers can be distinguished during review.
+  Distinguish missing or unrecognized Domain metadata from a valid nontechnical
+  classification when audit applicability depends on Domain.
 - Make the canonical-local-CI requirement technology-neutral: a technical
   repository still has one documented implementation with honest outcomes, but
   it may expose a POSIX script, `cargo xtask ci`, or another justified local

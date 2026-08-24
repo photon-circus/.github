@@ -57,11 +57,10 @@ A skipped or unobservable condition is never reported as `PASS`.
 The first version checks only facts that can be gathered safely from repository metadata, custom properties, trees, and default-branch protection. It does not claim to prove:
 
 - documentation quality;
-- whether a recognized script or Cargo alias actually implements the documented
-  canonical gate; a `local_ci` `PASS` therefore asserts only that exactly one
-  candidate entry point is present and that it sits at the canonical path named
-  in Section 14.1, never that the file is the documented gate, that it is the
-  single implementation, or that its outcomes are honest;
+- whether a recognized path, alias, or task-runner file is the documented
+  canonical gate or implements its semantics; `local_ci` therefore reports
+  `MANUAL_REVIEW` for every observed candidate shape and names the candidates.
+  Filename presence is evidence for review, not a standards `PASS`;
 - whether a repository with no recognized entry-point file has no canonical gate,
   because a documented command can be a bare tool invocation that leaves no
   distinctive path in the tree; `local_ci` therefore reports `MANUAL_REVIEW`

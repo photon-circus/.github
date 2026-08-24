@@ -74,13 +74,15 @@ For a newly created repository, this guide calls the first version the
 work implementation-ready; a separate recorded decision authorizes applicable
 implementation. When the adopted
 [feature-state process](../REPOSITORY_STANDARDS.md#121-feature-states)
-applies, that decision moves the proposal to `Committed`. The contract can then
-guide the first implementation while remaining explicitly provisional rather
-than fixed in stone. Its trigger identifies when the initial operations or
-artifacts, consumer path, and evidence entry point are available to challenge
-the boundary. Reaching that trigger starts a deliberate contract review; it
-does not silently make the draft current, promote lifecycle, create
-compatibility, or authorize release.
+applies, an implementation decision moves the proposal to `Committed` only when
+it also establishes the expectation that the feature will enter a release.
+Permission to prototype or gather evidence alone does not create that release
+commitment. The contract can guide authorized implementation while remaining
+explicitly provisional rather than fixed in stone. Its trigger identifies when
+the initial operations or artifacts, consumer path, and evidence entry point
+are available to challenge the boundary. Reaching that trigger starts a
+deliberate contract review; it does not silently make the draft current,
+promote lifecycle, create compatibility, or authorize release.
 
 ## 2. Keep authority levels distinct
 
