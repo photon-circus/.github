@@ -7,7 +7,7 @@ means that they have not yet been collected into a later numbered snapshot.
 
 ## Unreleased
 
-Last updated: 2026-08-23 UTC
+Last updated: 2026-08-24 UTC
 
 ### Added
 
@@ -15,8 +15,10 @@ Last updated: 2026-08-23 UTC
   published organization-owned Cargo package, including capability libraries,
   tools, and peripheral drivers. It requires an exact clean candidate, a
   complete release invocation with no failure or skipped applicable work,
-  inspection and hashing of each package archive, explicit workspace
-  publication order and package/tag identity, an annotated tag before upload,
+  inspection and hashing of each package archive, byte-preserving upload or
+  controlled deterministic reconstruction, inspection of the published bytes,
+  explicit workspace publication order and package/tag identity, an annotated
+  tag before upload,
   separately authorized publication, registry and documentation verification,
   exact-version consumer evidence where applicable, and durable release
   closure. First-publication and visibility-transition checks remain additive

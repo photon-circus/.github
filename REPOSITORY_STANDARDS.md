@@ -871,11 +871,23 @@ Before the first registry upload in a release, the release process must:
 
 Before uploading each selected package, the release process must:
 
-- Run a publication dry run, then inspect and hash the resulting final `.crate`
-  archive. If a later pre-upload command regenerates the archive, repeat its
-  inspection and digest. Package construction, dry run, and upload must not use
-  `--allow-dirty` or `--no-verify`; they use `--locked` when the repository
-  declares its lockfile a release input.
+- Run a publication dry run, then inspect and hash the resulting candidate
+  `.crate` archive. Its digest identifies the inspected candidate; it does not
+  by itself prove which bytes a later publication command uploads. Package
+  construction, dry run, and upload must not use `--allow-dirty` or
+  `--no-verify`; they use `--locked` when the repository declares its lockfile
+  a release input.
+- Use an upload mechanism that either transmits the inspected archive without
+  reconstructing it or establishes deterministic reconstruction from unchanged
+  inputs. A source-directory `cargo publish` invocation reconstructs the
+  archive, even when it follows `cargo publish --dry-run`, so the dry run alone
+  does not establish byte identity. The reconstruction path must use the same
+  frozen candidate, Cargo version, package and registry selection, Cargo
+  configuration, feature and lock options, and dependency resolution. No
+  package input may change between inspection and upload, including an included
+  generated or ignored file or a generated lockfile. If those controls cannot
+  be established, the package must not be uploaded through a reconstructing
+  client.
 - Make package selection and the destination registry unambiguous in the
   documented invocation and manifest. A workspace release must not depend on
   an incidental working directory or default-member selection.
@@ -885,8 +897,8 @@ Before uploading each selected package, the release process must:
   when Cargo emits it. When present, the VCS metadata must name the frozen
   candidate commit and expected repository-relative `path_in_vcs` and must not
   report a dirty worktree. Cargo documents this file as best-effort consistency
-  evidence, not verified provenance. Retain a SHA-256 digest of the verified
-  archive.
+  evidence, not verified provenance. Retain a SHA-256 digest of the inspected
+  candidate archive.
 - Exercise supported consumer-visible claims from the packaged artifact where
   packaging can affect them, including documentation, examples, declared
   features, compatibility range, targets, or downstream consumption as
@@ -924,10 +936,13 @@ the state rather than risk a duplicate or contradictory release action.
 
 After upload, the release process must:
 
-- Retrieve the registry's record and exact published archive, then compare its
-  checksum and, when Cargo emitted it, Cargo-reported VCS metadata with the
-  verified candidate artifact. The digest comparison is the binding byte-level
-  artifact-identity check; Cargo-reported VCS metadata is supporting evidence.
+- Retrieve the registry's record and exact published archive, verify its digest
+  against the inspected candidate, and repeat the material archive inspection
+  required above on the published bytes. A digest mismatch means the inspected
+  candidate was not the published artifact and fails release verification; a
+  content inspection performed only before a reconstructing upload must not be
+  attributed to the published archive. Compare Cargo-reported VCS metadata,
+  when present, with the verified candidate commit as supporting evidence.
 - Verify version availability and yank state, current package metadata, and
   ownership. For crates.io packages, verify the intended docs.rs result when
   documentation is part of the supported distribution surface. After a first
