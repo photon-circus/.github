@@ -12,6 +12,15 @@ contract evolution across all repository and material component types. It
 includes a provisional initial development contract and a concrete,
 evidence-triggered re-examination once the first usable surface exists.
 
+The explicitly non-normative
+[Rust Software Documentation Guide](docs/RUST_SOFTWARE_DOCUMENTATION_GUIDE.md)
+provides organization-wide guidance for the user-facing boundary of Rust
+libraries, tools, services, macros, FFI packages, firmware, embedded
+applications, and `no_std` crates. It covers reader outcomes, surface ownership,
+reproducible first success, semantic rustdoc, examples, compatibility,
+operations, migration, accessibility, and proportionate documentation checks
+without adding release gates or mandatory document shapes.
+
 Peripheral drivers also follow the
 [Peripheral Driver Release and Evidence Profile](docs/PERIPHERAL_DRIVER_PROFILE.md).
 The
@@ -22,8 +31,10 @@ so independently acting contributors and AI agents inherit settled decisions
 without making model success a hardware-qualification claim.
 The explicitly non-normative
 [Rust Peripheral-Driver Documentation Guide](docs/PERIPHERAL_DRIVER_DOCUMENTATION_GUIDE.md)
-offers proportional structures for repository, package, source, contribution,
-and agent documentation without adding requirements.
+specializes the general Rust guidance with proportional structures for driver
+repositories and packages, status disclosures, source and evidence capture,
+hardware and model boundaries, and contributor and agent documentation without
+adding requirements.
 The explicitly non-normative
 [Rust xtask field guide for Photon Circus technical repositories](docs/PERIPHERAL_DRIVER_XTASK_GUIDE.md)
 records what several native cross-platform verification gates made better,

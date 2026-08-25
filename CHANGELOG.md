@@ -7,10 +7,20 @@ means that they have not yet been collected into a later numbered snapshot.
 
 ## Unreleased
 
-Last updated: 2026-08-24 UTC
+Last updated: 2026-08-25 UTC
 
 ### Added
 
+- Add an explicitly non-normative Rust software documentation guide for every
+  Photon Circus repository that exposes a user-facing Rust product. It
+  organizes guidance around fit, first adoption, semantic contract, operation,
+  compatibility, and change; separates repository, package, rustdoc, example,
+  operations, contributor, and agent audiences; covers libraries, CLIs,
+  services, macros, FFI, embedded software, firmware, and generators; and adds
+  proportional prompts for clean-environment quick starts, API semantics,
+  features and support evidence, troubleshooting, migration, accessibility,
+  packaged documentation, and drift checks without creating a release gate,
+  numeric score, mandatory document set, or non-Rust requirement.
 - Add explicitly non-normative repository-contract guidance for every
   repository and material component type. It covers bounded responsibility,
   consumers and handoffs, component classification, claim-to-evidence mapping,
@@ -109,6 +119,13 @@ Last updated: 2026-08-24 UTC
 
 ### Changed
 
+- Make the Rust peripheral-driver documentation guide an explicit
+  specialization of the organization-wide Rust software guide. Its package
+  README path now includes fit and non-fit, applicable hardware and software
+  prerequisites, dependency and feature selection, a complete first success,
+  expected output, and evidence-scoped validation without requiring a board or
+  firmware artifact, while retaining driver-only lifecycle, distribution,
+  model, physical-evidence, and source guidance.
 - Require a repository that has published a package or deliverable to integrate
   later substantial feature work through `release/<semver>` rather than enter
   it into the default branch ahead of its release, including when only one
