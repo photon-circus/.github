@@ -122,7 +122,7 @@ resolution, and generated-site resolution are different checks.
 The adopted standards define the answers required near the top of every root
 README. For a user-facing Rust product, a useful order is:
 
-1. Name and one factual positioning sentence.
+1. Name and one plain-language factual positioning sentence.
 2. Current lifecycle, distribution, stability, and important non-fit.
 3. A complete quick start or a direct route to one.
 4. Purpose, responsibility, and explicit non-goals.
@@ -137,6 +137,22 @@ The first screen should establish identity, state, and the next action. Badges,
 logos, history, and sponsor material should not delay those answers. Prefer
 specific claims such as "fixed-capacity, `no_std`, no heap allocation" to
 unbounded adjectives such as "fast," "safe," or "production ready."
+
+An opening sentence is orientation, not a compressed contract. Write it for an
+evaluator who does not yet know the API: name the kind of product, the user
+problem or outcome, and only the input/output model needed to distinguish it.
+Put formulas, function signatures, generic parameters, invariant bounds, and
+repository-internal responsibility language after that plain explanation.
+
+Treat routine lifecycle, visibility, distribution, version, and stability
+facts as neutral status information, preferably with their practical
+consequence: for example, "the API may change," "repository access is
+required," or "no package has been published." Unless an applicable adopted
+profile specifically requires a warning-level disclosure, reserve warning,
+caution, or danger admonitions for a genuine hazard, a destructive or
+irreversible action, or another condition that requires the reader to
+intervene. Private, unpublished, Experimental, or prerelease status is not by
+itself a warning.
 
 ### 3.1 State fit and non-fit early
 
@@ -573,6 +589,11 @@ account serves the current product honestly.
 
 ## 13. Compact review prompts
 
+- Does the opening explain the product in evaluator language before formulas,
+  API mechanics, or internal contract terminology?
+- Do warning, caution, and danger admonitions identify an actual hazard,
+  destructive action, or required intervention, except where an applicable
+  adopted profile requires a specific disclosure?
 - Can an evaluator identify purpose, status, fit, non-fit, compatibility, and
   evidence limits before adopting the product?
 - Can a new user reproduce one meaningful result using only stated
