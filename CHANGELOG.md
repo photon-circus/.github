@@ -119,6 +119,12 @@ Last updated: 2026-08-25 UTC
 
 ### Changed
 
+- Clarify the non-normative Rust documentation guide that a README opening is
+  plain-language orientation rather than a compressed API or mathematical
+  contract, that routine product status is neutral information with practical
+  consequences, and that warning-level admonitions are reserved for actual
+  hazards or required intervention unless an applicable adopted profile
+  requires a specific disclosure.
 - Make the Rust peripheral-driver documentation guide an explicit
   specialization of the organization-wide Rust software guide. Its package
   README path now includes fit and non-fit, applicable hardware and software
