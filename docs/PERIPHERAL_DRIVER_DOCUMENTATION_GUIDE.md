@@ -15,6 +15,16 @@ if this guide conflicts with them. Every recommendation, imperative, use of
 "required" appear only when this guide summarizes an existing linked
 requirement; consult the normative source for the exact obligation.
 
+The explicitly non-normative
+[Rust Software Documentation Guide](RUST_SOFTWARE_DOCUMENTATION_GUIDE.md)
+provides the organization-wide user-outcome, README, rustdoc, example,
+compatibility, product-profile, operational, migration, accessibility, and
+documentation-verification guidance common to Rust software. This guide is its
+peripheral-driver specialization. It retains the driver-specific repository
+shape, package status, source and evidence, electrical and hardware, model, and
+contributor-routing concerns that should not be projected onto unrelated Rust
+products.
+
 ## 1. Recommended organizing rule
 
 Give each maintained fact one canonical owner. A documentary or device
@@ -185,8 +195,10 @@ Recommended order:
 3. Four-field lifecycle, distribution, model, and physical-evidence disclosure.
 4. `Packages in this workspace` table when more than one package exists.
 5. Responsibility and explicit non-goals.
-6. Quick-start link or very small example; avoid duplicating the full package
-   tutorial.
+6. Quick-start link or one small meaningful example; avoid duplicating the full
+   package path, but ensure the linked package surface provides the complete
+   prerequisites, dependency and features, runnable setup, command, expected
+   result, and next task described by the general Rust guide.
 7. Supported toolchain, targets, transport traits, and feature scope.
 8. Evidence summary, limitations, and what passing CI does not prove.
 9. Repository/document map.
@@ -260,16 +272,25 @@ Recommended order:
 3. The four-field disclosure required by the peripheral-driver profile. The
    fields report three independent dimensions, with evidence split into model
    and physical fields.
-4. Availability/install instructions. For a prerelease, show the exact version;
-   for an unpublished crate, say that it is not available from crates.io.
-5. Minimal compiled example.
-6. Important semantics and nonclaims that affect correct use.
-7. Features and default-feature behavior.
-8. `no_std`, allocation, unsafe-code, MSRV, and supported-target scope.
-9. API documentation, source repository, issue/security route, and
+4. Fit and non-fit, including the execution model, device or revision scope,
+   and important application-owned policy.
+5. Availability/install instructions. For a prerelease, name the current
+   version and choose an intentional compatible requirement or exact pin; for
+   an unpublished crate, say that it is not available from crates.io.
+6. A meaningful first-success path with software prerequisites and, when an
+   existing bounded example needs them, hardware prerequisites; dependency and
+   feature selection; complete setup; the build, test, or run command; expected
+   output or assertion; normal error handling; and a next task. Compile or
+   exercise it at the evidence level the README claims. Do not add an MCU
+   application, board example, or firmware artifact merely to satisfy this
+   documentation recommendation.
+7. Important semantics and nonclaims that affect correct use.
+8. Features and default-feature behavior.
+9. `no_std`, allocation, unsafe-code, MSRV, and supported-target scope.
+10. API documentation, source repository, issue/security route, and
    version-pinned contract links where those links are material to a released
    claim.
-10. License.
+11. License.
 
 Suggested skeleton:
 
@@ -282,15 +303,49 @@ Suggested skeleton:
 
 <status disclosure>
 
+## Fit and non-fit
+
+<Supported device and application contexts, execution model, and important
+integration policy that remains with the caller.>
+
 ## Availability
 
-<Unpublished statement or exact Cargo dependency.>
+<Unpublished statement or dependency declaration naming the current release or
+prerelease and the chosen compatibility policy.>
 
-## Usage
+## Quick start
+
+Prerequisites: <toolchain, target, timer/runtime, and required feature flags;
+for an existing bounded hardware example, also name the board/device, wiring,
+safe logic level, and runner>.
+
+```toml
+[dependencies]
+ph-<part>-<class> = { version = "<compatible requirement>" }
+```
+
+Use an equals-prefixed requirement such as `=1.2.3` only when deliberate exact
+pinning is intended.
+
+When this path needs a non-default feature, add
+`features = ["<feature>"]` to the dependency and explain its effect before the
+example.
 
 ```rust,no_run
-// Small compile-checked happy path.
+// Complete compile-checked path with normal error propagation and observable
+// units or state.
 ```
+
+Run from `<working directory>`:
+
+```text
+<build, test, or run command; flash command only when applicable>
+```
+
+Expected result: <assertion or host output; for a hardware example, the
+serial/RTT/defmt output or device-visible state>.
+
+Next: <link to a realistic task or example>.
 
 ## Semantics and limitations
 
@@ -317,6 +372,16 @@ Set `readme = "README.md"` explicitly in each publishable member's
 `Cargo.toml`. Before release, inspect `cargo package --list` and the extracted
 package to confirm that its README and license are present and that essential
 links work without the repository checkout.
+
+Validate the first-success path from a clean consumer project using only its
+stated prerequisites. A compile-checked consumer example, doctest, or hosted
+abstract-transport example can be the right first success for a small driver;
+it should state honestly what it does and does not exercise. When a bounded
+hardware example already belongs in the repository but cannot run in routine
+CI, compile it for its declared target where practical and state the exact
+manual board, device, wiring, runner, output, and recovery conditions used when
+it is exercised. Compilation, model execution, physical observation, and
+qualification remain different evidence claims.
 
 For crate README versus rustdoc synchronization, choose one of two patterns:
 
@@ -613,31 +678,28 @@ Do not require an organization-wide migration or completeness audit. The full
 non-normative sequence and stopping conditions live in the
 [resource pack](peripheral-driver-resources/README.md#remediate-an-existing-hardware-contract).
 
-## 12. Manifest and package-documentation notes
+## 12. Driver-specific package-documentation deltas
 
-- Set `readme = "README.md"` in each user-facing nested package.
-- Keep `description`, `license`/`license-file`, `repository`, `rust-version`,
-  keywords, and categories accurate.
-- Omit `homepage` when it only duplicates `repository` or `documentation`.
-- Use `[package.metadata.docs.rs]` only for the features, targets, or
-  configuration actually needed to render useful documentation.
-- Build rustdoc with warnings denied, run doctests, and check broken links.
-- Document public items; use intra-doc links rather than a manually copied API
-  signature inventory.
-- State `no_std`, allocation, and unsafe-code claims narrowly and enforce them
-  where possible. `#![forbid(unsafe_code)]` says something about that crate's
-  source, not its entire transitive dependency graph.
-- Inspect every publishable package, not only the workspace, for its README,
-  license, normalized manifest, and intended file set.
+Use the general
+[Rust Software Documentation Guide](RUST_SOFTWARE_DOCUMENTATION_GUIDE.md)
+for common manifest, README, rustdoc, feature, MSRV, docs.rs, example, link,
+package-inspection, and documentation-check guidance. Driver-specific deltas
+include:
 
-Primary references:
+- Make package descriptions identify the exact device class, execution model,
+  and material allocation or `no_std` distinction rather than merely calling
+  the crate an embedded driver.
+- Keep the required lifecycle, distribution, model-conformance, and physical-
+  evidence disclosure consistent in the packaged README and crate front page.
+- State `no_std`, allocation, unsafe-code, electrical, target, device-variant,
+  and hardware-support claims narrowly. `#![forbid(unsafe_code)]` says
+  something about that crate's source, not its entire transitive dependency
+  graph, and a successful build says nothing by itself about physical behavior.
 
-- [Cargo manifest `readme`, metadata, MSRV, license, repository, and homepage](https://doc.rust-lang.org/cargo/reference/manifest.html)
-- [Cargo packaging and publication inspection](https://doc.rust-lang.org/cargo/reference/publishing.html)
+Driver-guide supporting references:
+
 - [crates.io README relative-link rendering](https://github.com/rust-lang/crates.io/blob/main/crates/crates_io_markdown/src/lib.rs)
 - [docs.rs build behavior](https://docs.rs/about/builds)
-- [docs.rs build metadata](https://docs.rs/about/metadata)
 - [docs.rs Markdown rendering](https://github.com/rust-lang/docs.rs/blob/main/crates/bin/docs_rs_web/src/utils/markdown.rs)
-- [rustdoc front-page and public-item guidance](https://doc.rust-lang.org/rustdoc/how-to-write-documentation.html)
 - [GitHub default community-health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
 - [GitHub Actions status badges](https://docs.github.com/en/actions/how-tos/monitor-workflows/add-a-status-badge)

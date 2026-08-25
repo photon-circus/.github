@@ -1016,6 +1016,12 @@ Rust embedded repositories should document and enforce, as applicable:
 
 This profile is applied proportionally. Not every project requires the verification depth used by `ph-eventing`.
 
+The explicitly non-normative
+[Rust Software Documentation Guide](docs/RUST_SOFTWARE_DOCUMENTATION_GUIDE.md)
+provides advisory, product-type-aware detail for user-facing READMEs, rustdoc,
+examples, compatibility, operations, migration, accessibility, and
+documentation checks. It adds no requirement or release gate to this profile.
+
 ## 19. Exceptions
 
 A repository may deviate when the deviation is deliberate and documented.
